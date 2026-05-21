@@ -1,0 +1,22 @@
+{
+  "name": "mate-matico-backend",
+  "version": "1.0.0",
+  "description": "API backend Mate-Mático — Node.js, Express, Firebase",
+  "main": "src/server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "seed": "node src/scripts/seed.js"
+  },
+  "keywords": ["matematica", "express", "firebase"],
+  "license": "MIT",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "express-rate-limit": "^7.5.0",
+    "firebase-admin": "^13.0.2",
+    "helmet": "^8.1.0"
+  }
+}

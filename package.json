@@ -1,0 +1,12 @@
+{
+  "name": "mate-matico",
+  "private": true,
+  "description": "Monorepo Mate-Mático — backend API + frontend de prueba",
+  "scripts": {
+    "dev:api": "npm run dev --prefix backend",
+    "dev:front": "npm run dev --prefix frontend",
+    "start:api": "npm run start --prefix backend",
+    "seed": "npm run seed --prefix backend",
+    "setup": "npm install --prefix backend && npm install --prefix frontend"
+  }
+}
