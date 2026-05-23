@@ -37,9 +37,12 @@ export async function register(req, res, next) {
       ...(idToken && { idToken, refreshToken, expiresIn }),
     });
   } catch (err) {
+    console.error('Error en register:', err);
     if (err.code === 'auth/email-already-exists') {
       err.status = 409;
       err.message = 'El email ya está registrado';
+    } else if (err.code?.startsWith('auth/')) {
+      err.status = err.status || 400;
     }
     next(err);
   }
@@ -64,6 +67,10 @@ export async function login(req, res, next) {
 
     res.json({ success: true, ...session });
   } catch (err) {
+    console.error('Error en login:', err);
+    if (err.code?.startsWith('auth/')) {
+      err.status = err.status || 400;
+    }
     next(err);
   }
 }
@@ -74,13 +81,15 @@ export async function googleAuth(req, res, next) {
     const session = await loginWithGoogle(idToken);
     res.json({ success: true, ...session });
   } catch (err) {
+    console.error('Error en googleAuth:', err);
     if (err.code === 'auth/id-token-expired') {
       err.status = 401;
       err.message = 'Sesión expirada. Volvé a iniciar sesión.';
-    }
-    if (err.code === 'auth/argument-error') {
+    } else if (err.code === 'auth/argument-error') {
       err.status = 400;
       err.message = 'Token inválido';
+    } else if (err.code?.startsWith('auth/')) {
+      err.status = err.status || 400;
     }
     next(err);
   }
@@ -98,6 +107,8 @@ export async function me(req, res, next) {
       usuario: profile,
     });
   } catch (err) {
+    console.error('Error en me:', err);
     next(err);
   }
 }
+
