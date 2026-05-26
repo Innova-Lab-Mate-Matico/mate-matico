@@ -3,64 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Mate-Mático — Test API</title>
-  <link rel="stylesheet" href="/styles.css" />
+  <title>Mate-Mático — Panel de Aprendizaje</title>
+  <!-- Google Fonts: Outfit & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
-  <header>
-    <h1>Mate-Mático</h1>
-    <p class="subtitle">Panel de prueba — proyecto frontend separado</p>
-  </header>
-
-  <main class="layout">
-    <section class="card" id="auth-section">
-      <h2>1. Autenticación</h2>
-      <form id="auth-form">
-        <button type="button" id="btn-google" class="btn-google">
-          <span class="google-icon" aria-hidden="true">G</span>
-          Continuar con Google
-        </button>
-
-        <p class="divider"><span>o con email</span></p>
-
-        <label>Email <input type="email" id="email" placeholder="tu@email.com" /></label>
-        <label>Contraseña <input type="password" id="password" minlength="6" placeholder="mín. 6 caracteres" /></label>
-        <label>Nombre (registro) <input type="text" id="displayName" placeholder="Opcional" /></label>
-        <div class="actions">
-          <button type="button" id="btn-register">Registrarse</button>
-          <button type="button" id="btn-login" class="primary">Iniciar sesión</button>
-        </div>
-      </form>
-      <p id="auth-status" class="status"></p>
-    </section>
-
-    <section class="card" id="profile-section" hidden>
-      <h2>2. Perfil y gamificación</h2>
-      <div id="profile-box"></div>
-      <div class="actions">
-        <button type="button" id="btn-refresh-profile">Actualizar perfil</button>
-        <button type="button" id="btn-logout">Cerrar sesión</button>
-      </div>
-    </section>
-
-    <section class="card" id="modules-section" hidden>
-      <h2>3. Módulos y lecciones</h2>
-      <button type="button" id="btn-load-modules">Cargar módulos</button>
-      <div id="modules-list" class="list"></div>
-      <div id="lesson-panel" class="lesson-panel" hidden></div>
-    </section>
-
-    <section class="card" id="progress-section" hidden>
-      <h2>4. Progreso</h2>
-      <button type="button" id="btn-load-progress">Ver progreso</button>
-      <pre id="progress-output" class="code"></pre>
-    </section>
-  </main>
-
-  <footer>
-    <p>API base: <code id="api-base-label">—</code></p>
-  </footer>
-
-  <script type="module" src="/src/app.js"></script>
+  <div id="root"></div>
+  <script type="module" src="/src/main.jsx"></script>
 </body>
 </html>
