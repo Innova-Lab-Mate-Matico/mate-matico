@@ -1,0 +1,29 @@
+meta {
+  name: Guardar Respuestas Onboarding
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/auth/onboarding
+  body: json
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "confianzaMath": 4,
+    "intereses": ["ahorro", "finanzas"],
+    "edad": 20,
+    "nivelEducativo": "secundaria",
+    "objetivo": "Aprender a calcular porcentajes y ahorrar en mi vida cotidiana"
+  }
+}

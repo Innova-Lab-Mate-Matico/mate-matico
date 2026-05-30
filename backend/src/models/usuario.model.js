@@ -22,6 +22,15 @@ export function crearPerfilUsuarioInicial({ uid, email, displayName, photoURL = 
     ultimaLeccionCompletada: null,
     createdAt: new Date().toISOString(),
     lastLoginAt: new Date().toISOString(),
+    onboarding: {
+      completado: false,
+      edad: null,
+      nivelEducativo: null,
+      objetivo: null,
+      confianzaMath: null,
+      intereses: [],
+      moduloRecomendado: null,
+    },
   };
 }
 
@@ -47,5 +56,14 @@ export function serializarUsuario(doc) {
     rolActual: doc.rolActual ?? ROLES.PRINCIPIANTE,
     ultimaLeccionCompletada: ultimaISO,
     createdAt: doc.createdAt ?? null,
+    onboarding: doc.onboarding ?? {
+      completado: false,
+      edad: null,
+      nivelEducativo: null,
+      objetivo: null,
+      confianzaMath: null,
+      intereses: [],
+      moduloRecomendado: null,
+    },
   };
 }

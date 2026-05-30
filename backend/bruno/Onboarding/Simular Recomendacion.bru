@@ -1,0 +1,29 @@
+meta {
+  name: Simular Recomendacion Onboarding
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/auth/onboarding/recomendar
+  body: json
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "confianzaMath": 4,
+    "intereses": ["descuentos", "compras"],
+    "edad": 15,
+    "nivelEducativo": "primaria",
+    "objetivo": "Aprender a calcular ofertas en las tiendas de mi barrio"
+  }
+}
