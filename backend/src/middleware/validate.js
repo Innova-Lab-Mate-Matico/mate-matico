@@ -87,3 +87,77 @@ export function validateExerciseBody(req, res, next) {
 
   next();
 }
+
+export function validateOnboardingBody(req, res, next) {
+  const { edad, nivelEducativo, objetivo, confianzaMath, intereses } = req.body ?? {};
+
+  // 1. confianzaMath: obligatorio, entero, entre 1 y 5
+  if (confianzaMath === undefined || confianzaMath === null) {
+    return res.status(400).json({
+      success: false,
+      error: 'La confianza matemática (confianzaMath) es obligatoria',
+    });
+  }
+  const confianzaNum = Number(confianzaMath);
+  if (!Number.isInteger(confianzaNum) || confianzaNum < 1 || confianzaNum > 5) {
+    return res.status(400).json({
+      success: false,
+      error: 'La confianza matemática debe ser un número entero en el rango de 1 a 5',
+    });
+  }
+
+  // 2. intereses: obligatorio, array de strings, max 10 tags, no vacíos
+  if (!intereses || !Array.isArray(intereses) || intereses.length === 0) {
+    return res.status(400).json({
+      success: false,
+      error: 'Los intereses son obligatorios y deben ser un array de etiquetas (tags) no vacío',
+    });
+  }
+  if (intereses.length > 10) {
+    return res.status(400).json({
+      success: false,
+      error: 'No se pueden enviar más de 10 intereses',
+    });
+  }
+  const todosStrings = intereses.every(i => typeof i === 'string' && i.trim().length > 0);
+  if (!todosStrings) {
+    return res.status(400).json({
+      success: false,
+      error: 'Todos los intereses deben ser textos (strings) no vacíos',
+    });
+  }
+
+  // 3. edad: opcional, entero, rango 5-120
+  if (edad !== undefined && edad !== null && edad !== '') {
+    const edadNum = Number(edad);
+    if (!Number.isInteger(edadNum) || edadNum < 5 || edadNum > 120) {
+      return res.status(400).json({
+        success: false,
+        error: 'La edad debe ser un número entero válido entre 5 y 120 años',
+      });
+    }
+  }
+
+  // 4. nivelEducativo: opcional, lista controlada
+  if (nivelEducativo !== undefined && nivelEducativo !== null && nivelEducativo !== '') {
+    const nivelesValidos = ['primaria', 'secundaria', 'terciaria', 'universitaria', 'ninguno'];
+    if (!nivelesValidos.includes(String(nivelEducativo).trim().toLowerCase())) {
+      return res.status(400).json({
+        success: false,
+        error: 'El campo nivelEducativo no es válido. Debe ser uno de: primaria, secundaria, terciaria, universitaria, ninguno',
+      });
+    }
+  }
+
+  // 5. objetivo: opcional, string, max 500 chars
+  if (objetivo !== undefined && objetivo !== null) {
+    if (typeof objetivo !== 'string' || objetivo.trim().length > 500) {
+      return res.status(400).json({
+        success: false,
+        error: 'El objetivo debe ser un texto y no puede superar los 500 caracteres',
+      });
+    }
+  }
+
+  next();
+}
