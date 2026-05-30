@@ -232,7 +232,7 @@ describe('Onboarding Adaptativo - Backend Tests', () => {
 
       assert.strictEqual(res.status, 200);
       assert.strictEqual(res.body.success, true);
-      
+
       // Comprobar respuesta serializada
       const user = res.body.usuario;
       assert.strictEqual(user.uid, 'test-usuario-onboarding');
