@@ -113,3 +113,4 @@ export async function registrarActividadEmpatica(uid) {
 export function perfilPublico(usuario) {
   return serializarUsuario(usuario);
 }
+
