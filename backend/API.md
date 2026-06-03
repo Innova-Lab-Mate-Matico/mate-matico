@@ -102,6 +102,84 @@ Authorization: Bearer <idToken>
 
 ---
 
+### Onboarding Adaptativo — `/onboarding` (protegido)
+
+Endpoints para guardar las respuestas de la encuesta inicial y calcular la recomendación del primer módulo de aprendizaje (Hito 1).
+
+| Método | Ruta | Auth | Descripción |
+|--------|------|------|-------------|
+| `POST` | `/onboarding` | Sí | Guarda respuestas en Firestore, calcula recomendación y finaliza onboarding |
+| `POST` | `/onboarding/recomendar` | Sí | Simula/pre-visualiza la recomendación del motor sin guardar cambios en base de datos |
+
+#### Payload de Entrada Obligatorio (JSON)
+
+```json
+{
+  "confianzaMath": 4,
+  "intereses": ["ahorro", "finanzas"],
+  "edad": 20,
+  "nivelEducativo": "secundaria",
+  "objetivo": "Aprender a calcular porcentajes y ahorrar en mi vida cotidiana"
+}
+```
+
+*   **`confianzaMath`**: **(Obligatorio)** Número entero entre `1` (muy baja) y `5` (muy alta).
+*   **`intereses`**: **(Obligatorio)** Array de strings no vacío. Máximo 10 etiquetas (tags). Cada tag debe ser un texto no vacío.
+*   **`edad`**: *(Opcional)* Número entero entre `5` y `120`.
+*   **`nivelEducativo`**: *(Opcional)* String controlado. Debe ser exactamente uno de: `primaria`, `secundaria`, `terciaria`, `universitaria`, `ninguno`.
+*   **`objetivo`**: *(Opcional)* String de texto descriptivo. Máximo 500 caracteres.
+
+#### Respuesta `POST /onboarding` — exitoso (200)
+
+Calcula la sugerencia y actualiza el campo `onboarding` del perfil de usuario en Firestore marcándolo como completado. Retorna el usuario serializado con su nuevo estado.
+
+```json
+{
+  "success": true,
+  "usuario": {
+    "uid": "test-usuario-onboarding",
+    "email": "alumno@inova.edu.ar",
+    "displayName": "Alumno Test",
+    "photoURL": null,
+    "provider": "password",
+    "puntosTotales": 0,
+    "rachaDias": 0,
+    "recordRacha": 0,
+    "rolActual": "principiante",
+    "ultimaLeccionCompletada": null,
+    "createdAt": "2026-05-30T13:31:55.377Z",
+    "onboarding": {
+      "completado": true,
+      "edad": 20,
+      "nivelEducativo": "secundaria",
+      "objetivo": "Aprender a calcular porcentajes y ahorrar en mi vida cotidiana",
+      "confianzaMath": 4,
+      "intereses": ["ahorro", "finanzas"],
+      "moduloRecomendado": "porcentajes"
+    }
+  }
+}
+```
+
+#### Respuesta `POST /onboarding/recomendar` — exitoso (200)
+
+Endpoint consultivo e idempotente. Procesa las respuestas de la misma forma que el motor de recomendación, pero **no realiza ninguna escritura** en Firestore. Útil para pre-visualizar sugerencias antes de enviar la encuesta final.
+
+```json
+{
+  "success": true,
+  "moduloRecomendado": "porcentajes"
+}
+```
+
+#### Reglas del Motor de Recomendación (Cálculo determinista)
+1.  **Aritmética Básica (`aritmetica`):** Si la confianza matemática (`confianzaMath`) es `1` o `2` (independientemente del resto de datos).
+2.  **Porcentajes (`porcentajes`):** Si la confianza es aceptable (`>= 3`) e incluye intereses prácticos/financieros (`descuentos`, `finanzas`, `negocios`, `ahorro`, `compras`, `porcentajes`).
+3.  **Porcentajes (`porcentajes`):** Si la confianza es aceptable (`>= 3`) y el usuario es adulto (`edad >= 18`) o posee nivel educativo secundario, terciario o universitario.
+4.  **Aritmética Básica (`aritmetica`):** Por defecto (para perfiles infantiles o casos dudosos fuera de reglas).
+
+---
+
 ### Módulos — `/modules` (público, ejercicios dinámicos)
 
 | Método | Ruta | Auth |

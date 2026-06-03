@@ -7,6 +7,7 @@ import {
   exchangeCustomTokenForIdToken,
 } from '../services/auth.service.js';
 
+
 export async function register(req, res, next) {
   try {
     const { email, password, displayName } = req.body;
