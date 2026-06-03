@@ -9,7 +9,7 @@ process.env.FIRESTORE_EMULATOR_HOST = 'localhost:8080';
 // Importar la app de Express y dependencias
 import app from '../src/app.js';
 import { auth, db } from '../src/config/firebase.js';
-import { calcularRecomendacionOnboarding } from '../src/services/usuario.service.js';
+import { calcularRecomendacionOnboarding } from '../src/services/onboarding.service.js';
 
 // Guardar la función original de verificación de tokens para restaurarla después
 const originalVerifyIdToken = auth.verifyIdToken;
@@ -92,7 +92,7 @@ describe('Onboarding Adaptativo - Backend Tests', () => {
   describe('2. Validaciones del Payload de Onboarding (Middleware)', () => {
     it('Debe retornar 400 si falta la confianza matemática', async () => {
       const res = await request(app)
-        .post('/api/auth/onboarding/recomendar')
+        .post('/api/onboarding/recomendar')
         .set('Authorization', 'Bearer token-valido-123')
         .send({
           edad: 20,
@@ -108,7 +108,7 @@ describe('Onboarding Adaptativo - Backend Tests', () => {
 
     it('Debe retornar 400 si la confianza matemática está fuera de rango (1-5)', async () => {
       const res = await request(app)
-        .post('/api/auth/onboarding/recomendar')
+        .post('/api/onboarding/recomendar')
         .set('Authorization', 'Bearer token-valido-123')
         .send({
           confianzaMath: 6,
@@ -121,7 +121,7 @@ describe('Onboarding Adaptativo - Backend Tests', () => {
 
     it('Debe retornar 400 si el nivel educativo no es válido', async () => {
       const res = await request(app)
-        .post('/api/auth/onboarding/recomendar')
+        .post('/api/onboarding/recomendar')
         .set('Authorization', 'Bearer token-valido-123')
         .send({
           confianzaMath: 4,
@@ -135,7 +135,7 @@ describe('Onboarding Adaptativo - Backend Tests', () => {
 
     it('Debe retornar 400 si la edad no es un entero razonable', async () => {
       const res = await request(app)
-        .post('/api/auth/onboarding/recomendar')
+        .post('/api/onboarding/recomendar')
         .set('Authorization', 'Bearer token-valido-123')
         .send({
           confianzaMath: 4,
@@ -149,7 +149,7 @@ describe('Onboarding Adaptativo - Backend Tests', () => {
 
     it('Debe retornar 400 si intereses no es un array o está vacío', async () => {
       const res = await request(app)
-        .post('/api/auth/onboarding/recomendar')
+        .post('/api/onboarding/recomendar')
         .set('Authorization', 'Bearer token-valido-123')
         .send({
           confianzaMath: 4,
@@ -164,7 +164,7 @@ describe('Onboarding Adaptativo - Backend Tests', () => {
   describe('3. Integración de Endpoints y Persistencia en Firestore', () => {
     it('Debe retornar 401 si no se envía token de autenticación', async () => {
       const res = await request(app)
-        .post('/api/auth/onboarding')
+        .post('/api/onboarding')
         .send({
           confianzaMath: 4,
           intereses: ['finanzas']
@@ -176,7 +176,7 @@ describe('Onboarding Adaptativo - Backend Tests', () => {
 
     it('Debe retornar 401 si se envía un token inválido', async () => {
       const res = await request(app)
-        .post('/api/auth/onboarding')
+        .post('/api/onboarding')
         .set('Authorization', 'Bearer token-incorrecto')
         .send({
           confianzaMath: 4,
@@ -187,9 +187,9 @@ describe('Onboarding Adaptativo - Backend Tests', () => {
       assert.strictEqual(res.body.error, 'Token inválido o expirado');
     });
 
-    it('POST /api/auth/onboarding/recomendar debe retornar recomendación sin persistir en Firestore', async () => {
+    it('POST /api/onboarding/recomendar debe retornar recomendación sin persistir en Firestore', async () => {
       const res = await request(app)
-        .post('/api/auth/onboarding/recomendar')
+        .post('/api/onboarding/recomendar')
         .set('Authorization', 'Bearer token-valido-123')
         .send({
           confianzaMath: 2,
@@ -205,7 +205,7 @@ describe('Onboarding Adaptativo - Backend Tests', () => {
       assert.strictEqual(userDoc.exists, false);
     });
 
-    it('POST /api/auth/onboarding debe guardar datos, calcular recomendación y persistir en Firestore', async () => {
+    it('POST /api/onboarding debe guardar datos, calcular recomendación y persistir en Firestore', async () => {
       // 1. Asegurar primero que el usuario esté creado para simular el registro previo
       await db.collection('usuarios').doc('test-usuario-onboarding').set({
         uid: 'test-usuario-onboarding',
@@ -226,7 +226,7 @@ describe('Onboarding Adaptativo - Backend Tests', () => {
       };
 
       const res = await request(app)
-        .post('/api/auth/onboarding')
+        .post('/api/onboarding')
         .set('Authorization', 'Bearer token-valido-123')
         .send(payload);
 

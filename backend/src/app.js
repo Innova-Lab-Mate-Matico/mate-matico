@@ -1,5 +1,6 @@
 import express from 'express';
 
+import onboardingRoutes from './routes/onboarding.routes.js';
 import authRoutes from './routes/auth.routes.js';
 import progressRoutes from './routes/progress.routes.js';
 import exerciseRoutes from './routes/exercise.routes.js';
@@ -23,6 +24,7 @@ app.get('/api/health', (_req, res) => {
   });
 });
 
+app.use('/api/onboarding', onboardingRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/modules', modulesRoutes);
 app.use('/api/progress', progressRoutes);

@@ -102,14 +102,14 @@ Authorization: Bearer <idToken>
 
 ---
 
-### Onboarding Adaptativo — `/auth/onboarding` (protegido)
+### Onboarding Adaptativo — `/onboarding` (protegido)
 
 Endpoints para guardar las respuestas de la encuesta inicial y calcular la recomendación del primer módulo de aprendizaje (Hito 1).
 
 | Método | Ruta | Auth | Descripción |
 |--------|------|------|-------------|
-| `POST` | `/auth/onboarding` | Sí | Guarda respuestas en Firestore, calcula recomendación y finaliza onboarding |
-| `POST` | `/auth/onboarding/recomendar` | Sí | Simula/pre-visualiza la recomendación del motor sin guardar cambios en base de datos |
+| `POST` | `/onboarding` | Sí | Guarda respuestas en Firestore, calcula recomendación y finaliza onboarding |
+| `POST` | `/onboarding/recomendar` | Sí | Simula/pre-visualiza la recomendación del motor sin guardar cambios en base de datos |
 
 #### Payload de Entrada Obligatorio (JSON)
 
@@ -129,7 +129,7 @@ Endpoints para guardar las respuestas de la encuesta inicial y calcular la recom
 *   **`nivelEducativo`**: *(Opcional)* String controlado. Debe ser exactamente uno de: `primaria`, `secundaria`, `terciaria`, `universitaria`, `ninguno`.
 *   **`objetivo`**: *(Opcional)* String de texto descriptivo. Máximo 500 caracteres.
 
-#### Respuesta `POST /auth/onboarding` — exitoso (200)
+#### Respuesta `POST /onboarding` — exitoso (200)
 
 Calcula la sugerencia y actualiza el campo `onboarding` del perfil de usuario en Firestore marcándolo como completado. Retorna el usuario serializado con su nuevo estado.
 
@@ -161,7 +161,7 @@ Calcula la sugerencia y actualiza el campo `onboarding` del perfil de usuario en
 }
 ```
 
-#### Respuesta `POST /auth/onboarding/recomendar` — exitoso (200)
+#### Respuesta `POST /onboarding/recomendar` — exitoso (200)
 
 Endpoint consultivo e idempotente. Procesa las respuestas de la misma forma que el motor de recomendación, pero **no realiza ninguna escritura** en Firestore. Útil para pre-visualizar sugerencias antes de enviar la encuesta final.
 
