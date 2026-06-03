@@ -17,3 +17,10 @@ body:json {
     "displayName": "Estudiante Prueba"
   }
 }
+
+script:post-response {
+  if (res.body && res.body.idToken) {
+    bru.setEnvVar("token", res.body.idToken);
+  }
+}
+

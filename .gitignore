@@ -6,7 +6,7 @@ node_modules/
 dist/
 backend/.env
 frontend/.env
-config/
+/config/
 pdf/
 firebase.json
 firestore.rules
