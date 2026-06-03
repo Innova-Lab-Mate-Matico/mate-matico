@@ -2,7 +2,9 @@
 
 API REST desacoplada del frontend. Colección principal de usuarios: **`usuarios`**.
 
-**Base URL (desarrollo):** `http://localhost:3000/api`
+**Base URL (desarrollo):** `http://localhost:3000/api`  
+**Base URL (producción):** `https://mate-matico-backend.onrender.com/api`
+
 
 ## Autenticación
 
