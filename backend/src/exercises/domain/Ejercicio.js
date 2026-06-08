@@ -11,6 +11,8 @@ export class Ejercicio {
     this.explicacionError = datos.explicacionError ?? null;
     this.operandos = datos.operandos ?? {};
     this.respuestaCorrecta = datos.respuestaCorrecta;
+    this.semilla = datos.semilla ?? null;
+    this.tipoGenerador = datos.tipoGenerador ?? null;
   }
 
   /**
@@ -41,9 +43,11 @@ export class Ejercicio {
     return {
       id: this.id,
       tipo: this.tipo,
+      tipoGenerador: this.tipoGenerador,
       enunciado: this.enunciado,
       puntos: this.puntos,
       operandos: this.operandos,
+      semilla: this.semilla,
       ...(this.opciones ? { opciones: this.opciones } : {})
     };
   }

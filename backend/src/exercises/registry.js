@@ -1,4 +1,5 @@
 import { semillaNueva } from './utils/seededRandom.js';
+import { FabricaEjercicios } from './domain/FabricaEjercicios.js';
 import {
   generarEjercicioAritmetica,
   resolverRespuestaAritmetica,
@@ -19,7 +20,7 @@ export const LECCION_GENERADORES = {
   },
   porcentajes: {
     'concepto-porcentaje': ['porcentaje_mc', 'porcentaje_numerico'],
-    descuentos: ['descuento_mc', 'porcentaje_mc'],
+    descuentos: ['descuento_mc', 'aumento_numerico'], // alineado con Figma Yerba + Internet
   },
   fracciones: {
     'fracciones-basicas': ['fraccion_decimal_mc'],
@@ -67,9 +68,14 @@ export function generarEjerciciosLeccion(moduleId, lessonId, semillaBase = null)
   return tipos
     .map((tipo, index) => {
       const semilla = base + index * 9973;
-      const ejercicio = generar(tipo, semilla);
-      if (!ejercicio) return null;
-      return ejercicioParaCliente(ejercicio, tipo);
+      const datosEjercicio = generar(tipo, semilla);
+      if (!datosEjercicio) return null;
+
+      // Instanciar usando la Fábrica
+      datosEjercicio.semilla = semilla;
+      datosEjercicio.tipoGenerador = tipo;
+      const ejercicioObj = FabricaEjercicios.crear(datosEjercicio);
+      return ejercicioObj.serializarParaCliente();
     })
     .filter(Boolean);
 }
@@ -93,17 +99,19 @@ export function reconstruirEjercicio(moduleId, lessonId, exerciseId, semilla, op
     if (ejercicio?.id !== exerciseId) continue;
 
     const respuesta = resolver(operandos ?? ejercicio.operandos);
-    return {
+    return FabricaEjercicios.crear({
       ...ejercicio,
+      semilla,
+      tipoGenerador: tipo,
       operandos: operandos ?? ejercicio.operandos,
       respuestaCorrecta: respuesta ?? ejercicio.respuestaCorrecta,
-    };
+    });
   }
 
   // Fallback: validación solo con operandos (el front reenvía lo mostrado en pantalla)
   if (operandos) {
     const respuesta = resolver(operandos);
-    return {
+    return FabricaEjercicios.crear({
       id: exerciseId,
       tipo: 'numeric',
       respuestaCorrecta: respuesta,
@@ -112,13 +120,18 @@ export function reconstruirEjercicio(moduleId, lessonId, exerciseId, semilla, op
         'Revisá la operación con calma. No perdés puntos por equivocarte.',
       comodinPista: 'Mate-Matico te sugiere descomponer el cálculo en pasos pequeños.',
       puntos: 10,
-    };
+      semilla,
+    });
   }
 
   return null;
 }
 
 export function compararRespuesta(ejercicio, answer) {
+  if (ejercicio && typeof ejercicio.validar === 'function') {
+    return ejercicio.validar(answer);
+  }
+  // Fallback en caso de recibir un objeto plano heredado
   const esperado = ejercicio.respuestaCorrecta;
   if (ejercicio.tipo === 'multiple_choice') {
     return String(answer).trim() === String(esperado).trim();
