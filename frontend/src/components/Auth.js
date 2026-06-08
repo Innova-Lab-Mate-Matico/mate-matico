@@ -29,10 +29,38 @@ export default function Auth({
   const [isRegisterMode, setIsRegisterMode] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
+  const validateEmail = (val) => {
+    const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!EMAIL_RE.test(val)) return false;
+    const domainParts = val.toLowerCase().split('@')[1]?.split('.') ?? [];
+    const baseDomain = domainParts[0];
+    const allowedDomains = ['gmail', 'outlook', 'yahoo', 'hotmail'];
+    return allowedDomains.includes(baseDomain);
+  };
+
+  const validatePassword = (val) => {
+    const hasUpper = /[A-Z]/.test(val);
+    const hasLower = /[a-z]/.test(val);
+    const hasDigit = /\d/.test(val);
+    const hasSpecial = /[^A-Za-z0-9]/.test(val);
+    const isCorrectLength = val.length >= 8 && val.length <= 12;
+    return hasUpper && hasLower && hasDigit && hasSpecial && isCorrectLength;
+  };
+
+  const validateName = (val) => {
+    if (!val || !val.trim()) return false;
+    const nameRe = /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]+$/;
+    return nameRe.test(val.trim());
+  };
+
+  const isFormValid = isRegisterMode
+    ? validateName(displayName) && validateEmail(email) && validatePassword(password)
+    : email.trim().length > 0 && password.length > 0;
+
   const handleSubmit = async (e, type) => {
     e.preventDefault();
 
-    if (!email || !password) return;
+    if (!isFormValid) return;
 
     setIsLoading(true);
 
@@ -115,6 +143,11 @@ export default function Auth({
             required
             disabled={isLoading}
           />
+          {isRegisterMode && email.trim().length > 0 && !validateEmail(email) && (
+            <small style={{ color: 'red', display: 'block', marginTop: '5px' }}>
+              Dominio no permitido (solo gmail, outlook, yahoo, hotmail).
+            </small>
+          )}
         </div>
 
         <div className="form-group">
@@ -125,8 +158,7 @@ export default function Auth({
           <input
             type="password"
             id="password"
-            minLength="6"
-            placeholder="Mínimo 6 caracteres"
+            placeholder={isRegisterMode ? "Mín. 8-12 chars, mayús, minús, num, especial" : "Contraseña"}
             value={password}
             onChange={(e) =>
               setPassword(e.target.value)
@@ -134,26 +166,47 @@ export default function Auth({
             required
             disabled={isLoading}
           />
+          {isRegisterMode && password.length > 0 && !validatePassword(password) && (
+            <small style={{ color: 'red', display: 'block', marginTop: '5px' }}>
+              La contraseña debe tener de 8 a 12 caracteres e incluir mayúscula, minúscula, número y carácter especial.
+            </small>
+          )}
         </div>
 
         {isRegisterMode && (
           <div className="form-group">
             <label htmlFor="displayName">
-              Nombre Completo / Apodo
+              Nombre Completo (solo letras)
             </label>
 
             <input
               type="text"
               id="displayName"
-              placeholder="Opcional"
+              placeholder="Juan Perez"
               value={displayName}
               onChange={(e) =>
                 setDisplayName(
                   e.target.value
                 )
               }
+              onBlur={() => {
+                if (displayName) {
+                  const capitalized = displayName
+                    .trim()
+                    .split(/\s+/)
+                    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+                    .join(' ');
+                  setDisplayName(capitalized);
+                }
+              }}
+              required
               disabled={isLoading}
             />
+            {displayName.trim().length > 0 && !validateName(displayName) && (
+              <small style={{ color: 'red', display: 'block', marginTop: '5px' }}>
+                El nombre solo debe contener letras.
+              </small>
+            )}
           </div>
         )}
 
@@ -168,7 +221,7 @@ export default function Auth({
           <button
             type="submit"
             className="btn-primary"
-            disabled={isLoading}
+            disabled={isLoading || !isFormValid}
             style={{ width: '100%' }}
           >
             {isLoading
@@ -177,6 +230,7 @@ export default function Auth({
               ? 'Crear Cuenta'
               : 'Ingresar'}
           </button>
+
 
           <button
             type="button"

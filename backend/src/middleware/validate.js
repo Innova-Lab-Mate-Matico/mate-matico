@@ -3,33 +3,58 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 export function validateRegisterBody(req, res, next) {
   const { email, password, displayName } = req.body ?? {};
 
-  if (!email || !password) {
+  if (!email || !password || !displayName || !String(displayName).trim()) {
     return res.status(400).json({
       success: false,
-      error: 'Email y contraseña son obligatorios',
+      error: 'Nombre, email y contraseña son obligatorios',
     });
   }
 
-  if (!EMAIL_RE.test(String(email).trim())) {
+  // 1. Validar nombre (solo letras)
+  const nameStr = String(displayName).trim();
+  const nameRe = /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]+$/;
+  if (!nameRe.test(nameStr)) {
+    return res.status(400).json({
+      success: false,
+      error: 'El nombre solo debe contener letras',
+    });
+  }
+
+  // 2. Validar formato de email
+  const emailStr = String(email).trim().toLowerCase();
+  if (!EMAIL_RE.test(emailStr)) {
     return res.status(400).json({ success: false, error: 'Email inválido' });
   }
 
-  if (String(password).length < 6) {
+  // 3. Validar dominios permitidos
+  const domainParts = emailStr.split('@')[1]?.split('.') ?? [];
+  const baseDomain = domainParts[0];
+  const allowedDomains = ['gmail', 'outlook', 'yahoo', 'hotmail'];
+  if (!allowedDomains.includes(baseDomain)) {
     return res.status(400).json({
       success: false,
-      error: 'La contraseña debe tener al menos 6 caracteres',
+      error: 'Email con dominio no permitido. Solo se aceptan gmail, outlook, yahoo o hotmail.',
     });
   }
 
-  if (displayName && String(displayName).length > 80) {
+  // 4. Validar contraseña (8-12 chars, mayús + minús + número + especial)
+  const passStr = String(password);
+  const hasUpper = /[A-Z]/.test(passStr);
+  const hasLower = /[a-z]/.test(passStr);
+  const hasDigit = /\d/.test(passStr);
+  const hasSpecial = /[^A-Za-z0-9]/.test(passStr);
+  const isCorrectLength = passStr.length >= 8 && passStr.length <= 12;
+
+  if (!hasUpper || !hasLower || !hasDigit || !hasSpecial || !isCorrectLength) {
     return res.status(400).json({
       success: false,
-      error: 'El nombre no puede superar 80 caracteres',
+      error: 'La contraseña no cumple los requisitos mínimos.',
     });
   }
 
   next();
 }
+
 
 export function validateLoginBody(req, res, next) {
   const { email, password } = req.body ?? {};
