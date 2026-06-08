@@ -41,8 +41,9 @@ export async function register(req, res, next) {
     console.error('Error en register:', err);
     if (err.code === 'auth/email-already-exists') {
       err.status = 409;
-      err.message = 'El email ya está registrado';
+      err.message = 'El email ya está registrado. ¿Querés iniciar sesión?';
     } else if (err.code?.startsWith('auth/')) {
+
       err.status = err.status || 400;
     }
     next(err);
