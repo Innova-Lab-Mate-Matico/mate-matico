@@ -1,9 +1,6 @@
 import { db } from '../config/firebase.js';
 import { COLECCION_USUARIOS } from '../models/usuario.model.js';
-import {
-  reconstruirEjercicio,
-  compararRespuesta,
-} from '../exercises/registry.js';
+import { reconstruirEjercicio } from '../exercises/registry.js';
 import {
   aplicarRecompensaActividad,
   registrarActividadEmpatica,
@@ -83,10 +80,46 @@ export async function validarEjercicio(uid, body) {
   }
 
   const clave = claveEjercicio(moduleId, lessonId, exerciseId);
-  const correcto = compararRespuesta(ejercicio, answer);
+  
+  // Utilización de validación orientada a objetos (Polimorfismo directo)
+  const correcto = ejercicio.validar(answer);
   const erroresConsecutivos = await registrarIntento(uid, clave, correcto);
 
-  await db.collection('registroIntentos').add({
+  if (!correcto) {
+    // Paralelización de escritura de log de auditoría y lectura de perfil
+    const logPromise = db.collection('registroIntentos').add({
+      userId: uid,
+      moduleId,
+      lessonId,
+      exerciseId,
+      semilla,
+      answer,
+      correcto,
+      createdAt: new Date().toISOString(),
+    });
+
+    const [user] = await Promise.all([
+      obtenerUsuario(uid),
+      logPromise
+    ]);
+
+    return {
+      correcto: false,
+      puntosGanados: 0,
+      explicacionError:
+        ejercicio.explicacionError ??
+        'No te preocupes: en Mate-Matico podés intentar de nuevo las veces que necesites.',
+      habilitarComodin: erroresConsecutivos >= UMBRAL_COMODIN,
+      comodinPista:
+        erroresConsecutivos >= UMBRAL_COMODIN ? ejercicio.comodinPista ?? null : null,
+      rolActual: user?.rolActual ?? 'principiante',
+    };
+  }
+
+  const puntosGanados = ejercicio.puntos ?? 10;
+
+  // Paralelización de las escrituras e incrementos atómicos independientes para mitigar latencia
+  const logPromise = db.collection('registroIntentos').add({
     userId: uid,
     moduleId,
     lessonId,
@@ -97,31 +130,22 @@ export async function validarEjercicio(uid, body) {
     createdAt: new Date().toISOString(),
   });
 
-  if (!correcto) {
-    return {
-      correcto: false,
-      puntosGanados: 0,
-      explicacionError:
-        ejercicio.explicacionError ??
-        'No te preocupes: en Mate-Matico podés intentar de nuevo las veces que necesites.',
-      habilitarComodin: erroresConsecutivos >= UMBRAL_COMODIN,
-      comodinPista:
-        erroresConsecutivos >= UMBRAL_COMODIN ? ejercicio.comodinPista ?? null : null,
-      rolActual: (await obtenerUsuario(uid))?.rolActual ?? 'principiante',
-    };
-  }
-
-  const puntosGanados = ejercicio.puntos ?? 10;
-  const recompensa = await aplicarRecompensaActividad(uid, puntosGanados, {
+  const recompensaPromise = aplicarRecompensaActividad(uid, puntosGanados, {
     actualizarRacha: true,
   });
 
-  await updateLessonProgress(uid, {
+  const progressPromise = updateLessonProgress(uid, {
     moduleId,
     lessonId,
     completada: true,
     puntaje: puntosGanados,
   });
+
+  const [recompensa] = await Promise.all([
+    recompensaPromise,
+    progressPromise,
+    logPromise
+  ]);
 
   return {
     correcto: true,

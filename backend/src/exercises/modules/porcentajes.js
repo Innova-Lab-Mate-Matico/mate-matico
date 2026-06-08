@@ -103,8 +103,25 @@ export function generarEjercicioPorcentajes(tipoGenerador, semilla) {
   return { ...plantilla.generar(rng), semilla };
 }
 
-export function resolverRespuestaPorcentajes(operandos) {
+export function resolverRespuestaPorcentajes(operandos, tipoGenerador = null) {
   const { operacion, porcentaje, base, precio, descuento } = operandos;
+
+  if (tipoGenerador) {
+    switch (tipoGenerador) {
+      case 'descuento_mc':
+        return Math.round((precio * descuento) / 100);
+      case 'aumento_numerico': {
+        const aum = Math.round((precio * (porcentaje ?? 10)) / 100);
+        return precio + aum;
+      }
+      case 'porcentaje_mc':
+      case 'porcentaje_numerico':
+        return Math.round((base * porcentaje) / 100);
+      default:
+        break;
+    }
+  }
+
   if (operacion === 'porcentaje') {
     return Math.round((base * porcentaje) / 100);
   }

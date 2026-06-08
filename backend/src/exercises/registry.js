@@ -98,7 +98,7 @@ export function reconstruirEjercicio(moduleId, lessonId, exerciseId, semilla, op
     const ejercicio = generar(tipo, semilla);
     if (ejercicio?.id !== exerciseId) continue;
 
-    const respuesta = resolver(operandos ?? ejercicio.operandos);
+    const respuesta = resolver(operandos ?? ejercicio.operandos, tipo);
     return FabricaEjercicios.crear({
       ...ejercicio,
       semilla,
@@ -127,20 +127,6 @@ export function reconstruirEjercicio(moduleId, lessonId, exerciseId, semilla, op
   return null;
 }
 
-export function compararRespuesta(ejercicio, answer) {
-  if (ejercicio && typeof ejercicio.validar === 'function') {
-    return ejercicio.validar(answer);
-  }
-  // Fallback en caso de recibir un objeto plano heredado
-  const esperado = ejercicio.respuestaCorrecta;
-  if (ejercicio.tipo === 'multiple_choice') {
-    return String(answer).trim() === String(esperado).trim();
-  }
-  const user = Number(answer);
-  const ok = Number(esperado);
-  if (Number.isNaN(user) || Number.isNaN(ok)) return false;
-  return Math.abs(user - ok) < 0.01;
-}
 
 export function ejercicioParaCliente(ejercicio, tipoGenerador) {
   return {

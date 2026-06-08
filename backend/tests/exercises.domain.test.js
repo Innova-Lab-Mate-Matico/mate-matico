@@ -4,6 +4,9 @@ import { Ejercicio } from '../src/exercises/domain/Ejercicio.js';
 import { EjercicioMultipleChoice } from '../src/exercises/domain/EjercicioMultipleChoice.js';
 import { EjercicioNumerico } from '../src/exercises/domain/EjercicioNumerico.js';
 import { FabricaEjercicios } from '../src/exercises/domain/FabricaEjercicios.js';
+import { resolverRespuestaPorcentajes } from '../src/exercises/modules/porcentajes.js';
+import { resolverRespuestaAritmetica } from '../src/exercises/modules/aritmeticaBasica.js';
+import { resolverRespuestaFracciones } from '../src/exercises/modules/fracciones.js';
 
 describe('Modelo de Dominio de Ejercicios (OOP/SOLID)', () => {
   describe('1. Clase Abstracta Ejercicio', () => {
@@ -110,6 +113,41 @@ describe('Modelo de Dominio de Ejercicios (OOP/SOLID)', () => {
       assert.throws(() => {
         FabricaEjercicios.crear({ tipo: 'unknown_type', id: '3' });
       }, /Tipo de ejercicio no soportado/);
+    });
+  });
+
+  describe('5. Resolvers de Módulos Matemáticos con Contexto de Plantilla', () => {
+    it('Debe resolver respuestas de porcentajes usando el tipo de generador para distinguir propósitos', () => {
+      const resAhorro = resolverRespuestaPorcentajes(
+        { precio: 12000, descuento: 20 },
+        'descuento_mc'
+      );
+      assert.strictEqual(resAhorro, 2400);
+
+      const resAumento = resolverRespuestaPorcentajes(
+        { precio: 18000, porcentaje: 10 },
+        'aumento_numerico'
+      );
+      assert.strictEqual(resAumento, 19800);
+
+      const resBase = resolverRespuestaPorcentajes(
+        { base: 100, porcentaje: 25 },
+        'porcentaje_mc'
+      );
+      assert.strictEqual(resBase, 25);
+    });
+
+    it('Debe resolver respuestas de aritmética básica usando el tipo de generador', () => {
+      const resSuma = resolverRespuestaAritmetica({ a: 10, b: 5 }, 'suma_num');
+      assert.strictEqual(resSuma, 15);
+
+      const resResta = resolverRespuestaAritmetica({ a: 10, b: 5 }, 'resta_mc');
+      assert.strictEqual(resResta, 5);
+    });
+
+    it('Debe resolver respuestas de fracciones usando el tipo de generador', () => {
+      const resFrac = resolverRespuestaFracciones({ num: 3, den: 4 }, 'fraccion_decimal_mc');
+      assert.strictEqual(resFrac, 0.75);
     });
   });
 });
