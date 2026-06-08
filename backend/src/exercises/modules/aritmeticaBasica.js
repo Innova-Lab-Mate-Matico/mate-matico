@@ -116,8 +116,26 @@ export function generarEjercicioAritmetica(tipoGenerador, semilla) {
   return { ...ejercicio, semilla };
 }
 
-export function resolverRespuestaAritmetica(operandos) {
+export function resolverRespuestaAritmetica(operandos, tipoGenerador = null) {
   const { a, b, operacion } = operandos;
+
+  if (tipoGenerador) {
+    switch (tipoGenerador) {
+      case 'suma_mc':
+      case 'suma_numerica':
+      case 'suma_num':
+        return a + b;
+      case 'resta_mc':
+      case 'resta_num':
+        return a - b;
+      case 'multiplicacion_mc':
+      case 'multiplicacion_num':
+        return a * b;
+      default:
+        break;
+    }
+  }
+
   switch (operacion) {
     case 'suma':
       return a + b;

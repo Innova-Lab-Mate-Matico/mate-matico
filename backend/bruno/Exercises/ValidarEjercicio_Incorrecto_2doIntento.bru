@@ -1,0 +1,49 @@
+meta {
+  name: Validar Ejercicio (Incorrecto - 2do Intento)
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/exercises/validate
+  body: json
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "moduleId": "porcentajes",
+    "lessonId": "descuentos",
+    "exerciseId": "desc-mc",
+    "answer": 3400,
+    "semilla": 42,
+    "operandos": {
+      "descuento": 20,
+      "precio": 12000,
+      "operacion": "ahorro"
+    }
+  }
+}
+
+docs {
+  # Validar Ejercicio (Incorrecto - 2do Intento)
+  Este request simula el segundo error consecutivo enviando otra respuesta errónea ($3.400).
+  
+  ## Prerrequisito:
+  Para que el test funcione, debés haber ejecutado previamente el request de "1er Intento" sobre este mismo usuario para llevar el contador de errores consecutivos a 1.
+  
+  ## Respuesta Esperada (200 OK):
+  - `correcto`: false
+  - `puntosGanados`: 0
+  - `explicacionError`: Explicación detallada de Figma.
+  - `habilitarComodin`: true (Se activa la ayuda)
+  - `comodinPista`: La pista del termo de Figma ("Pista: el 20% es la quinta parte...")
+}
