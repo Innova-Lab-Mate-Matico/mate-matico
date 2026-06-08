@@ -1,0 +1,49 @@
+meta {
+  name: Validar Ejercicio (Incorrecto - 1er Intento)
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/exercises/validate
+  body: json
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "moduleId": "porcentajes",
+    "lessonId": "descuentos",
+    "exerciseId": "desc-mc",
+    "answer": 1200,
+    "semilla": 42,
+    "operandos": {
+      "descuento": 20,
+      "precio": 12000,
+      "operacion": "ahorro"
+    }
+  }
+}
+
+docs {
+  # Validar Ejercicio (Incorrecto - 1er Intento)
+  Este request envía una respuesta errónea para el ejercicio de Yerba ($1.200).
+  
+  ## Payload (JSON):
+  - `answer`: 1200 (Respuesta incorrecta)
+  
+  ## Respuesta Esperada (200 OK):
+  - `correcto`: false
+  - `puntosGanados`: 0
+  - `explicacionError`: Explicación detallada de Figma ("El 20% de $12.000 es: (20/100) × 12.000 = $2.400...")
+  - `habilitarComodin`: false (no se entrega pista todavía)
+  - `comodinPista`: null
+}
