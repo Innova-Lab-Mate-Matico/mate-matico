@@ -28,8 +28,9 @@ echo   Panel: http://localhost:5173
 echo   (El backend debe estar en :3000)
 echo ========================================
 echo.
-echo Si Google no funciona, agrega VITE_FIREBASE_API_KEY en frontend\.env
+echo Si Google no funciona, agrega REACT_APP_FIREBASE_API_KEY en frontend\.env
 echo.
 
-call npm run dev
+call npm start
 pause
+
