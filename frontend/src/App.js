@@ -15,7 +15,8 @@ import Opiniones from './components/Opiniones';
 // URL base de la API backend
 const API_BASE =
   process.env.REACT_APP_API_BASE_URL ||
-  'http://localhost:3000/api';
+  'https://mate-matico-backend.onrender.com/api';
+
 
 // Configuración Firebase Client
 const firebaseClientConfig = {
