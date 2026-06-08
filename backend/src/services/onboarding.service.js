@@ -1,5 +1,5 @@
 import { db } from '../config/firebase.js';
-import { COLECCION_USUARIOS } from '../models/usuario.model.js';
+import { COLECCION_USUARIOS, dbToUsuario } from '../models/usuario.model.js';
 
 const usuariosCol = () => db.collection(COLECCION_USUARIOS);
 
@@ -60,5 +60,8 @@ export async function guardarOnboardingUsuario(uid, respuestas) {
   });
 
   const updatedDoc = await ref.get();
-  return { uid, ...updatedDoc.data() };
+  const data = dbToUsuario(updatedDoc.data());
+  data.uid = updatedDoc.id;
+  return data;
 }
+

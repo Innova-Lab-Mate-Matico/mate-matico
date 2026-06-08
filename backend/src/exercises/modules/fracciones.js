@@ -37,9 +37,19 @@ export function generarEjercicioFracciones(tipoGenerador, semilla) {
   return { ...plantilla.generar(rng), semilla };
 }
 
-export function resolverRespuestaFracciones(operandos) {
+export function resolverRespuestaFracciones(operandos, tipoGenerador = null) {
   const { num, den } = operandos;
   if (!den) return null;
+
+  if (tipoGenerador) {
+    switch (tipoGenerador) {
+      case 'fraccion_decimal_mc':
+        return Math.round((num / den) * 100) / 100;
+      default:
+        break;
+    }
+  }
+
   return Math.round((num / den) * 100) / 100;
 }
 

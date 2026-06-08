@@ -1,0 +1,54 @@
+meta {
+  name: Validar Ejercicio (Correcto)
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/exercises/validate
+  body: json
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "moduleId": "porcentajes",
+    "lessonId": "descuentos",
+    "exerciseId": "desc-mc",
+    "answer": 2400,
+    "semilla": 42,
+    "operandos": {
+      "descuento": 20,
+      "precio": 12000,
+      "operacion": "ahorro"
+    }
+  }
+}
+
+docs {
+  # Validar Ejercicio (Correcto)
+  Este request envía la respuesta correcta para el ejercicio de Yerba ($2.400) alineado con Figma.
+  
+  ## Payload (JSON):
+  - `moduleId`: "porcentajes"
+  - `lessonId`: "descuentos"
+  - `exerciseId`: "desc-mc"
+  - `answer`: 2400 (Respuesta correcta)
+  - `semilla`: 42 (Semilla determinista)
+  - `operandos`: Atributos dinámicos del ejercicio
+  
+  ## Respuesta Esperada (200 OK):
+  - `correcto`: true
+  - `puntosGanados`: 10
+  - `rolActual`: "principiante" (o el rol vigente)
+  - `rolSubio`: false (o true si sube de rango en el test)
+  - `puntosTotales`: Puntos incrementados del alumno
+}
