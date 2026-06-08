@@ -4,6 +4,8 @@ import {
   COLECCION_USUARIOS,
   crearPerfilUsuarioInicial,
   serializarUsuario,
+  usuarioToDb,
+  dbToUsuario,
 } from '../models/usuario.model.js';
 import { calcularRolActual, rolSubio } from './rol.service.js';
 import { evaluarRacha } from './racha.service.js';
@@ -13,7 +15,9 @@ const usuariosCol = () => db.collection(COLECCION_USUARIOS);
 export async function obtenerUsuario(uid) {
   const doc = await usuariosCol().doc(uid).get();
   if (!doc.exists) return null;
-  return { uid, ...doc.data() };
+  const data = dbToUsuario(doc.data());
+  data.uid = doc.id;
+  return data;
 }
 
 export async function crearUsuarioSiNoExiste(datos) {
@@ -21,25 +25,26 @@ export async function crearUsuarioSiNoExiste(datos) {
   const doc = await ref.get();
 
   if (doc.exists) {
-    return { usuario: { uid: doc.id, ...doc.data() }, esNuevo: false };
+    const data = dbToUsuario(doc.data());
+    data.uid = doc.id;
+    return { usuario: data, esNuevo: false };
   }
 
   const perfil = crearPerfilUsuarioInicial(datos);
-  await ref.set({
-    ...perfil,
-    ultimaLeccionCompletada: null,
-  });
+  await ref.set(usuarioToDb(perfil));
 
   return { usuario: perfil, esNuevo: true };
 }
 
 export async function actualizarLogin(uid, { displayName, photoURL, provider }) {
-  await usuariosCol().doc(uid).update({
-    displayName,
-    photoURL: photoURL ?? null,
-    provider,
-    lastLoginAt: new Date().toISOString(),
-  });
+  await usuariosCol().doc(uid).update(
+    usuarioToDb({
+      displayName,
+      photoURL: photoURL ?? null,
+      provider,
+      lastLoginAt: new Date().toISOString(),
+    })
+  );
 }
 
 export async function contarLeccionesCompletadas(uid) {
@@ -67,22 +72,27 @@ export async function aplicarRecompensaActividad(uid, puntosGanados, { actualiza
       throw err;
     }
 
-    const data = snap.data();
+    const rawData = snap.data();
+    const data = dbToUsuario(rawData);
+    data.uid = snap.id;
     const puntosActuales = (data.puntosTotales ?? 0) + puntosGanados;
     const rolAnterior = data.rolActual;
     const rolNuevo = calcularRolActual(puntosActuales, leccionesCompletadas);
 
-    const updates = {
+    const updates = usuarioToDb({
       puntosTotales: FieldValue.increment(puntosGanados),
       rolActual: rolNuevo,
-    };
+    });
 
     let rachaInfo = {};
     if (actualizarRacha) {
       rachaInfo = evaluarRacha(data);
-      updates.rachaDias = rachaInfo.rachaDias;
-      updates.recordRacha = rachaInfo.recordRacha;
-      updates.ultimaLeccionCompletada = rachaInfo.ultimaLeccionCompletada;
+      const mappedRacha = usuarioToDb({
+        rachaDias: rachaInfo.rachaDias,
+        recordRacha: rachaInfo.recordRacha,
+        ultimaLeccionCompletada: rachaInfo.ultimaLeccionCompletada,
+      });
+      Object.assign(updates, mappedRacha);
     }
 
     tx.update(ref, updates);
@@ -102,15 +112,20 @@ export async function registrarActividadEmpatica(uid) {
   const snap = await ref.get();
   if (!snap.exists) return;
 
-  const rachaInfo = evaluarRacha(snap.data());
-  await ref.update({
-    ultimaLeccionCompletada: rachaInfo.ultimaLeccionCompletada,
-    rachaDias: rachaInfo.rachaDias,
-    recordRacha: rachaInfo.recordRacha,
-  });
+  const data = dbToUsuario(snap.data());
+  data.uid = snap.id;
+  const rachaInfo = evaluarRacha(data);
+  await ref.update(
+    usuarioToDb({
+      ultimaLeccionCompletada: rachaInfo.ultimaLeccionCompletada,
+      rachaDias: rachaInfo.rachaDias,
+      recordRacha: rachaInfo.recordRacha,
+    })
+  );
 }
 
 export function perfilPublico(usuario) {
   return serializarUsuario(usuario);
 }
+
 
