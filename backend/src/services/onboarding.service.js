@@ -1,7 +1,19 @@
 import { db } from '../config/firebase.js';
 import { COLECCION_USUARIOS, dbToUsuario } from '../models/usuario.model.js';
+import { BigQuery } from '@google-cloud/bigquery';
+import { getFirebaseServiceAccount } from '../config/env.js';
 
 const usuariosCol = () => db.collection(COLECCION_USUARIOS);
+
+// Inicializar cliente de BigQuery utilizando las mismas credenciales de la cuenta de servicio
+const credentials = getFirebaseServiceAccount();
+const bigquery = new BigQuery({
+  projectId: credentials.project_id,
+  credentials: {
+    client_email: credentials.client_email,
+    private_key: credentials.private_key,
+  },
+});
 
 /**
  * Motor de Recomendación Inicial
@@ -59,9 +71,30 @@ export async function guardarOnboardingUsuario(uid, respuestas) {
     onboarding: onboardingData
   });
 
+  // Envío en tiempo real a BigQuery (Streaming Insert) como un proceso complementario
+  try {
+    const datasetId = 'onboarding_data';
+    const tableId = 'usuarios_onboarding';
+
+    const row = {
+      usuario_id: uid,
+      edad: onboardingData.edad,
+      nivel_educativo: onboardingData.nivelEducativo,
+      objetivo: onboardingData.objetivo,
+      confianza_math: onboardingData.confianzaMath,
+      modulo_recomendo: onboardingData.moduloRecomendado,
+      fecha_registro: BigQuery.timestamp(new Date()),
+    };
+
+    await bigquery.dataset(datasetId).table(tableId).insert([row]);
+  } catch (bqError) {
+    console.error('Error al insertar datos de onboarding en BigQuery:', bqError);
+  }
+
   const updatedDoc = await ref.get();
   const data = dbToUsuario(updatedDoc.data());
   data.uid = updatedDoc.id;
   return data;
 }
+
 
