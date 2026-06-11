@@ -1,5 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
+import { initializeApp } from 'firebase/app';
+import { getAuth, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import './App.css'; // Tus estilos globales
 import Auth from './components/Auth';
 import Profile from './components/Profile';
@@ -28,6 +30,10 @@ const firebaseClientConfig = {
   appId: process.env.REACT_APP_FIREBASE_APP_ID,
 };
 
+let firebaseApp;
+let firebaseAuth;
+
+
 export default function App() {
   const [token, setToken] = useState(
     localStorage.getItem('idToken') || ''
@@ -39,8 +45,7 @@ export default function App() {
   const [statusMsg, setStatusMsg] = useState('');
   const [isStatusOk, setIsStatusOk] = useState(true);
 
-  const [firebaseAuthModule, setFirebaseAuthModule] =
-    useState(null);
+
 
   // Pestaña activa
   const [activeTab, setActiveTab] = useState('perfil');
@@ -159,52 +164,30 @@ export default function App() {
   };
 
   /*
-    Carga dinámica del SDK Firebase.
+    Carga del SDK Firebase.
   */
   const getFirebaseAuth = async () => {
-    if (firebaseAuthModule) {
-      return firebaseAuthModule;
+    if (!firebaseApp) {
+      if (
+        !firebaseClientConfig.apiKey ||
+        !firebaseClientConfig.projectId
+      ) {
+        throw new Error(
+          'Configurá REACT_APP_FIREBASE_API_KEY y REACT_APP_FIREBASE_PROJECT_ID en frontend/.env'
+        );
+      }
+      firebaseApp = initializeApp(firebaseClientConfig);
+      firebaseAuth = getAuth(firebaseApp);
     }
-
-    if (
-      !firebaseClientConfig.apiKey ||
-      !firebaseClientConfig.projectId
-    ) {
-      throw new Error(
-        'Configurá REACT_APP_FIREBASE_API_KEY y REACT_APP_FIREBASE_PROJECT_ID en frontend/.env'
-      );
-    }
-
-    const { initializeApp } = await import(
-      'https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js'
-    );
-
-    const {
-      getAuth,
-      GoogleAuthProvider,
-      signInWithPopup,
-    } = await import(
-      'https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js'
-    );
-
-    const app = initializeApp(
-      firebaseClientConfig
-    );
-
-    const authInstance = getAuth(app);
 
     const provider = new GoogleAuthProvider();
 
-    const module = {
-      auth: authInstance,
+    return {
+      auth: firebaseAuth,
       GoogleAuthProvider,
       signInWithPopup,
       provider,
     };
-
-    setFirebaseAuthModule(module);
-
-    return module;
   };
 
   /*
