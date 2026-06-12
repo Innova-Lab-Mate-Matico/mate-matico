@@ -107,10 +107,12 @@ export default function App() {
 
   // 🔥 FIREBASE OK
   const getFirebaseAuth = async () => {
+    
     if (!firebaseApp) {
       const { initializeApp } = await import(
         'https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js'
       );
+      
 
       const { getAuth, GoogleAuthProvider, signInWithPopup } = await import(
         'https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js'
