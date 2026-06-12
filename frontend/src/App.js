@@ -11,12 +11,27 @@ import Navbar from './components/Navbar';
 import Faqs from './components/Faqs';
 import Opiniones from './components/Opiniones';
 
+// Firebase correcto (npm)
+import { initializeApp } from "firebase/app";
+import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+
 const API_BASE =
   process.env.REACT_APP_API_BASE_URL ||
   'https://mate-matico-backend.onrender.com/api';
 
-let firebaseApp;
-let firebaseAuth;
+// Firebase config
+const firebaseConfig = {
+  apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
+  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.REACT_APP_FIREBASE_APP_ID,
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const provider = new GoogleAuthProvider();
 
 export default function App() {
   const [token, setToken] = useState(
@@ -64,7 +79,6 @@ export default function App() {
     return data;
   };
 
-  // ✅ FIX: callbacks sin dependencias (evita ESLint + loops)
   const loadProfile = useCallback(async (activeToken = null) => {
     try {
       const data = await apiCall('/auth/me', {}, activeToken);
@@ -73,7 +87,7 @@ export default function App() {
       console.error('Error al cargar perfil:', err);
       logout();
     }
-  }, []);
+  }, [token]);
 
   const loadUserProgress = useCallback(async (activeToken = null) => {
     try {
@@ -82,15 +96,14 @@ export default function App() {
     } catch (err) {
       console.error('Error al cargar progreso:', err);
     }
-  }, []);
+  }, [token]);
 
-  // ✅ FIX limpio
   useEffect(() => {
     if (!token) return;
 
     loadProfile(token);
     loadUserProgress(token);
-  }, [token]);
+  }, [token, loadProfile, loadUserProgress]);
 
   const saveToken = (idToken) => {
     setToken(idToken);
@@ -103,48 +116,6 @@ export default function App() {
     setProgress(null);
     localStorage.removeItem('idToken');
     setStatus('Sesión cerrada correctamente', true);
-  };
-
-  // 🔥 FIREBASE OK
-  const getFirebaseAuth = async () => {
-    
-    if (!firebaseApp) {
-      const { initializeApp } = await import(
-        'https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js'
-      );
-      
-
-      const { getAuth, GoogleAuthProvider, signInWithPopup } = await import(
-        'https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js'
-      );
-
-      firebaseApp = initializeApp({
-        apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
-        authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
-        projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
-        storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
-        messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
-        appId: process.env.REACT_APP_FIREBASE_APP_ID,
-      });
-
-      firebaseAuth = getAuth(firebaseApp);
-
-      return {
-        auth: firebaseAuth,
-        provider: new GoogleAuthProvider(),
-        signInWithPopup,
-      };
-    }
-
-    const { GoogleAuthProvider, signInWithPopup } = await import(
-      'https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js'
-    );
-
-    return {
-      auth: firebaseAuth,
-      provider: new GoogleAuthProvider(),
-      signInWithPopup,
-    };
   };
 
   const handleRegister = async (email, password, displayName) => {
@@ -190,9 +161,6 @@ export default function App() {
   const handleGoogleLogin = async () => {
     try {
       setStatus('Google login...');
-
-      const { auth, provider, signInWithPopup } =
-        await getFirebaseAuth();
 
       provider.setCustomParameters({
         prompt: 'select_account',
