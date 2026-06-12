@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import './App.css';
+
 import Auth from './components/Auth';
 import Profile from './components/Profile';
 import Modules from './components/Modules';
@@ -23,6 +24,9 @@ const firebaseClientConfig = {
   appId: process.env.REACT_APP_FIREBASE_APP_ID,
 };
 
+let firebaseApp;
+let firebaseAuth;
+
 export default function App() {
   const [token, setToken] = useState(
     localStorage.getItem('idToken') || ''
@@ -33,8 +37,6 @@ export default function App() {
 
   const [statusMsg, setStatusMsg] = useState('');
   const [isStatusOk, setIsStatusOk] = useState(true);
-
-  const [firebaseAuthModule, setFirebaseAuthModule] = useState(null);
 
   const [activeTab, setActiveTab] = useState('perfil');
 
@@ -71,10 +73,6 @@ export default function App() {
     return data;
   };
 
-  // -------------------------
-  // FIX: useCallback functions
-  // -------------------------
-
   const loadProfile = useCallback(async (activeToken = null) => {
     try {
       const data = await apiCall('/auth/me', {}, activeToken);
@@ -93,10 +91,6 @@ export default function App() {
       console.error('Error al cargar progreso:', err);
     }
   }, [token]);
-
-  // -------------------------
-  // Auto login restore
-  // -------------------------
 
   useEffect(() => {
     if (token) {
@@ -119,39 +113,45 @@ export default function App() {
   };
 
   const getFirebaseAuth = async () => {
-    if (firebaseAuthModule) return firebaseAuthModule;
+    if (!firebaseApp) {
+      if (
+        !firebaseClientConfig.apiKey ||
+        !firebaseClientConfig.projectId
+      ) {
+        throw new Error('Configurá Firebase en .env');
+      }
 
-    if (!firebaseClientConfig.apiKey || !firebaseClientConfig.projectId) {
-      throw new Error(
-        'Configurá Firebase en .env'
+      const { initializeApp } = await import(
+        'https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js'
       );
+
+      const { getAuth, GoogleAuthProvider, signInWithPopup } = await import(
+        'https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js'
+      );
+
+      firebaseApp = initializeApp(firebaseClientConfig);
+      firebaseAuth = getAuth(firebaseApp);
+
+      const provider = new GoogleAuthProvider();
+
+      return {
+        auth: firebaseAuth,
+        GoogleAuthProvider,
+        signInWithPopup,
+        provider,
+      };
     }
 
-    const { initializeApp } = await import(
-      'https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js'
-    );
-
-    const {
-      getAuth,
-      GoogleAuthProvider,
-      signInWithPopup,
-    } = await import(
+    const { GoogleAuthProvider, signInWithPopup } = await import(
       'https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js'
     );
 
-    const app = initializeApp(firebaseClientConfig);
-    const authInstance = getAuth(app);
-    const provider = new GoogleAuthProvider();
-
-    const module = {
-      auth: authInstance,
+    return {
+      auth: firebaseAuth,
       GoogleAuthProvider,
       signInWithPopup,
-      provider,
+      provider: new GoogleAuthProvider(),
     };
-
-    setFirebaseAuthModule(module);
-    return module;
   };
 
   const handleRegister = async (email, password, displayName) => {
@@ -163,16 +163,13 @@ export default function App() {
         body: JSON.stringify({ email, password, displayName }),
       });
 
-      if (!data.idToken) {
-        setStatus('Registro correcto. Iniciá sesión.', true);
-        return;
+      if (data.idToken) {
+        saveToken(data.idToken);
+        loadUserProgress(data.idToken);
+        setUser(data.usuario);
+        setActiveTab('perfil');
       }
 
-      saveToken(data.idToken);
-      loadUserProgress(data.idToken);
-
-      setUser(data.usuario);
-      setActiveTab('perfil');
       setStatus('¡Registro correcto!', true);
     } catch (err) {
       setStatus(err.message, false);
@@ -259,15 +256,9 @@ export default function App() {
         ) : (
           <>
             <nav className="tab-bar">
-              <button onClick={() => setActiveTab('perfil')}>
-                Mi Perfil
-              </button>
-              <button onClick={() => setActiveTab('lecciones')}>
-                Lecciones
-              </button>
-              <button onClick={() => setActiveTab('progreso')}>
-                Progreso
-              </button>
+              <button onClick={() => setActiveTab('perfil')}>Mi Perfil</button>
+              <button onClick={() => setActiveTab('lecciones')}>Lecciones</button>
+              <button onClick={() => setActiveTab('progreso')}>Progreso</button>
             </nav>
 
             {activeTab === 'perfil' && (
