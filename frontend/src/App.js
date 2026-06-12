@@ -15,15 +15,6 @@ const API_BASE =
   process.env.REACT_APP_API_BASE_URL ||
   'https://mate-matico-backend.onrender.com/api';
 
-const firebaseClientConfig = {
-  apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
-  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.REACT_APP_FIREBASE_APP_ID,
-};
-
 let firebaseApp;
 let firebaseAuth;
 
@@ -92,11 +83,13 @@ export default function App() {
     }
   }, [token]);
 
+  // ✅ FIX ESLINT: dependencias completas
   useEffect(() => {
-    if (token) {
-      loadProfile(token);
-      loadUserProgress(token);
-    }
+    if (!token) return;
+
+    loadProfile(token);
+    loadUserProgress(token);
+
   }, [token, loadProfile, loadUserProgress]);
 
   const saveToken = (idToken) => {
@@ -112,48 +105,6 @@ export default function App() {
     setStatus('Sesión cerrada correctamente', true);
   };
 
-  const getFirebaseAuth = async () => {
-    if (!firebaseApp) {
-      if (
-        !firebaseClientConfig.apiKey ||
-        !firebaseClientConfig.projectId
-      ) {
-        throw new Error('Configurá Firebase en .env');
-      }
-
-      const { initializeApp } = await import(
-        'https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js'
-      );
-
-      const { getAuth, GoogleAuthProvider, signInWithPopup } = await import(
-        'https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js'
-      );
-
-      firebaseApp = initializeApp(firebaseClientConfig);
-      firebaseAuth = getAuth(firebaseApp);
-
-      const provider = new GoogleAuthProvider();
-
-      return {
-        auth: firebaseAuth,
-        GoogleAuthProvider,
-        signInWithPopup,
-        provider,
-      };
-    }
-
-    const { GoogleAuthProvider, signInWithPopup } = await import(
-      'https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js'
-    );
-
-    return {
-      auth: firebaseAuth,
-      GoogleAuthProvider,
-      signInWithPopup,
-      provider: new GoogleAuthProvider(),
-    };
-  };
-
   const handleRegister = async (email, password, displayName) => {
     try {
       setStatus('Creando cuenta...');
@@ -165,7 +116,6 @@ export default function App() {
 
       if (data.idToken) {
         saveToken(data.idToken);
-        loadUserProgress(data.idToken);
         setUser(data.usuario);
         setActiveTab('perfil');
       }
@@ -186,10 +136,9 @@ export default function App() {
       });
 
       saveToken(data.idToken);
-      loadUserProgress(data.idToken);
-
       setUser(data.usuario);
       setActiveTab('perfil');
+
       setStatus('Sesión iniciada', true);
     } catch (err) {
       setStatus(err.message, false);
@@ -200,13 +149,6 @@ export default function App() {
     try {
       setStatus('Google login...');
 
-      const { auth, signInWithPopup, provider } =
-        await getFirebaseAuth();
-
-      provider.setCustomParameters({
-        prompt: 'select_account',
-      });
-
       const credential = await signInWithPopup(auth, provider);
       const googleIdToken = await credential.user.getIdToken();
 
@@ -216,8 +158,6 @@ export default function App() {
       });
 
       saveToken(data.idToken);
-      loadUserProgress(data.idToken);
-
       setUser(data.usuario);
       setActiveTab('perfil');
 
@@ -225,16 +165,6 @@ export default function App() {
     } catch (err) {
       setStatus(err.message, false);
     }
-  };
-
-  const handleAnswerSuccess = (result) => {
-    setUser((prev) => ({
-      ...prev,
-      puntosTotales: result.puntosTotales,
-      rolActual: result.rolActual,
-      rachaDias: result.rachaDias,
-      recordRacha: result.recordRacha,
-    }));
   };
 
   return (
@@ -266,8 +196,8 @@ export default function App() {
                 user={user}
                 onLogout={logout}
                 onRefresh={() => {
-                  loadProfile();
-                  loadUserProgress();
+                  loadProfile(token);
+                  loadUserProgress(token);
                 }}
               />
             )}
@@ -275,9 +205,8 @@ export default function App() {
             {activeTab === 'lecciones' && (
               <Modules
                 apiCall={apiCall}
-                onAnswerSuccess={handleAnswerSuccess}
                 progress={progress}
-                onRefreshProgress={loadUserProgress}
+                onRefreshProgress={() => loadUserProgress(token)}
               />
             )}
 
