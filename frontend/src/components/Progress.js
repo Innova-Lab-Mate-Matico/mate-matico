@@ -14,7 +14,7 @@ import React, { useState } from 'react';
   Compatible con:
   - Create React App
   - React clásico
-*/
+
 
 export default function Progress({
   apiCall
@@ -28,9 +28,7 @@ export default function Progress({
   const [showRaw, setShowRaw] =
     useState(false);
 
-  /*
-    Obtener progreso desde backend.
-  */
+
   const loadProgress = async () => {
     setLoading(true);
 
@@ -50,10 +48,7 @@ export default function Progress({
     }
   };
 
-  /*
-    Verificar si existen
-    lecciones completadas.
-  */
+ 
   const hasProgress =
     progressData &&
     progressData.progreso &&
@@ -63,7 +58,7 @@ export default function Progress({
 
   return (
     <div className="card">
-      {/* Header */}
+      
       <div
         style={{
           display: 'flex',
@@ -91,7 +86,7 @@ export default function Progress({
         </button>
       </div>
 
-      {/* Estado vacío */}
+      
       {!progressData &&
         !loading && (
           <p
@@ -109,7 +104,7 @@ export default function Progress({
           </p>
         )}
 
-      {/* Datos */}
+      
       {progressData && (
         <div
           style={{
@@ -119,7 +114,7 @@ export default function Progress({
             gap: '20px',
           }}
         >
-          {/* Tarjetas estadísticas */}
+      
           <div
             style={{
               display: 'flex',
@@ -185,7 +180,7 @@ export default function Progress({
             </div>
           </div>
 
-          {/* Lecciones */}
+  
           <div>
             <h4>
               Lecciones
@@ -330,7 +325,7 @@ export default function Progress({
             )}
           </div>
 
-          {/* JSON técnico */}
+        
           <div
             style={{
               marginTop:
@@ -375,4 +370,8 @@ export default function Progress({
       )}
     </div>
   );
+}*/
+
+export default function Progress() {
+  return null;
 }
