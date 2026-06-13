@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import './App.css';
 
 import Auth from './components/Auth';
@@ -11,7 +11,6 @@ import Navbar from './components/Navbar';
 import Faqs from './components/Faqs';
 import Opiniones from './components/Opiniones';
 
-// Firebase (npm - correcto para Vercel)
 import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 
@@ -51,6 +50,12 @@ export default function App() {
     setIsStatusOk(ok);
   };
 
+  // ✅ TOKEN SAVE
+  const saveToken = (idToken) => {
+    setToken(idToken);
+    localStorage.setItem('idToken', idToken);
+  };
+
   const apiCall = async (path, options = {}, customToken = null) => {
     const headers = {
       'Content-Type': 'application/json',
@@ -80,7 +85,7 @@ export default function App() {
   };
 
   // PROFILE
-  const loadProfile = async (activeToken = null) => {
+  const loadProfile = useCallback(async (activeToken = null) => {
     try {
       const data = await apiCall('/auth/me', {}, activeToken);
       setUser(data.usuario);
@@ -88,29 +93,29 @@ export default function App() {
       console.error('Error al cargar perfil:', err);
       logout();
     }
-  };
+  }, [token]);
 
   // PROGRESS
-  const loadUserProgress = async (activeToken = null) => {
+  const loadUserProgress = useCallback(async (activeToken = null) => {
     try {
       const data = await apiCall('/progress', {}, activeToken);
       setProgress(data.progreso || {});
     } catch (err) {
       console.error('Error al cargar progreso:', err);
     }
-  };
-// eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token]);
+
+  // EFFECT
   useEffect(() => {
     if (!token) return;
 
-    loadProfile(token);
-    loadUserProgress(token);
-  }, [token]);
+    const run = async () => {
+      await loadProfile(token);
+      await loadUserProgress(token);
+    };
 
-  const saveToken = (idToken) => {
-    setToken(idToken);
-    localStorage.setItem('idToken', idToken);
-  };
+    run();
+  }, [token, loadProfile, loadUserProgress]);
 
   const logout = () => {
     setToken('');
