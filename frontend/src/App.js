@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import './App.css'; // Tus estilos globales
@@ -53,12 +53,7 @@ export default function App() {
   /*
     Intentar recuperar sesión automáticamente al iniciar la aplicación.
   */
-  useEffect(() => {
-    if (token) {
-      loadProfile(token);
-      loadUserProgress(token);
-    }
-  }, [token]);
+
 
   const setStatus = (msg, ok = true) => {
     setStatusMsg(msg);
