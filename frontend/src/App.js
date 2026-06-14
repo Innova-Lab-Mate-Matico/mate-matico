@@ -58,7 +58,7 @@ export default function App() {
       loadProfile(token);
       loadUserProgress(token);
     }
-  }, []);
+  }, [token]);
 
   const setStatus = (msg, ok = true) => {
     setStatusMsg(msg);
