@@ -1,24 +1,45 @@
 
-import React, { useState } from 'react';
-import { initializeApp } from 'firebase/app';
-import { getAuth, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
-import './App.css'; // Tus estilos globales
+/*import React, { useState, useEffect } from 'react';
 import Auth from './components/Auth';
 import Profile from './components/Profile';
 import Modules from './components/Modules';
 import Progress from './components/Progress';
 
-// --- TUS COMPONENTES INYECTADOS (Limpios sin Avance) ---
-import Header from './components/Header';
-import Navbar from './components/Navbar';
-import Faqs from './components/Faqs';
-import Opiniones from './components/Opiniones';
+/*
+  MATE-MÁTICO — APLICACIÓN PRINCIPAL (REACT CLÁSICO)
+
+  Este archivo orquesta el estado global de la sesión del alumno.
+
+  FUNCIONES PRINCIPALES:
+  - Sincroniza tokens JWT de Firebase usando localStorage.
+  - Controla la navegación por pestañas (Perfil, Lecciones, Progreso).
+  - Realiza peticiones REST al backend.
+  - Gestiona autenticación tradicional y login con Google.
+  - Carga Firebase dinámicamente en el navegador.
+
+  IMPORTANTE:
+  Este proyecto utiliza React clásico (Create React App).
+  Las variables de entorno deben comenzar con:
+
+  REACT_APP_
+
+  Ejemplo:
+  REACT_APP_API_BASE_URL=
+  REACT_APP_FIREBASE_API_KEY=
+
+  El equipo frontend puede:
+  - reorganizar componentes,
+  - agregar React Router,
+  - usar Tailwind,
+  - mejorar el diseño,
+  - separar lógica en hooks,
+  sin modificar la lógica principal de autenticación.
+
 
 // URL base de la API backend
 const API_BASE =
   process.env.REACT_APP_API_BASE_URL ||
-  'https://mate-matico-backend.onrender.com/api';
-
+  'http://localhost:3000/api';
 
 // Configuración Firebase Client
 const firebaseClientConfig = {
@@ -26,13 +47,10 @@ const firebaseClientConfig = {
   authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
   projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
   storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
+  messagingSenderId:
+    process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
   appId: process.env.REACT_APP_FIREBASE_APP_ID,
 };
-
-let firebaseApp;
-let firebaseAuth;
-
 
 export default function App() {
   const [token, setToken] = useState(
@@ -45,15 +63,22 @@ export default function App() {
   const [statusMsg, setStatusMsg] = useState('');
   const [isStatusOk, setIsStatusOk] = useState(true);
 
-
+  const [firebaseAuthModule, setFirebaseAuthModule] =
+    useState(null);
 
   // Pestaña activa
   const [activeTab, setActiveTab] = useState('perfil');
 
   /*
-    Intentar recuperar sesión automáticamente al iniciar la aplicación.
-  */
-
+    Intentar recuperar sesión automáticamente
+    al iniciar la aplicación.
+  
+  useEffect(() => {
+    if (token) {
+      loadProfile(token);
+      loadUserProgress(token);
+    }
+  }, []);
 
   const setStatus = (msg, ok = true) => {
     setStatusMsg(msg);
@@ -62,7 +87,7 @@ export default function App() {
 
   /*
     Wrapper estándar para llamadas HTTP al backend.
-  */
+  
   const apiCall = async (
     path,
     options = {},
@@ -99,7 +124,7 @@ export default function App() {
 
   /*
     Obtener perfil del usuario autenticado.
-  */
+  
   const loadProfile = async (activeToken = null) => {
     try {
       const data = await apiCall(
@@ -117,7 +142,7 @@ export default function App() {
 
   /*
     Obtener progreso académico del alumno.
-  */
+  
   const loadUserProgress = async (
     activeToken = null
   ) => {
@@ -136,7 +161,7 @@ export default function App() {
 
   /*
     Guardar token JWT localmente.
-  */
+  
   const saveToken = (idToken) => {
     setToken(idToken);
     localStorage.setItem('idToken', idToken);
@@ -144,7 +169,7 @@ export default function App() {
 
   /*
     Cerrar sesión.
-  */
+  
   const logout = () => {
     setToken('');
     setUser(null);
@@ -159,35 +184,58 @@ export default function App() {
   };
 
   /*
-    Carga del SDK Firebase.
-  */
+    Carga dinámica del SDK Firebase.
+    Optimiza rendimiento inicial.
+  
   const getFirebaseAuth = async () => {
-    if (!firebaseApp) {
-      if (
-        !firebaseClientConfig.apiKey ||
-        !firebaseClientConfig.projectId
-      ) {
-        throw new Error(
-          'Configurá REACT_APP_FIREBASE_API_KEY y REACT_APP_FIREBASE_PROJECT_ID en frontend/.env'
-        );
-      }
-      firebaseApp = initializeApp(firebaseClientConfig);
-      firebaseAuth = getAuth(firebaseApp);
+    if (firebaseAuthModule) {
+      return firebaseAuthModule;
     }
+
+    if (
+      !firebaseClientConfig.apiKey ||
+      !firebaseClientConfig.projectId
+    ) {
+      throw new Error(
+        'Configurá REACT_APP_FIREBASE_API_KEY y REACT_APP_FIREBASE_PROJECT_ID en frontend/.env'
+      );
+    }
+
+    const { initializeApp } = await import(
+      'https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js'
+    );
+
+    const {
+      getAuth,
+      GoogleAuthProvider,
+      signInWithPopup,
+    } = await import(
+      'https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js'
+    );
+
+    const app = initializeApp(
+      firebaseClientConfig
+    );
+
+    const authInstance = getAuth(app);
 
     const provider = new GoogleAuthProvider();
 
-    return {
-      auth: firebaseAuth,
+    const module = {
+      auth: authInstance,
       GoogleAuthProvider,
       signInWithPopup,
       provider,
     };
+
+    setFirebaseAuthModule(module);
+
+    return module;
   };
 
   /*
     Registro Email/Contraseña.
-  */
+  
   const handleRegister = async (
     email,
     password,
@@ -218,6 +266,7 @@ export default function App() {
       }
 
       saveToken(data.idToken);
+
       loadUserProgress(data.idToken);
 
       setStatus(
@@ -226,6 +275,7 @@ export default function App() {
       );
 
       setUser(data.usuario);
+
       setActiveTab('perfil');
     } catch (err) {
       setStatus(err.message, false);
@@ -234,7 +284,7 @@ export default function App() {
 
   /*
     Login Email/Contraseña.
-  */
+  
   const handleLogin = async (
     email,
     password
@@ -254,6 +304,7 @@ export default function App() {
       );
 
       saveToken(data.idToken);
+
       loadUserProgress(data.idToken);
 
       setStatus(
@@ -262,6 +313,7 @@ export default function App() {
       );
 
       setUser(data.usuario);
+
       setActiveTab('perfil');
     } catch (err) {
       setStatus(err.message, false);
@@ -270,7 +322,7 @@ export default function App() {
 
   /*
     Login Google usando Firebase Popup.
-  */
+  
   const handleGoogleLogin = async () => {
     try {
       setStatus(
@@ -311,6 +363,7 @@ export default function App() {
       );
 
       saveToken(data.idToken);
+
       loadUserProgress(data.idToken);
 
       setStatus(
@@ -327,6 +380,7 @@ export default function App() {
       );
 
       setUser(data.usuario);
+
       setActiveTab('perfil');
     } catch (err) {
       const friendlyMsg =
@@ -341,7 +395,7 @@ export default function App() {
 
   /*
     Actualización local de gamificación.
-  */
+  
   const handleAnswerSuccess = (result) => {
     setUser((prev) => ({
       ...prev,
@@ -357,60 +411,109 @@ export default function App() {
   };
 
   return (
-    <div className="app-container" id="arriba">
-      {/* 1. Navbar Oficial en la parte superior */}
-      <Navbar />
+    <div className="app-container">
+      {/* Header 
+      <header className="header">
+        <div className="logo-section">
+          <h1>
+            🧉 Mate-Mático (React Frontend)
+          </h1>
 
-      {/* 2. Tu cabecera oficial con la info del proyecto */}
-      <Header />
+          <p>
+            Lógica de conexión integrada
+            para frontend developers
+          </p>
+        </div>
 
-      {/* Main */}
+        {user && (
+          <div
+            style={{
+              marginTop: '10px',
+              fontSize: '14px',
+            }}
+          >
+            <span>
+              🔥 Racha activa:{' '}
+              {user.rachaDias ?? 0} días
+            </span>
+
+            {' | '}
+
+            <span>
+              ✨ Puntos:{' '}
+              {user.puntosTotales ?? 0} pts
+            </span>
+          </div>
+        )}
+      </header>
+
+      {/* Main 
       <main>
-        {/* CONEXIÓN REAL: Si el usuario NO está logueado, muestra aviso y Auth */}
         {!user ? (
-          <section className="seccion-login-prompt" style={{ padding: '40px 10%', textAlign: 'center' }}>
-            <p>Por favor, inicia sesión para ver tu progreso técnico.</p>
-            <div style={{ maxWidth: '450px', margin: '20px auto 0' }}>
-              <Auth
-                onLogin={handleLogin}
-                onGoogleLogin={handleGoogleLogin}
-                onRegister={handleRegister}
-                statusMsg={statusMsg}
-                isStatusOk={isStatusOk}
-              />
-            </div>
-          </section>
+          <div
+            style={{
+              maxWidth: '450px',
+              margin: '0 auto',
+            }}
+          >
+            <Auth
+              onLogin={handleLogin}
+              onGoogleLogin={
+                handleGoogleLogin
+              }
+              onRegister={handleRegister}
+              statusMsg={statusMsg}
+              isStatusOk={isStatusOk}
+            />
+          </div>
         ) : (
-          /* Si el usuario SÍ inició sesión, despliega directamente las pestañas */
           <div>
-            {/* Sistema de pestañas original del repositorio remoto */}
+            {/* Navegación 
             <nav className="tab-bar">
               <button
                 type="button"
-                className={`tab-btn ${activeTab === 'perfil' ? 'active-tab' : ''}`}
-                onClick={() => setActiveTab('perfil')}
+                className={`tab-btn ${
+                  activeTab === 'perfil'
+                    ? 'active-tab'
+                    : ''
+                }`}
+                onClick={() =>
+                  setActiveTab('perfil')
+                }
               >
                 1. Mi Perfil
               </button>
 
               <button
                 type="button"
-                className={`tab-btn ${activeTab === 'lecciones' ? 'active-tab' : ''}`}
-                onClick={() => setActiveTab('lecciones')}
+                className={`tab-btn ${
+                  activeTab === 'lecciones'
+                    ? 'active-tab'
+                    : ''
+                }`}
+                onClick={() =>
+                  setActiveTab('lecciones')
+                }
               >
                 2. Lecciones y Ejercicios
               </button>
 
               <button
                 type="button"
-                className={`tab-btn ${activeTab === 'progreso' ? 'active-tab' : ''}`}
-                onClick={() => setActiveTab('progreso')}
+                className={`tab-btn ${
+                  activeTab === 'progreso'
+                    ? 'active-tab'
+                    : ''
+                }`}
+                onClick={() =>
+                  setActiveTab('progreso')
+                }
               >
                 3. Mi Progreso y Logros
               </button>
             </nav>
 
-            {/* Contenido de las pestañas */}
+            {/* Contenido 
             <div className="layout-grid">
               {activeTab === 'perfil' && (
                 <Profile
@@ -426,9 +529,13 @@ export default function App() {
               {activeTab === 'lecciones' && (
                 <Modules
                   apiCall={apiCall}
-                  onAnswerSuccess={handleAnswerSuccess}
+                  onAnswerSuccess={
+                    handleAnswerSuccess
+                  }
                   progress={progress}
-                  onRefreshProgress={loadUserProgress}
+                  onRefreshProgress={
+                    loadUserProgress
+                  }
                 />
               )}
 
@@ -438,19 +545,20 @@ export default function App() {
             </div>
           </div>
         )}
-
-        {/* 3. Tus secciones informativas estáticas abajo del contenido dinámico */}
-        <Faqs />
-        <Opiniones />
       </main>
 
-      {/* Footer Técnico del repositorio remoto */}
+      {/* Footer 
       <footer className="footer">
-        <p>API Endpoint: <code>{API_BASE}</code></p>
+        <p>
+          API Endpoint:{' '}
+          <code>{API_BASE}</code>
+        </p>
+
         <p style={{ marginTop: '5px' }}>
-          Mate-Mático Monorepo MVP — React Frontend © 2026
+          Mate-Mático Monorepo MVP —
+          React Frontend © 2026
         </p>
       </footer>
     </div>
   );
-}
+}*/

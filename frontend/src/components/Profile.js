@@ -4,18 +4,6 @@ import Mascota from './Mascota';
 /*
   MATE-MÁTICO — COMPONENTE PERFIL
   (REACT CLÁSICO)
-
-  Este componente muestra:
-  - datos básicos del usuario,
-  - estadísticas de gamificación,
-  - rachas,
-  - puntos,
-  - rol actual,
-  - mascota activa.
-
-  Compatible con:
-  - Create React App
-  - React clásico
 */
 
 export default function Profile({
@@ -23,94 +11,61 @@ export default function Profile({
   onLogout,
   onRefresh
 }) {
-  const rol =
-    user.rolActual ||
-    'principiante';
+  const rol = user.rolActual || 'principiante';
 
   return (
     <div className="card">
-      <h2
-        style={{
-          marginBottom: '10px',
-        }}
-      >
+      <h2 style={{ marginBottom: '10px' }}>
         Perfil de Usuario
       </h2>
 
-      {/* Mascota */}
       <Mascota rol={rol} />
 
-      {/* Datos usuario */}
-      <div
-        style={{
-          marginTop: '15px',
-        }}
-      >
+      <div style={{ marginTop: '15px' }}>
         <h3>
-          Apodo:{' '}
-          {user.displayName ||
-            'Sin Nombre'}
+          Apodo: {user.displayName || 'Sin Nombre'}
         </h3>
 
-        <p>
-          Email: {user.email}
-        </p>
+        <p>Email: {user.email}</p>
 
         <p>
           Método de registro:{' '}
-          <code>
-            {user.provider}
-          </code>
+          <code>{user.provider}</code>
         </p>
       </div>
 
-      {/* Estadísticas */}
       <div
         style={{
           marginTop: '15px',
-          borderTop:
-            '1px solid #ccc',
-          paddingTop: '10px',
+          borderTop: '1px solid #ccc',
+          paddingTop: '10px'
         }}
       >
-        <h4>
-          Estadísticas de
-          Gamificación
-        </h4>
+        <h4>Estadísticas de Gamificación</h4>
 
         <div
           style={{
             margin: '10px 0',
             display: 'flex',
-            flexDirection:
-              'column',
-            gap: '5px',
+            flexDirection: 'column',
+            gap: '5px'
           }}
         >
           <div>
             <span className="badge badge-gold">
-              Puntos acumulados:{' '}
-              {user.puntosTotales ??
-                0}{' '}
-              pts
+              Puntos acumulados: {user.puntosTotales ?? 0} pts
             </span>
           </div>
 
           <div>
             <span className="badge badge-success">
-              Racha actual:{' '}
-              {user.rachaDias ??
-                0}{' '}
-              días
+              Racha actual: {user.rachaDias ?? 0} días
             </span>
           </div>
 
           <div>
             <span className="badge">
-              Récord histórico:{' '}
-              {user.recordRacha ??
-                0}{' '}
-              días
+              Récord histórico: {user.recordRacha ?? 0} días
             </span>
           </div>
 
@@ -118,24 +73,21 @@ export default function Profile({
             <span
               className="badge"
               style={{
-                background:
-                  '#007bff',
-                color: '#fff',
+                background: '#007bff',
+                color: '#fff'
               }}
             >
-              Rol Actual:{' '}
-              {rol}
+              Rol Actual: {rol}
             </span>
           </div>
         </div>
       </div>
 
-      {/* Acciones */}
       <div
         style={{
           marginTop: '20px',
           display: 'flex',
-          gap: '10px',
+          gap: '10px'
         }}
       >
         <button
@@ -151,11 +103,9 @@ export default function Profile({
           onClick={onLogout}
           style={{
             flex: 1,
-            backgroundColor:
-              '#f8d7da',
+            backgroundColor: '#f8d7da',
             color: '#721c24',
-            borderColor:
-              '#f5c6cb',
+            borderColor: '#f5c6cb'
           }}
         >
           Cerrar Sesión
