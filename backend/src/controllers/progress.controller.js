@@ -26,7 +26,7 @@ export async function getUserProgress(req, res, next) {
 export async function patchProgress(req, res, next) {
   try {
     const { moduleId } = req.params;
-    const { lessonId, completada, puntaje } = req.body;
+    const { lessonId, completada, puntaje, tiempo_segundos } = req.body;
 
     if (!lessonId) {
       return res.status(400).json({
@@ -40,6 +40,7 @@ export async function patchProgress(req, res, next) {
       lessonId,
       completada,
       puntaje,
+      tiempo_segundos,
     });
 
     res.json({ success: true, progresoModulo: updated });

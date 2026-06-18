@@ -3,6 +3,7 @@ import {
   obtenerModuloConEjercicios,
   obtenerLeccion,
 } from '../services/modules.service.js';
+import { trackEvent } from '../services/tracking.service.js';
 
 export function listModules(_req, res) {
   res.json({ success: true, modulos: listarModulos() });
@@ -28,6 +29,17 @@ export function getLesson(req, res) {
 
   if (!leccion) {
     return res.status(404).json({ success: false, error: 'Lección no encontrada' });
+  }
+
+  if (req.user?.uid) {
+    const difficultyMap = { 1: 'bajo', 2: 'medio', 3: 'alto' };
+    const dificultad = difficultyMap[leccion.difficulty] || 'bajo';
+
+    trackEvent(req.user.uid, 'leccion_iniciada', {
+      leccion_id: leccion.id,
+      tema: leccion.moduleId,
+      dificultad,
+    });
   }
 
   res.json({ success: true, leccion });
