@@ -1,5 +1,5 @@
 import { db } from '../config/firebase.js';
-import { COLECCION_USUARIOS, dbToUsuario } from '../models/usuario.model.js';
+import { COLECCION_USUARIOS, dbToUsuario, usuarioToDb } from '../models/usuario.model.js';
 import { BigQuery } from '@google-cloud/bigquery';
 import { getFirebaseServiceAccount } from '../config/env.js';
 
@@ -67,9 +67,9 @@ export async function guardarOnboardingUsuario(uid, respuestas) {
     moduloRecomendado: recomendacion,
   };
 
-  await ref.update({
+  await ref.update(usuarioToDb({
     onboarding: onboardingData
-  });
+  }));
 
   // Envío en tiempo real a BigQuery (Streaming Insert) como un proceso complementario
   try {

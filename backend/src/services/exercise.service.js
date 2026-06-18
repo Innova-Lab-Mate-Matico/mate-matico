@@ -1,12 +1,14 @@
 import { db } from '../config/firebase.js';
 import { COLECCION_USUARIOS } from '../models/usuario.model.js';
 import { reconstruirEjercicio } from '../exercises/registry.js';
+import { findLesson } from '../data/moduleCatalog.js';
 import {
   aplicarRecompensaActividad,
   registrarActividadEmpatica,
   obtenerUsuario,
 } from './usuario.service.js';
 import { updateLessonProgress } from './progress.service.js';
+import { trackEvent } from './tracking.service.js';
 
 const UMBRAL_COMODIN = 2;
 const COLECCION_PLANTILLAS = 'plantillasEjercicio';
@@ -86,22 +88,19 @@ export async function validarEjercicio(uid, body) {
   const erroresConsecutivos = await registrarIntento(uid, clave, correcto);
 
   if (!correcto) {
-    // Paralelización de escritura de log de auditoría y lectura de perfil
-    const logPromise = db.collection('registroIntentos').add({
-      userId: uid,
-      moduleId,
-      lessonId,
-      exerciseId,
-      semilla,
-      answer,
-      correcto,
-      createdAt: new Date().toISOString(),
+    // Telemetría en segundo plano
+    const lessonData = findLesson(moduleId, lessonId);
+    const dificultad = lessonData ? (lessonData.level.difficulty === 1 ? 'bajo' : lessonData.level.difficulty === 2 ? 'medio' : 'alto') : 'bajo';
+    trackEvent(uid, 'ejercicio_completado', {
+      ejercicio_id: exerciseId,
+      tema: moduleId,
+      subtema: lessonId,
+      dificultad,
+      resultado: 'incorrecto',
+      tiempo_segundos: body.tiempo_segundos !== undefined ? Number(body.tiempo_segundos) : null,
     });
 
-    const [user] = await Promise.all([
-      obtenerUsuario(uid),
-      logPromise
-    ]);
+    const user = await obtenerUsuario(uid);
 
     return {
       correcto: false,
@@ -118,16 +117,16 @@ export async function validarEjercicio(uid, body) {
 
   const puntosGanados = ejercicio.puntos ?? 10;
 
-  // Paralelización de las escrituras e incrementos atómicos independientes para mitigar latencia
-  const logPromise = db.collection('registroIntentos').add({
-    userId: uid,
-    moduleId,
-    lessonId,
-    exerciseId,
-    semilla,
-    answer,
-    correcto,
-    createdAt: new Date().toISOString(),
+  // Telemetría en segundo plano
+  const lessonData = findLesson(moduleId, lessonId);
+  const dificultad = lessonData ? (lessonData.level.difficulty === 1 ? 'bajo' : lessonData.level.difficulty === 2 ? 'medio' : 'alto') : 'bajo';
+  trackEvent(uid, 'ejercicio_completado', {
+    ejercicio_id: exerciseId,
+    tema: moduleId,
+    subtema: lessonId,
+    dificultad,
+    resultado: 'correcto',
+    tiempo_segundos: body.tiempo_segundos !== undefined ? Number(body.tiempo_segundos) : null,
   });
 
   const recompensaPromise = aplicarRecompensaActividad(uid, puntosGanados, {
@@ -139,12 +138,12 @@ export async function validarEjercicio(uid, body) {
     lessonId,
     completada: true,
     puntaje: puntosGanados,
+    tiempo_segundos: body.tiempo_segundos !== undefined ? Number(body.tiempo_segundos) : null,
   });
 
   const [recompensa] = await Promise.all([
     recompensaPromise,
     progressPromise,
-    logPromise
   ]);
 
   return {
