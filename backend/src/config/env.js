@@ -19,11 +19,21 @@ const projectId = required('FIREBASE_PROJECT_ID');
 const nodeEnv = optional('NODE_ENV', 'development');
 
 function parseCorsOrigins() {
-  const raw = optional('CORS_ORIGINS', 'http://localhost:5173,http://127.0.0.1:5173,https://mate-matico.vercel.app,https://mate-matico.vercel.app/');
-  return raw
+  const raw = optional('CORS_ORIGINS', 'http://localhost:5173,http://127.0.0.1:5173');
+  const origins = raw
     .split(',')
     .map((o) => o.trim())
     .filter(Boolean);
+
+  // Asegurar siempre los orígenes de producción del frontend para evitar fallos de CORS
+  const prodOrigins = ['https://mate-matico.vercel.app', 'https://mate-matico.vercel.app/'];
+  prodOrigins.forEach((origin) => {
+    if (!origins.includes(origin)) {
+      origins.push(origin);
+    }
+  });
+
+  return origins;
 }
 
 export const env = {
