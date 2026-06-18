@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import './App.css'; // Tus estilos globales
@@ -7,6 +7,7 @@ import Auth from './components/Auth';
 import Profile from './components/Profile';
 import Modules from './components/Modules';
 import Progress from './components/Progress';
+import OnboardingWizard from './components/OnboardingWizard';
 
 // --- TUS COMPONENTES INYECTADOS (Limpios sin Avance) ---
 import Header from './components/Header';
@@ -53,6 +54,13 @@ export default function App() {
   /*
     Intentar recuperar sesión automáticamente al iniciar la aplicación.
   */
+  useEffect(() => {
+    if (token) {
+      loadProfile(token);
+      loadUserProgress(token);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
 
   const setStatus = (msg, ok = true) => {
@@ -380,8 +388,19 @@ export default function App() {
               />
             </div>
           </section>
+        ) : !user.onboarding?.completado ? (
+          /* Si el usuario no completó el onboarding, le mostramos el Wizard */
+          <section className="seccion-onboarding" style={{ padding: '20px 10%' }}>
+            <OnboardingWizard
+              apiCall={apiCall}
+              onComplete={(updatedUser) => {
+                setUser(updatedUser);
+                setStatus(`¡Onboarding completado! Módulo recomendado: ${updatedUser.onboarding?.moduloRecomendado?.toUpperCase()}`, true);
+              }}
+            />
+          </section>
         ) : (
-          /* Si el usuario SÍ inició sesión, despliega directamente las pestañas */
+          /* Si el usuario SÍ inició sesión y completó onboarding, despliega directamente las pestañas */
           <div>
             {/* Sistema de pestañas original del repositorio remoto */}
             <nav className="tab-bar">
