@@ -353,7 +353,7 @@ Tras **2 errores seguidos** en el mismo ejercicio → `habilitarComodin: true`.
 Variable `CORS_ORIGINS` en `backend/.env`:
 
 ```
-CORS_ORIGINS=http://localhost:5173,http://127.0.0.1:5173
+CORS_ORIGINS=http://localhost:5173,http://127.0.0.1:5173,https://mate-matico.vercel.app,https://mate-matico.vercel.app/
 ```
 
 ---

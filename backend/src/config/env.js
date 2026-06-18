@@ -19,7 +19,7 @@ const projectId = required('FIREBASE_PROJECT_ID');
 const nodeEnv = optional('NODE_ENV', 'development');
 
 function parseCorsOrigins() {
-  const raw = optional('CORS_ORIGINS', 'http://localhost:5173,http://127.0.0.1:5173');
+  const raw = optional('CORS_ORIGINS', 'http://localhost:5173,http://127.0.0.1:5173,https://mate-matico.vercel.app,https://mate-matico.vercel.app/');
   return raw
     .split(',')
     .map((o) => o.trim())
