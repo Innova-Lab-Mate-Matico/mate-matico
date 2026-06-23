@@ -71,7 +71,14 @@ export async function guardarOnboardingUsuario(uid, respuestas) {
     onboarding: onboardingData
   }));
 
-  // Envío en tiempo real a BigQuery (Streaming Insert) como un proceso complementario
+  // Envío en tiempo real a BigQuery (Load Job) como un proceso complementario (apto para Sandbox gratuito)
+  if (process.env.NODE_ENV === 'test' || process.env.FIRESTORE_EMULATOR_HOST) {
+    const updatedDoc = await ref.get();
+    const data = dbToUsuario(updatedDoc.data());
+    data.uid = updatedDoc.id;
+    return data;
+  }
+
   try {
     const datasetId = 'onboarding_data';
     const tableId = 'usuarios_onboarding';
@@ -83,10 +90,23 @@ export async function guardarOnboardingUsuario(uid, respuestas) {
       objetivo: onboardingData.objetivo,
       confianza_math: onboardingData.confianzaMath,
       modulo_recomendo: onboardingData.moduloRecomendado,
-      fecha_registro: BigQuery.timestamp(new Date()),
+      fecha_registro: new Date().toISOString(),
     };
 
-    await bigquery.dataset(datasetId).table(tableId).insert([row]);
+    const ndjson = JSON.stringify(row) + '\n';
+    const table = bigquery.dataset(datasetId).table(tableId);
+
+    const writeStream = table.createWriteStream({
+      sourceFormat: 'NEWLINE_DELIMITED_JSON',
+      writeDisposition: 'WRITE_APPEND',
+    });
+
+    writeStream.on('error', (err) => {
+      console.error('[BigQuery Stream Error] Falló el stream del usuario onboarding a BigQuery:', err.message);
+    });
+
+    writeStream.write(ndjson);
+    writeStream.end();
   } catch (bqError) {
     console.error('Error al insertar datos de onboarding en BigQuery:', bqError);
   }
