@@ -12,12 +12,9 @@ import Header from './components/Header';
 import Navbar from './components/Navbar';
 import Faqs from './components/Faqs';
 import Opiniones from './components/Opiniones';
-import InteresesSeleccion from './components/InteresesSeleccion';
-import RecomendacionModulo from './components/RecomendacionModulo';
 
 // NUEVOS COMPONENTES: Control de flujo inicial de captación
-import EdadSelector from "./components/EdadSelector/EdadSelector";
-import NivelSelector from "./components/NivelSelector/NivelSelector";
+import OnboardingWizard from './components/OnboardingWizard';
 
 // URL base de la API backend
 const API_BASE =
@@ -53,12 +50,16 @@ export default function App() {
   // Pestaña activa
   const [activeTab, setActiveTab] = useState('perfil');
 
-  // NUEVO ESTADO: Control de pasos para usuarios no logueados
-  const [step, setStep] = useState(1);
-
   /*
     Intentar recuperar sesión automáticamente al iniciar la aplicación.
   */
+  React.useEffect(() => {
+    const savedToken = localStorage.getItem('idToken');
+    if (savedToken) {
+      loadProfile(savedToken);
+      loadUserProgress(savedToken);
+    }
+  }, []);
 
 
   const setStatus = (msg, ok = true) => {
@@ -362,6 +363,12 @@ export default function App() {
     }
   };
 
+  const handleOnboardingComplete = (updatedUser) => {
+    setUser(updatedUser);
+    loadUserProgress(token);
+    setActiveTab('lecciones');
+  };
+
   return (
     <div className="app-container" id="arriba">
       {/* 1. Navbar Oficial en la parte superior */}
@@ -372,22 +379,12 @@ export default function App() {
 
       {/* Main */}
       <main>
-        {/* CONEXIÓN REAL: Si el usuario NO está logueado, muestra el flujo por pasos y Auth */}
         {!user ? (
+          /* PÁGINA DE INGRESO: Solo Login/Registro */
           <section className="seccion-login-prompt" style={{ padding: '40px 10%', textAlign: 'center' }}>
-            
-            {/* 🆕 FLOW POR PASOS INYECTADO */}
-            {step === 1 && (
-              <EdadSelector onNext={() => setStep(2)} />
-            )}
-
-            {step === 2 && (
-              <NivelSelector />
-            )}
-
-            {/* 🔐 LOGIN AUTOMÁTICO DEBAJO */}
-            <p style={{ marginTop: '30px' }}>Por favor, inicia sesión para ver tu progreso técnico.</p>
-            <div style={{ maxWidth: '450px', margin: '20px auto 0' }}>
+            <h2 style={{ fontSize: '2em', marginBottom: '10px', color: '#1a365d' }}>¡Aprendé Matemática de forma Adaptativa!</h2>
+            <p style={{ color: '#4a5568', marginBottom: '30px' }}>Iniciá sesión o registrate para comenzar tu recorrido personalizado.</p>
+            <div style={{ maxWidth: '450px', margin: '0 auto' }}>
               <Auth
                 onLogin={handleLogin}
                 onGoogleLogin={handleGoogleLogin}
@@ -397,10 +394,17 @@ export default function App() {
               />
             </div>
           </section>
+        ) : !user.onboarding || !user.onboarding.completado ? (
+          /* FLUJO DE ONBOARDING: Usuario registrado/logueado que aún no hizo el test inicial */
+          <section className="seccion-onboarding" style={{ padding: '40px 5%' }}>
+            <OnboardingWizard
+              apiCall={apiCall}
+              onComplete={handleOnboardingComplete}
+            />
+          </section>
         ) : (
-          /* Si el usuario SÍ inició sesión, despliega directamente las pestañas del panel */
+          /* PANEL PRINCIPAL: Usuario logueado con onboarding completado */
           <div>
-            {/* Sistema de pestañas original del repositorio remoto */}
             <nav className="tab-bar">
               <button
                 type="button"
@@ -427,7 +431,6 @@ export default function App() {
               </button>
             </nav>
 
-            {/* Contenido de las pestañas */}
             <div className="layout-grid">
               {activeTab === 'perfil' && (
                 <Profile
@@ -456,18 +459,13 @@ export default function App() {
           </div>
         )}
 
-        {/* 3. SEGUNDO BLOQUE: Tus tarjetas de captación (Intereses y Recomendaciones) */}
-        <section id="intereses" className="seccion-intereses">
-          <InteresesSeleccion />
-        </section>
-
-        <section id="recomendacion" className="seccion-recomendacion">
-          <RecomendacionModulo />
-        </section>
-
-        {/* 4. TERCER BLOQUE: Secciones informativas estáticas al final de todo */}
-        <Faqs />
-        <Opiniones />
+        {/* Secciones informativas estáticas al final de todo (para visitantes) */}
+        {!user && (
+          <>
+            <Faqs />
+            <Opiniones />
+          </>
+        )}
       </main>
 
       {/* Footer Técnico del repositorio remoto */}
