@@ -1,3 +1,6 @@
+/* ==========================================================================
+   1. ESTILOS BASE COMPILADOS POR EL GRUPO (NUEVAS PESTAÑAS REMOTAS)
+   ========================================================================== */
 .App {
   text-align: center;
 }
@@ -37,10 +40,10 @@
   }
 }
 
-/* ==========================================
-    Estilos agregados de Aless (landing prueba)
-   ========================================== */
 
+/* ==========================================================================
+   2. ESTILOS AGREGADOS DE ALESS (LANDING BASE)
+   ========================================================================== */
 body {
     margin: 0;
     padding: 0;
@@ -106,7 +109,7 @@ nav ul li:last-child {
 nav ul li a {
     text-decoration: none;
     font-weight: bold;
-    color: black; /* Color para los links del nav */
+    color: black; 
     transition: color 0.2s;
 }
 
@@ -134,4 +137,303 @@ section {
 
 .link-volver:hover {
     color: #000;             
+}
+
+
+/* ==========================================================================
+   3. ESTILOS COMPARTIDOS INYECTADOS (FONDO BLANCO OFICIAL MATE-MATICO)
+   ========================================================================== */
+.intereses-page,
+.recomendacion-page {
+    font-family: 'Poppins', 'Segoe UI', Helvetica, Arial, sans-serif;
+    background-color: #FFFFFF; 
+    min-height: 100vh;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center; 
+    box-sizing: border-box;
+    padding: 60px 20px;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Estructura de Tarjetas Internas */
+.intereses-card,
+.recomendacion-card {
+    background-color: #FFFFFF;
+    width: 100%;
+    max-width: 360px;
+    box-sizing: border-box;
+    z-index: 2;
+}
+
+.intereses-card { padding: 10px 0; }
+.recomendacion-card { padding: 10px 0; }
+
+/* Tipografías Protegidas */
+.intereses-page .auth-title,
+.recomendacion-page .auth-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #111111;
+    margin-bottom: 10px;
+    line-height: 1.2;
+}
+
+.intereses-page .auth-subtitle,
+.recomendacion-page .auth-subtitle {
+    font-size: 0.9rem;
+    font-weight: 400;
+    color: #444444;
+    line-height: 1.4;
+}
+
+
+/* ==========================================================================
+   4. ESTILOS EXCLUSIVOS: InteresesSeleccion
+   ========================================================================== */
+.intereses-section {
+    margin-top: 35px;
+}
+
+.intereses-heading {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #1A1A1A;
+    margin-bottom: 15px;
+}
+
+.tags-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-start;
+}
+
+.tag-button {
+    font-family: 'Poppins', sans-serif;
+    background-color: #FFFFFF;
+    border: 1px solid #D1D5DB;
+    border-radius: 20px;
+    padding: 10px 20px;
+    font-size: 0.95rem;
+    font-weight: 400;
+    color: #333333;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: left;
+}
+
+.tag-button:hover { background-color: #F3F4F6; }
+.tag-button.selected { background-color: #E0E7FF; border-color: #4F46E5; color: #4F46E5; }
+
+
+/* ==========================================================================
+   5. ESTILOS EXCLUSIVOS: RecomendacionModulo (Mascota Matecito)
+   ========================================================================== */
+.ola-superior { position: absolute; top: 0; right: 0; width: 320px; height: auto; z-index: 1; }
+.ola-inferior { position: absolute; bottom: 0; left: 0; width: 320px; height: auto; z-index: 1; }
+
+.mate-mascot-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    margin-top: 15px;
+}
+
+.mate-avatar { width: 65px; height: 65px; object-fit: contain; }
+
+.speech-bubble {
+    background-color: #FFEED4;
+    border-radius: 12px;
+    padding: 10px 14px;
+    position: relative;
+    font-size: 0.85rem;
+    color: #4A3B2C;
+    font-weight: 500;
+    line-height: 1.3;
+}
+
+.speech-bubble::before {
+    content: '';
+    position: absolute;
+    left: -8px;
+    top: 50%;
+    transform: translateY(-50%);
+    border-width: 5px 8px 5px 0;
+    border-style: solid;
+    border-color: transparent #FFEED4 transparent transparent;
+}
+
+.modulo-detalle-box {
+    border: 1px solid #E5E7EB;
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 10px;
+}
+
+.modulo-header-destacado {
+    background-color: #F0F4F8;
+    padding: 12px;
+    border-radius: 8px;
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+.modulo-header-destacado h3 { font-size: 1.05rem; font-weight: 700; color: #1A1A1A; margin: 0 0 4px 0; }
+.modulo-header-destacado p { font-size: 0.85rem; color: #555555; margin: 0; line-height: 1.3; }
+
+.modulo-cuerpo-aprendizajes h4 { font-size: 1.05rem; font-weight: 700; color: #B522CA; margin: 0 0 12px 0; text-align: center; }
+.modulo-cuerpo-aprendizajes ul { list-style: none; padding: 0; margin: 0 0 20px 0; display: flex; flex-direction: column; gap: 8px; }
+.modulo-cuerpo-aprendizajes li { font-size: 0.9rem; color: #444444; display: flex; align-items: center; gap: 8px; font-weight: 400; }
+.check-icon { color: #B522CA; font-weight: 700; }
+
+.tiempo-estimado-box { background-color: #F6EFFB; border-radius: 12px; padding: 12px 15px; display: flex; align-items: center; gap: 12px; }
+.clock-icon-placeholder { font-size: 1.6rem; }
+.tiempo-texto { display: flex; flex-direction: column; }
+.tiempo-titulo { font-size: 0.9rem; font-weight: 600; color: #1A1A1A; }
+.tiempo-duracion { font-size: 0.85rem; color: #666666; }
+
+
+/* ==========================================================================
+   6. ESTRUCTURA GENERAL DE BOTÓN ANCLA (MALLADO COMPACTO PC)
+   ========================================================================== */
+.action-container {
+    width: 100%;
+    max-width: 360px;
+    margin-top: 25px;
+    padding: 0;
+    box-sizing: border-box;
+    z-index: 2;
+}
+
+.action-container a {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 50px;
+    background-color: #1A345D;
+    border: 2px solid #FFFFFF;
+    border-radius: 12px;
+    text-decoration: none;
+    transition: background-color 0.2s ease;
+    box-sizing: border-box;
+}
+
+.action-container a:hover { background-color: #132747; }
+.btn-primary-text { font-family: 'Poppins', sans-serif; color: #FFFFFF; font-size: 1rem; font-weight: 600; }
+
+
+/* ==========================================================================
+   7. SECCIÓN DE EDAD (Y REGLAS UNIFICADAS BOTÓN CONTINUAR)
+   ========================================================================== */
+.edad-container {
+    padding: 20px;
+    text-align: center;
+    font-family: 'Poppins', sans-serif;
+}
+
+.edad-opciones {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin: 20px 0;
+}
+
+.edad-opciones button {
+    font-family: 'Poppins', sans-serif;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #D1D5DB;
+    background: #FFFFFF;
+    cursor: pointer;
+    font-size: 0.95rem;
+    color: #333333;
+    transition: background-color 0.2s ease;
+}
+
+.edad-opciones button:hover {
+    background-color: #F3F4F6;
+}
+
+/* Botón unificado y protegido para ambos formularios */
+.continuar {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    max-width: 360px;
+    height: 50px; 
+    background-color: #1E3A5F;
+    color: #FFFFFF;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    font-size: 1rem;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.continuar:hover {
+    background-color: #142843;
+}
+
+
+/* ==========================================================================
+   8. NUEVO COMPONENTE: SELECCIÓN DE NIVEL
+   ========================================================================== */
+.nivel-container {
+    padding: 20px;
+    text-align: center;
+    font-family: 'Poppins', sans-serif;
+}
+
+.barra {
+    height: 6px;
+    background: #E5E7EB;
+    border-radius: 10px;
+    margin: 20px 0;
+}
+
+.progreso {
+    width: 40%;
+    height: 100%;
+    background: #9747FF; /* Violeta del diseño */
+    border-radius: 10px;
+}
+
+.niveles {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: #666666;
+    margin-bottom: 20px;
+    font-family: 'Poppins', sans-serif;
+}
+
+
+/* ==========================================================================
+   9. BREAKPOINTS REGLAMENTARIOS (TABLETS Y CONTENEDORES MÁXIMOS PC)
+   ========================================================================== */
+@media (max-width: 992px) {
+  .auth-logo { 
+    width: 180px; 
+  }
+  .intereses-page .ola-superior, .intereses-page .ola-inferior,
+  .recomendacion-page .ola-superior, .recomendacion-page .ola-inferior { 
+    width: 180px; 
+  }
+}
+
+@media (min-width: 768px) {
+  .edad-container,
+  .nivel-container {
+    max-width: 400px;
+    margin: auto;
+  }
 }

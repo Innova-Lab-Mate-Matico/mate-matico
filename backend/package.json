@@ -8,6 +8,8 @@
     "start": "node src/server.js",
     "dev": "node --watch src/server.js",
     "seed": "node src/scripts/seed.js",
+    "seed:analytics": "node src/scripts/seed_mock_bigquery.js",
+    "clean:analytics": "node src/scripts/seed_mock_bigquery.js --clean",
     "test": "node --test"
   },
   "keywords": [

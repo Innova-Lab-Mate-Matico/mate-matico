@@ -1,6 +1,11 @@
 import { test, describe, it, before, after } from 'node:test';
 import assert from 'node:assert';
 import request from 'supertest';
+
+// Forzar variables de entorno para testing
+process.env.NODE_ENV = 'test';
+process.env.FIRESTORE_EMULATOR_HOST = 'localhost:8080';
+
 import app from '../src/app.js';
 import { auth, db } from '../src/config/firebase.js';
 
