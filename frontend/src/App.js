@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import './App.css'; // Tus estilos globales
@@ -7,13 +6,18 @@ import Auth from './components/Auth';
 import Profile from './components/Profile';
 import Modules from './components/Modules';
 import Progress from './components/Progress';
-import OnboardingWizard from './components/OnboardingWizard';
 
-// --- TUS COMPONENTES INYECTADOS (Limpios sin Avance) ---
+// --- TUS COMPONENTES INYECTADOS (Unificados con tus flujos nuevos) ---
 import Header from './components/Header';
 import Navbar from './components/Navbar';
 import Faqs from './components/Faqs';
 import Opiniones from './components/Opiniones';
+import InteresesSeleccion from './components/InteresesSeleccion';
+import RecomendacionModulo from './components/RecomendacionModulo';
+
+// NUEVOS COMPONENTES: Control de flujo inicial de captación
+import EdadSelector from "./components/EdadSelector/EdadSelector";
+import NivelSelector from "./components/NivelSelector/NivelSelector";
 
 // URL base de la API backend
 const API_BASE =
@@ -46,21 +50,15 @@ export default function App() {
   const [statusMsg, setStatusMsg] = useState('');
   const [isStatusOk, setIsStatusOk] = useState(true);
 
-
-
   // Pestaña activa
   const [activeTab, setActiveTab] = useState('perfil');
+
+  // NUEVO ESTADO: Control de pasos para usuarios no logueados
+  const [step, setStep] = useState(1);
 
   /*
     Intentar recuperar sesión automáticamente al iniciar la aplicación.
   */
-  useEffect(() => {
-    if (token) {
-      loadProfile(token);
-      loadUserProgress(token);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
 
   const setStatus = (msg, ok = true) => {
@@ -374,10 +372,21 @@ export default function App() {
 
       {/* Main */}
       <main>
-        {/* CONEXIÓN REAL: Si el usuario NO está logueado, muestra aviso y Auth */}
+        {/* CONEXIÓN REAL: Si el usuario NO está logueado, muestra el flujo por pasos y Auth */}
         {!user ? (
           <section className="seccion-login-prompt" style={{ padding: '40px 10%', textAlign: 'center' }}>
-            <p>Por favor, inicia sesión para ver tu progreso técnico.</p>
+            
+            {/* 🆕 FLOW POR PASOS INYECTADO */}
+            {step === 1 && (
+              <EdadSelector onNext={() => setStep(2)} />
+            )}
+
+            {step === 2 && (
+              <NivelSelector />
+            )}
+
+            {/* 🔐 LOGIN AUTOMÁTICO DEBAJO */}
+            <p style={{ marginTop: '30px' }}>Por favor, inicia sesión para ver tu progreso técnico.</p>
             <div style={{ maxWidth: '450px', margin: '20px auto 0' }}>
               <Auth
                 onLogin={handleLogin}
@@ -388,19 +397,8 @@ export default function App() {
               />
             </div>
           </section>
-        ) : !user.onboarding?.completado ? (
-          /* Si el usuario no completó el onboarding, le mostramos el Wizard */
-          <section className="seccion-onboarding" style={{ padding: '20px 10%' }}>
-            <OnboardingWizard
-              apiCall={apiCall}
-              onComplete={(updatedUser) => {
-                setUser(updatedUser);
-                setStatus(`¡Onboarding completado! Módulo recomendado: ${updatedUser.onboarding?.moduloRecomendado?.toUpperCase()}`, true);
-              }}
-            />
-          </section>
         ) : (
-          /* Si el usuario SÍ inició sesión y completó onboarding, despliega directamente las pestañas */
+          /* Si el usuario SÍ inició sesión, despliega directamente las pestañas del panel */
           <div>
             {/* Sistema de pestañas original del repositorio remoto */}
             <nav className="tab-bar">
@@ -458,7 +456,16 @@ export default function App() {
           </div>
         )}
 
-        {/* 3. Tus secciones informativas estáticas abajo del contenido dinámico */}
+        {/* 3. SEGUNDO BLOQUE: Tus tarjetas de captación (Intereses y Recomendaciones) */}
+        <section id="intereses" className="seccion-intereses">
+          <InteresesSeleccion />
+        </section>
+
+        <section id="recomendacion" className="seccion-recomendacion">
+          <RecomendacionModulo />
+        </section>
+
+        {/* 4. TERCER BLOQUE: Secciones informativas estáticas al final de todo */}
         <Faqs />
         <Opiniones />
       </main>
