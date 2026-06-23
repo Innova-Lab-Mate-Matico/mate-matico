@@ -15,6 +15,9 @@ import Opiniones from './components/Opiniones';
 
 // NUEVOS COMPONENTES: Control de flujo inicial de captación
 import OnboardingWizard from './components/OnboardingWizard';
+import InteresesSeleccion from './components/InteresesSeleccion';
+import RecomendacionModulo from './components/RecomendacionModulo';
+
 
 // URL base de la API backend
 const API_BASE =
@@ -462,6 +465,15 @@ export default function App() {
         {/* Secciones informativas estáticas al final de todo (para visitantes) */}
         {!user && (
           <>
+            {/* Tarjetas de captación (Intereses y Recomendación) */}
+            <section id="intereses" className="seccion-intereses" style={{ padding: '20px 0' }}>
+              <InteresesSeleccion />
+            </section>
+
+            <section id="recomendacion" className="seccion-recomendacion" style={{ padding: '20px 0' }}>
+              <RecomendacionModulo />
+            </section>
+
             <Faqs />
             <Opiniones />
           </>
