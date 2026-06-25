@@ -69,43 +69,47 @@ export default function App() {
     setStatusMsg(msg);
     setIsStatusOk(ok);
   };
-
-  /*
-    Wrapper estándar para llamadas HTTP al backend.
-  */
-  const apiCall = async (
-    path,
-    options = {},
-    customToken = null
-  ) => {
-    const headers = {
-      'Content-Type': 'application/json',
-      ...options.headers,
-    };
-
-    const activeToken = customToken || token;
-
-    if (activeToken) {
-      headers.Authorization = `Bearer ${activeToken}`;
-    }
-
-    const res = await fetch(`${API_BASE}${path}`, {
-      ...options,
-      headers,
-    });
-
-    const data = await res.json().catch(() => ({}));
-
-    if (!res.ok) {
-      throw new Error(
-        data.error ||
-          res.statusText ||
-          'Error inesperado en la API'
-      );
-    }
-
-    return data;
+/*
+  Wrapper estándar para llamadas HTTP al backend.
+*/
+const apiCall = async (path, options = {}, customToken = null) => {
+  const headers = {
+    "Content-Type": "application/json",
+    ...options.headers,
   };
+
+  const activeToken = customToken || token;
+
+  if (activeToken) {
+    headers.Authorization = `Bearer ${activeToken}`;
+  }
+
+  const res = await fetch(`${API_BASE}${path}`, {
+    ...options,
+    headers,
+  });
+
+  const data = await res.json().catch(() => ({}));
+
+  // 🔴 DEBUG IMPORTANTE: ver respuesta real del backend
+  console.log("API RESPONSE:", {
+    status: res.status,
+    ok: res.ok,
+    data,
+  });
+
+  if (!res.ok) {
+    console.log("API ERROR RAW:", data);
+
+    throw {
+      status: res.status,
+      message: data.error || res.statusText || "Error inesperado en la API",
+      raw: data,
+    };
+  }
+
+  return data;
+};
 
   /*
     Obtener perfil del usuario autenticado.
