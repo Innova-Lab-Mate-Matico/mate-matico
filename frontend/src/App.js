@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { initializeApp } from 'firebase/app';
-import { getAuth, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { getAuth, GoogleAuthProvider, signInWithPopup, sendPasswordResetEmail } from 'firebase/auth';
 import './App.css'; // Tus estilos globales
 import Auth from './components/Auth';
 import Profile from './components/Profile';
@@ -15,8 +15,9 @@ import Opiniones from './components/Opiniones';
 
 // NUEVOS COMPONENTES: Control de flujo inicial de captación
 import OnboardingWizard from './components/OnboardingWizard';
-import InteresesSeleccion from './components/InteresesSeleccion';
-import RecomendacionModulo from './components/RecomendacionModulo';
+
+import olaSuperior from './assets/image 2.png';
+import olaInferior from './assets/image 10 (1).png';
 
 
 // URL base de la API backend
@@ -53,6 +54,9 @@ export default function App() {
   // Pestaña activa
   const [activeTab, setActiveTab] = useState('perfil');
 
+  // Pestaña de visitantes
+  const [visitorTab, setVisitorTab] = useState('login'); // 'login' | 'faqs' | 'opiniones'
+
   /*
     Intentar recuperar sesión automáticamente al iniciar la aplicación.
   */
@@ -64,48 +68,63 @@ export default function App() {
     }
   }, []);
 
+  React.useEffect(() => {
+    if (!user) {
+      document.body.classList.add('visitor-body');
+    } else {
+      document.body.classList.remove('visitor-body');
+    }
+    return () => {
+      document.body.classList.remove('visitor-body');
+    };
+  }, [user]);
+
 
   const setStatus = (msg, ok = true) => {
     setStatusMsg(msg);
     setIsStatusOk(ok);
   };
-
-  /*
-    Wrapper estándar para llamadas HTTP al backend.
-  */
-  const apiCall = async (
-    path,
-    options = {},
-    customToken = null
-  ) => {
-    const headers = {
-      'Content-Type': 'application/json',
-      ...options.headers,
-    };
-
-    const activeToken = customToken || token;
-
-    if (activeToken) {
-      headers.Authorization = `Bearer ${activeToken}`;
-    }
-
-    const res = await fetch(`${API_BASE}${path}`, {
-      ...options,
-      headers,
-    });
-
-    const data = await res.json().catch(() => ({}));
-
-    if (!res.ok) {
-      throw new Error(
-        data.error ||
-          res.statusText ||
-          'Error inesperado en la API'
-      );
-    }
-
-    return data;
+/*
+  Wrapper estándar para llamadas HTTP al backend.
+*/
+const apiCall = async (path, options = {}, customToken = null) => {
+  const headers = {
+    "Content-Type": "application/json",
+    ...options.headers,
   };
+
+  const activeToken = customToken || token;
+
+  if (activeToken) {
+    headers.Authorization = `Bearer ${activeToken}`;
+  }
+
+  const res = await fetch(`${API_BASE}${path}`, {
+    ...options,
+    headers,
+  });
+
+  const data = await res.json().catch(() => ({}));
+
+  // 🔴 DEBUG IMPORTANTE: ver respuesta real del backend
+  console.log("API RESPONSE:", {
+    status: res.status,
+    ok: res.ok,
+    data,
+  });
+
+  if (!res.ok) {
+    console.log("API ERROR RAW:", data);
+
+    throw {
+      status: res.status,
+      message: data.error || res.statusText || "Error inesperado en la API",
+      raw: data,
+    };
+  }
+
+  return data;
+};
 
   /*
     Obtener perfil del usuario autenticado.
@@ -183,6 +202,7 @@ export default function App() {
       }
       firebaseApp = initializeApp(firebaseClientConfig);
       firebaseAuth = getAuth(firebaseApp);
+      firebaseAuth.languageCode = 'es';
     }
 
     const provider = new GoogleAuthProvider();
@@ -273,6 +293,23 @@ export default function App() {
 
       setUser(data.usuario);
       setActiveTab('perfil');
+    } catch (err) {
+      setStatus(err.message, false);
+    }
+  };
+
+  /*
+    Recuperar Contraseña usando Firebase.
+  */
+  const handleRecoverPassword = async (email) => {
+    try {
+      setStatus('Enviando correo de recuperación...');
+      const { auth } = await getFirebaseAuth();
+      await sendPasswordResetEmail(auth, email);
+      setStatus(
+        'Te enviamos un correo electrónico con instrucciones para restablecer tu contraseña.',
+        true
+      );
     } catch (err) {
       setStatus(err.message, false);
     }
@@ -372,41 +409,68 @@ export default function App() {
     setActiveTab('lecciones');
   };
 
-  return (
-    <div className="app-container" id="arriba">
-      {/* 1. Navbar Oficial en la parte superior */}
-      <Navbar />
+  if (!user) {
+    /* PÁGINA DE INGRESO: Solo el Login/Registro a pantalla completa con su fondo y olas */
+    return (
+      <div className="app-main-layout">
+        <img src={olaSuperior} alt="" className="global-wave ola-superior" />
+        <img src={olaInferior} alt="" className="global-wave ola-inferior" />
+        <Auth
+          onLogin={handleLogin}
+          onGoogleLogin={handleGoogleLogin}
+          onRegister={handleRegister}
+          onRecoverPassword={handleRecoverPassword}
+          statusMsg={statusMsg}
+          isStatusOk={isStatusOk}
+        />
+      </div>
+    );
+  }
 
-      {/* 2. Tu cabecera oficial con la info del proyecto */}
-      <Header />
-
-      {/* Main */}
-      <main>
-        {!user ? (
-          /* PÁGINA DE INGRESO: Solo Login/Registro */
-          <section className="seccion-login-prompt" style={{ padding: '40px 10%', textAlign: 'center' }}>
-            <h2 style={{ fontSize: '2em', marginBottom: '10px', color: '#1a365d' }}>¡Aprendé Matemática de forma Adaptativa!</h2>
-            <p style={{ color: '#4a5568', marginBottom: '30px' }}>Iniciá sesión o registrate para comenzar tu recorrido personalizado.</p>
-            <div style={{ maxWidth: '450px', margin: '0 auto' }}>
-              <Auth
-                onLogin={handleLogin}
-                onGoogleLogin={handleGoogleLogin}
-                onRegister={handleRegister}
-                statusMsg={statusMsg}
-                isStatusOk={isStatusOk}
+  if (!user.onboarding || !user.onboarding.completado) {
+    /* FLUJO DE ONBOARDING: Pantalla completa limpia para el asistente de onboarding */
+    return (
+      <div className="app-main-layout">
+        <img src={olaSuperior} alt="" className="global-wave ola-superior" />
+        <img src={olaInferior} alt="" className="global-wave ola-inferior" />
+        <div className="app-container" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+          <main>
+            <section className="seccion-onboarding" style={{ padding: '40px 5%' }}>
+              <OnboardingWizard
+                apiCall={apiCall}
+                onComplete={handleOnboardingComplete}
               />
-            </div>
-          </section>
-        ) : !user.onboarding || !user.onboarding.completado ? (
-          /* FLUJO DE ONBOARDING: Usuario registrado/logueado que aún no hizo el test inicial */
-          <section className="seccion-onboarding" style={{ padding: '40px 5%' }}>
-            <OnboardingWizard
-              apiCall={apiCall}
-              onComplete={handleOnboardingComplete}
-            />
-          </section>
-        ) : (
-          /* PANEL PRINCIPAL: Usuario logueado con onboarding completado */
+            </section>
+          </main>
+          <footer className="footer" style={{ borderTop: 'none' }}>
+            <p>API Endpoint: <code>{API_BASE}</code></p>
+            <p style={{ marginTop: '5px' }}>
+              Mate-Mático Monorepo MVP — React Frontend © 2026
+            </p>
+          </footer>
+        </div>
+      </div>
+    );
+  }
+
+  /* PANEL PRINCIPAL: Usuario logueado con onboarding completado, cabecera compacta con estadísticas */
+  return (
+    <div className="app-main-layout">
+      <img src={olaSuperior} alt="" className="global-wave ola-superior" />
+      <img src={olaInferior} alt="" className="global-wave ola-inferior" />
+      <div className="app-container" id="arriba" style={{ minHeight: '100vh' }}>
+        <header className="dashboard-header">
+          <div className="dashboard-header-left">
+            <img className="dashboard-logo" src="./img/matemático.png" alt="el mate-mático" />
+            <h2>EL MATE-MÁTICO</h2>
+          </div>
+          <div className="dashboard-header-right">
+            <span>🔥 {user.rachaDias ?? 0} {user.rachaDias === 1 ? 'día' : 'días'}</span>
+            <span>✨ {user.puntosTotales ?? 0} pts</span>
+          </div>
+        </header>
+
+        <main>
           <div>
             <nav className="tab-bar">
               <button
@@ -414,7 +478,8 @@ export default function App() {
                 className={`tab-btn ${activeTab === 'perfil' ? 'active-tab' : ''}`}
                 onClick={() => setActiveTab('perfil')}
               >
-                1. Mi Perfil
+                <span className="tab-text-full">1. Mi Perfil</span>
+                <span className="tab-text-short">Perfil</span>
               </button>
 
               <button
@@ -422,7 +487,8 @@ export default function App() {
                 className={`tab-btn ${activeTab === 'lecciones' ? 'active-tab' : ''}`}
                 onClick={() => setActiveTab('lecciones')}
               >
-                2. Lecciones y Ejercicios
+                <span className="tab-text-full">2. Lecciones y Ejercicios</span>
+                <span className="tab-text-short">Lecciones</span>
               </button>
 
               <button
@@ -430,7 +496,8 @@ export default function App() {
                 className={`tab-btn ${activeTab === 'progreso' ? 'active-tab' : ''}`}
                 onClick={() => setActiveTab('progreso')}
               >
-                3. Mi Progreso y Logros
+                <span className="tab-text-full">3. Mi Progreso y Logros</span>
+                <span className="tab-text-short">Progreso</span>
               </button>
             </nav>
 
@@ -452,6 +519,7 @@ export default function App() {
                   onAnswerSuccess={handleAnswerSuccess}
                   progress={progress}
                   onRefreshProgress={loadUserProgress}
+                  user={user}
                 />
               )}
 
@@ -460,33 +528,15 @@ export default function App() {
               )}
             </div>
           </div>
-        )}
+        </main>
 
-        {/* Secciones informativas estáticas al final de todo (para visitantes) */}
-        {!user && (
-          <>
-            {/* Tarjetas de captación (Intereses y Recomendación) */}
-            <section id="intereses" className="seccion-intereses" style={{ padding: '20px 0' }}>
-              <InteresesSeleccion />
-            </section>
-
-            <section id="recomendacion" className="seccion-recomendacion" style={{ padding: '20px 0' }}>
-              <RecomendacionModulo />
-            </section>
-
-            <Faqs />
-            <Opiniones />
-          </>
-        )}
-      </main>
-
-      {/* Footer Técnico del repositorio remoto */}
-      <footer className="footer">
-        <p>API Endpoint: <code>{API_BASE}</code></p>
-        <p style={{ marginTop: '5px' }}>
-          Mate-Mático Monorepo MVP — React Frontend © 2026
-        </p>
-      </footer>
+        <footer className="footer">
+          <p>API Endpoint: <code>{API_BASE}</code></p>
+          <p style={{ marginTop: '5px' }}>
+            Mate-Mático Monorepo MVP — React Frontend © 2026
+          </p>
+        </footer>
+      </div>
     </div>
   );
 }

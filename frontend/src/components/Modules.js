@@ -1,4 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import luzIcon from '../assets/luz.png';
+import dudaIcon from '../assets/duda.png';
+import loLograsteIcon from '../assets/lo lograste.png';
 
 /*
   MATE-MÁTICO — COMPONENTE LECCIONES Y MÓDULOS
@@ -25,7 +28,8 @@ export default function Modules({
   apiCall,
   onAnswerSuccess,
   progress,
-  onRefreshProgress
+  onRefreshProgress,
+  user
 }) {
   const [modules, setModules] = useState([]);
   const [selectedModuleId, setSelectedModuleId] =
@@ -43,6 +47,10 @@ export default function Modules({
   // Conteo de errores consecutivos
   const [errorCount, setErrorCount] =
     useState({});
+
+  // Índice del ejercicio actual (flujo paso a paso)
+  const [currentExerciseIndex, setCurrentExerciseIndex] =
+    useState(0);
 
   const [loading, setLoading] =
     useState(false);
@@ -113,14 +121,33 @@ export default function Modules({
   /*
     Abrir lección.
   */
-  const handleSelectLesson = (
+  const handleSelectLesson = async (
     lesson
   ) => {
-    setActiveLesson(lesson);
+    setLoading(true);
 
-    setExerciseStates({});
+    try {
+      const data = await apiCall(
+        `/modules/${selectedModuleId}/lessons/${lesson.id}?semilla=${moduleDetail.semillaSesion}`
+      );
 
-    setErrorCount({});
+      setActiveLesson(
+        data.leccion ??
+          data.lesson ??
+          lesson
+      );
+    } catch (err) {
+      console.error(
+        'Error al cargar lección del backend:',
+        err
+      );
+      setActiveLesson(lesson);
+    } finally {
+      setLoading(false);
+      setExerciseStates({});
+      setErrorCount({});
+      setCurrentExerciseIndex(0);
+    }
   };
 
   /*
@@ -206,6 +233,10 @@ export default function Modules({
 
       if (result.correcto) {
         onAnswerSuccess(result);
+        // Auto-avanzar al siguiente ejercicio después de 1.5s de celebración
+        setTimeout(() => {
+          setCurrentExerciseIndex(prev => prev + 1);
+        }, 1500);
       } else {
         setErrorCount((prev) => ({
           ...prev,
@@ -219,6 +250,33 @@ export default function Modules({
         `Error al validar: ${err.message}`
       );
     }
+  };
+
+  /*
+    Manejadores de entrada del usuario para los ejercicios.
+  */
+  const handleSelectOption = (exId, option) => {
+    if (exerciseStates[exId]?.correcto) return;
+
+    setExerciseStates((prev) => ({
+      ...prev,
+      [exId]: {
+        ...prev[exId],
+        selectedOption: option,
+      },
+    }));
+  };
+
+  const handleNumericChange = (exId, value) => {
+    if (exerciseStates[exId]?.correcto) return;
+
+    setExerciseStates((prev) => ({
+      ...prev,
+      [exId]: {
+        ...prev[exId],
+        userInput: value,
+      },
+    }));
   };
 
   /*
@@ -365,6 +423,12 @@ export default function Modules({
                       mod.rolSugerido
                     }
                   </span>
+
+                  {user?.onboarding?.moduloRecomendado === mod.id && (
+                    <span className="badge badge-recommended">
+                      ★ Recomendado
+                    </span>
+                  )}
                 </div>
               </div>
             </div>
@@ -384,69 +448,41 @@ export default function Modules({
   ) {
     return (
       <div className="card">
-        <div
-          style={{
-            display: 'flex',
-            justifyContent:
-              'space-between',
-            alignItems:
-              'center',
-            marginBottom:
-              '15px',
-          }}
+        {/* Navegación de retorno */}
+        <button
+          className="module-back-btn"
+          onClick={handleBackToCatalog}
         >
-          <button
-            onClick={
-              handleBackToCatalog
-            }
-          >
-            ⇠ Volver al Catálogo
-          </button>
+          ← Volver al Catálogo
+        </button>
 
-          <h2>
+        {/* Título del módulo */}
+        <div className="module-detail-header">
+          <h2 className="module-detail-title">
             {moduleDetail.title}
           </h2>
+          {moduleDetail.description && (
+            <p className="module-detail-desc">
+              {moduleDetail.description}
+            </p>
+          )}
         </div>
 
-        <p
-          style={{
-            fontSize: '13px',
-            color: '#666',
-            marginBottom:
-              '20px',
-          }}
-        >
-          Semilla de sesión:{' '}
-          <code>
-            {
-              moduleDetail.semillaSesion
-            }
-          </code>
-        </p>
-
+        {/* Árbol de niveles y lecciones */}
         <div className="lessons-tree">
           {moduleDetail.levels.map(
-            (lvl) => (
+            (lvl, lvlIndex) => (
               <div
                 key={lvl.id}
                 className="level-group"
-                style={{
-                  marginBottom:
-                    '20px',
-                  padding: '10px',
-                  border:
-                    '1px solid #ddd',
-                }}
               >
-                <div
-                  style={{
-                    fontWeight:
-                      'bold',
-                    marginBottom:
-                      '10px',
-                  }}
-                >
-                  {lvl.title}
+                <div className="level-header">
+                  <span className="level-badge">
+                    {lvlIndex + 1}
+                  </span>
+                  <span className="level-title">
+                    {lvl.title}
+                  </span>
                 </div>
 
                 <div className="lessons-list">
@@ -459,9 +495,7 @@ export default function Modules({
 
                       return (
                         <button
-                          key={
-                            lesson.id
-                          }
+                          key={lesson.id}
                           className={`lesson-btn-card ${
                             completed
                               ? 'completed'
@@ -472,40 +506,17 @@ export default function Modules({
                               lesson
                             )
                           }
-                          style={{
-                            display:
-                              'flex',
-                            justifyContent:
-                              'space-between',
-                            padding:
-                              '10px',
-                            width:
-                              '100%',
-                            background:
-                              completed
-                                ? '#d4edda'
-                                : '#fff',
-                            borderColor:
-                              completed
-                                ? '#c3e6cb'
-                                : '#ccc',
-                            marginBottom:
-                              '5px',
-                          }}
                         >
-                          <span>
-                            {completed
-                              ? '✓ '
-                              : '🧉 '}
-
-                            <strong>
-                              {
-                                lesson.title
-                              }
-                            </strong>
+                          <span className="lesson-btn-left">
+                            <span className="lesson-icon">
+                              {completed ? '✓' : '🧉'}
+                            </span>
+                            <span className="lesson-name">
+                              {lesson.title}
+                            </span>
                           </span>
 
-                          <span>
+                          <span className={`lesson-action ${completed ? 'lesson-action-done' : ''}`}>
                             {completed
                               ? 'COMPLETADO'
                               : 'INICIAR ▶'}
@@ -528,21 +539,16 @@ export default function Modules({
     Lección activa.
   */
   if (activeLesson) {
-    const allCorrect =
-      activeLesson.ejercicios
-        ?.length > 0 &&
-      activeLesson.ejercicios.every(
-        (ex) =>
-          exerciseStates[ex.id]
-            ?.correcto
-      );
+    const ejercicios = activeLesson.ejercicios || [];
+    const totalEjercicios = ejercicios.length;
+    const allCompleted = totalEjercicios > 0 && currentExerciseIndex >= totalEjercicios;
 
     /*
       Pantalla de éxito.
     */
-    if (allCorrect) {
+    if (allCompleted) {
       const totalPoints =
-        activeLesson.ejercicios.reduce(
+        ejercicios.reduce(
           (sum, ex) =>
             sum +
             (ex.puntos ?? 10),
@@ -551,43 +557,59 @@ export default function Modules({
 
       return (
         <div
-          className="card"
+          className="card milestone-card"
           style={{
             textAlign: 'center',
-            border:
-              '2px solid #28a745',
-            padding: '30px',
+            border: '2px solid #7b61ff',
+            padding: '40px 30px',
+            borderRadius: '24px',
+            boxShadow: '0 12px 36px rgba(123, 97, 255, 0.15)',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '18px'
           }}
         >
+          <img
+            src={loLograsteIcon}
+            alt="Hito Completado"
+            style={{
+              width: '180px',
+              height: 'auto',
+              marginBottom: '10px',
+              display: 'block'
+            }}
+          />
+
           <h2
             style={{
-              color: '#28a745',
+              color: '#7b61ff',
+              fontFamily: "'Poppins', sans-serif",
+              fontWeight: '800',
+              fontSize: '1.8rem',
+              margin: '0'
             }}
           >
-            🎉 ¡Lección Completada!
+            🏆 ¡HITO COMPLETADO! 🏆
           </h2>
 
-          <p>
-            Respondiste todas
-            las preguntas
-            correctamente.
+          <p style={{ margin: '0', fontSize: '15px', color: '#4b5563', fontWeight: '500' }}>
+            ¡Excelente trabajo! Superaste todos los ejercicios con éxito y desbloqueaste nuevos conocimientos.
           </p>
 
           <div
             style={{
-              margin:
-                '20px 0',
               display: 'flex',
-              justifyContent:
-                'center',
+              justifyContent: 'center',
               gap: '15px',
+              width: '100%'
             }}
           >
-            <span className="badge badge-gold">
-              +{totalPoints} pts
+            <span className="badge badge-gold" style={{ fontSize: '14px', padding: '10px 20px' }}>
+              ✨ +{totalPoints} Puntos
             </span>
 
-            <span className="badge badge-success">
+            <span className="badge badge-success" style={{ fontSize: '14px', padding: '10px 20px', backgroundColor: '#e6fffa', color: '#047481', border: '1px solid rgba(4, 116, 129, 0.1)' }}>
               🔥 Racha mantenida
             </span>
           </div>
@@ -595,131 +617,229 @@ export default function Modules({
           <button
             type="button"
             className="btn-primary"
+            style={{
+              marginTop: '15px',
+              width: '100%',
+              maxWidth: '300px',
+              height: '50px',
+              fontSize: '16px'
+            }}
             onClick={async () => {
-              if (
-                onRefreshProgress
-              ) {
+              if (onRefreshProgress) {
                 await onRefreshProgress();
               }
-
-              handleBackToModule();
+              handleBackToCatalog();
             }}
           >
-            Regresar
+            Finalizar Lección
           </button>
         </div>
       );
     }
 
     /*
-      Ejercicios activos.
+      Ejercicio actual (paso a paso).
     */
+    const ex = ejercicios[currentExerciseIndex];
+    if (!ex) return null;
+
+    const exState = exerciseStates[ex.id] || {};
+    const consecutiveErrors = errorCount[ex.id] || 0;
+
+    const isCorrect = exState.correcto;
+    const isChecked = exState.checked;
+    const isMultipleChoice = ex.tipo === 'multiple_choice';
+
+    const selectedOption = exState.selectedOption || '';
+    const numericValue = exState.userInput || '';
+
+    const hasHint = exState.comodinPista || (isChecked && !isCorrect && consecutiveErrors >= 2);
+    const hasError = isChecked && !isCorrect && exState.explicacionError;
+
+    const isSubmitDisabled = isCorrect || (
+      isMultipleChoice ? !selectedOption : !numericValue.trim()
+    );
+
+    const progressPercent = (currentExerciseIndex / totalEjercicios) * 100;
+    const progressPercentFilled = isCorrect
+      ? ((currentExerciseIndex + 1) / totalEjercicios) * 100
+      : progressPercent;
+
     return (
       <div className="card">
-        <div
-          style={{
-            display: 'flex',
-            justifyContent:
-              'space-between',
-            alignItems:
-              'center',
-            marginBottom:
-              '15px',
-          }}
-        >
+        {/* Cabecera con progreso */}
+        <div className="exercise-progress-header">
           <button
-            onClick={
-              handleBackToModule
-            }
+            onClick={handleBackToModule}
+            className="exercise-exit-btn"
           >
-            ⇠ Salir
+            ✕
           </button>
 
-          <h3>
-            Lección:{' '}
-            {
-              activeLesson.title
-            }
-          </h3>
+          <div className="exercise-progress-bar">
+            <div
+              className="exercise-progress-fill"
+              style={{ width: `${progressPercentFilled}%` }}
+            />
+          </div>
+
+          <span className="exercise-counter">
+            {currentExerciseIndex + 1}/{totalEjercicios}
+          </span>
         </div>
 
-        <div
-          className="exercises-container"
-          style={{
-            display: 'flex',
-            flexDirection:
-              'column',
-            gap: '15px',
-          }}
-        >
-          {activeLesson.ejercicios?.map(
-            (ex, index) => {
-              const exState =
-                exerciseStates[
-                  ex.id
-                ];
+        {/* Ejercicio actual con animación */}
+        <div className="exercise-step" key={ex.id}>
+          <div className="exercise-card">
+            {/* Cabecera del Ejercicio */}
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                fontSize: '13px',
+                color: '#666',
+                marginBottom: '10px',
+              }}
+            >
+              <span style={{ fontWeight: '600', color: '#94a3b8' }}>
+                Ejercicio {currentExerciseIndex + 1}
+              </span>
 
-              const consecutiveErrors =
-                errorCount[
-                  ex.id
-                ] || 0;
+              <div>
+                {isCorrect ? (
+                  <span className="badge badge-success">
+                    ✓ ¡Correcto!
+                  </span>
+                ) : isChecked ? (
+                  <span className="badge badge-error">
+                    ❌ Reintentar
+                  </span>
+                ) : (
+                  <span className="badge">
+                    ✨ {ex.puntos} pts
+                  </span>
+                )}
+              </div>
+            </div>
 
-              const numericValue =
-                exState?.userInput ||
-                '';
+            {/* Enunciado del Ejercicio */}
+            <div
+              style={{
+                fontWeight: 'bold',
+                fontSize: '1.15rem',
+                color: '#1e293b',
+                marginBottom: '20px',
+                lineHeight: '1.5',
+              }}
+            >
+              {ex.enunciado ?? ex.prompt}
+            </div>
 
-              return (
-                <div
-                  key={ex.id}
-                  className="exercise-card"
-                  style={{
-                    border:
-                      '1px solid #ccc',
-                    padding: '15px',
+            {/* Inputs / Opciones */}
+            {isMultipleChoice ? (
+              <div className="options-container">
+                {ex.opciones?.map((opt, oIdx) => {
+                  const isOptSelected = selectedOption === String(opt);
+
+                  let optClass = "option-btn";
+                  if (isOptSelected) {
+                    optClass += " selected";
+                    if (isChecked) {
+                      optClass += isCorrect ? " correct" : " incorrect";
+                    }
+                  }
+
+                  return (
+                    <button
+                      key={oIdx}
+                      type="button"
+                      className={optClass}
+                      disabled={isCorrect}
+                      onClick={() => handleSelectOption(ex.id, String(opt))}
+                    >
+                      <span style={{ marginRight: '10px', fontWeight: 'bold' }}>
+                        {['A', 'B', 'C', 'D'][oIdx] || '•'}.
+                      </span>
+                      {opt}
+                    </button>
+                  );
+                })}
+              </div>
+            ) : (
+              <div>
+                <input
+                  type="text"
+                  className="numeric-input"
+                  placeholder="Escribí tu respuesta acá..."
+                  disabled={isCorrect}
+                  value={numericValue}
+                  onChange={(e) => handleNumericChange(ex.id, e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !isSubmitDisabled) {
+                      handleSubmitAnswer(ex, numericValue);
+                    }
                   }}
-                >
-                  <div
-                    style={{
-                      display:
-                        'flex',
-                      justifyContent:
-                        'space-between',
-                      fontSize:
-                        '12px',
-                      color:
-                        '#666',
-                      marginBottom:
-                        '5px',
-                    }}
-                  >
-                    <span>
-                      Ejercicio{' '}
-                      {index + 1}
-                    </span>
+                />
+              </div>
+            )}
 
-                    <span>
-                      {ex.puntos}{' '}
-                      pts
-                    </span>
-                  </div>
-
-                  <div
-                    style={{
-                      fontWeight:
-                        'bold',
-                      fontSize:
-                        '16px',
-                      marginBottom:
-                        '15px',
-                    }}
-                  >
-                    {ex.enunciado ??
-                      ex.prompt}
-                  </div>
+            {/* Explicación de Error */}
+            {hasError && (
+              <div className="feedback-card error">
+                <img
+                  src={dudaIcon}
+                  alt="Mate de duda"
+                  className="feedback-img"
+                />
+                <div className="feedback-text">
+                  <strong>¡Sigamos practicando!</strong>
+                  {exState.explicacionError}
                 </div>
-              );
-            }
-          )}
+              </div>
+            )}
+
+            {/* Pistas del Termo de Mate-Mático */}
+            {hasHint && exState.comodinPista && (
+              <div className="feedback-card pista">
+                <img
+                  src={luzIcon}
+                  alt="Mate brillante"
+                  className="feedback-img"
+                />
+                <div className="feedback-text">
+                  <strong>Pista de Mate-Mático:</strong>
+                  {exState.comodinPista}
+                </div>
+              </div>
+            )}
+
+            {/* Botón Comprobar */}
+            {!isCorrect && (
+              <div className="btn-check-container">
+                <button
+                  type="button"
+                  className="btn-check"
+                  disabled={isSubmitDisabled}
+                  onClick={() =>
+                    handleSubmitAnswer(
+                      ex,
+                      isMultipleChoice ? selectedOption : numericValue
+                    )
+                  }
+                >
+                  Comprobar
+                </button>
+              </div>
+            )}
+
+            {/* Indicador de avance automático */}
+            {isCorrect && (
+              <div className="exercise-advance-hint">
+                Avanzando al siguiente ejercicio...
+              </div>
+            )}
+          </div>
         </div>
       </div>
     );

@@ -1,14 +1,44 @@
 import React from 'react';
-import BotonAncla from './BotonAncla';
 
-export default function Navbar() {
+export default function Navbar({ onNavigate, currentTab, loggedIn }) {
+    if (loggedIn) {
+        return null;
+    }
+
     return (
-        <nav>
-        <ul>
-            <li><BotonAncla destino="faqs">FAQ´s</BotonAncla></li>
-            <li><BotonAncla destino="opiniones">Opiniones</BotonAncla></li>
-            
-        </ul>
+        <nav className="visitor-navbar">
+            <div className="nav-brand" onClick={() => onNavigate('login')} style={{ cursor: 'pointer' }}>
+                🧉 Mate-Mático
+            </div>
+            <ul>
+                <li>
+                    <button 
+                        type="button" 
+                        className={`nav-tab-btn ${currentTab === 'login' ? 'active' : ''}`}
+                        onClick={() => onNavigate('login')}
+                    >
+                        Ingresar
+                    </button>
+                </li>
+                <li>
+                    <button 
+                        type="button" 
+                        className={`nav-tab-btn ${currentTab === 'faqs' ? 'active' : ''}`}
+                        onClick={() => onNavigate('faqs')}
+                    >
+                        Preguntas Frecuentes
+                    </button>
+                </li>
+                <li>
+                    <button 
+                        type="button" 
+                        className={`nav-tab-btn ${currentTab === 'opiniones' ? 'active' : ''}`}
+                        onClick={() => onNavigate('opiniones')}
+                    >
+                        Opiniones
+                    </button>
+                </li>
+            </ul>
         </nav>
     );
 }

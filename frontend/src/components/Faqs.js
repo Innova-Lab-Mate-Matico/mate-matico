@@ -1,7 +1,6 @@
 import React from 'react';
-import BotonAncla from './BotonAncla';
 
-export default function Faqs() {
+export default function Faqs({ onBack }) {
     return (
     <section id="faqs">
         <h2>Preguntas Frecuentes</h2>
@@ -17,9 +16,13 @@ export default function Faqs() {
         <p><strong>3. ¿Qué tipo de contenido incluye el curso?</strong></p>
         <p>El curso incluye videos explicativos, ejercicios prácticos, y evaluaciones para ayudarte a consolidar tus conocimientos.</p>
 
-        <div className="contenedor-volver">
-            <BotonAncla destino="arriba">▲ Arriba</BotonAncla>
-        </div>
+        {onBack && (
+            <div className="contenedor-volver">
+                <button type="button" className="btn-secondary" onClick={onBack}>
+                    Volver al inicio
+                </button>
+            </div>
+        )}
     </section>
     );
 }
