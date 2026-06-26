@@ -129,30 +129,6 @@
 }
 
 /* =========================
-   OLAS (FONDO DECORATIVO)
-========================= */
-
-.ola-superior,
-.ola-inferior {
-  position: absolute;
-  z-index: 0;
-  pointer-events: none;
-  transition: width 0.3s ease;
-}
-
-.ola-superior {
-  top: 0;
-  right: 0;
-  width: 320px;
-}
-
-.ola-inferior {
-  bottom: 0;
-  left: 0;
-  width: 320px;
-}
-
-/* =========================
    FORMULARIOS
 ========================= */
 
@@ -391,14 +367,6 @@
   .auth-card {
     max-width: 420px;
   }
-
-  .ola-superior {
-    width: 450px;
-  }
-
-  .ola-inferior {
-    width: 450px;
-  }
 }
 
 /* =========================
@@ -433,12 +401,6 @@
   .auth-subtitle {
     font-size: 0.88rem;
     margin-bottom: 10px;
-  }
-
-  .ola-superior,
-  .ola-inferior {
-    width: 160px;
-    opacity: 0.7;
   }
 
   .btn-primary,
