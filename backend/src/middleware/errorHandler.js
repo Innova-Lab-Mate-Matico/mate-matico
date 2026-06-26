@@ -21,10 +21,6 @@ export function errorHandler(err, _req, res, _next) {
     message = SAFE_MESSAGES[500];
   }
 
-  if (env.isProduction && status === 401) {
-    message = SAFE_MESSAGES[401];
-  }
-
   const body = { success: false, error: message };
 
   if (!env.isProduction && err.code) {
