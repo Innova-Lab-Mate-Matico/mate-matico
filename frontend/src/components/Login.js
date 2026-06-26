@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import logoPrincipal from "../assets/Logo.png";
 import googleIcon from "../assets/google.png";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
+import olaSuperior from "../assets/image 2.png";
+import olaInferior from "../assets/image 10 (1).png";
 
 export default function Login({
   onLogin,
@@ -35,6 +37,8 @@ export default function Login({
 
   return (
     <div className="auth-form-wrapper">
+      <img src={olaSuperior} alt="" className="ola-superior" />
+      <img src={olaInferior} alt="" className="ola-inferior" />
 
       <div className="auth-header">
         <img
@@ -111,7 +115,7 @@ export default function Login({
 
         <button
           type="button"
-          className="btn-secondary"
+          className="btn-primary"
           onClick={onSwitchMode}
         >
           Nuevo usuario

@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 
 import logoPrincipal from "../assets/Logo.png";
+import olaSuperior from "../assets/image 2.png";
+import olaInferior from "../assets/image 10 (1).png";
 
 export default function RecoverPassword({
   onRecoverPassword,
@@ -31,6 +33,8 @@ export default function RecoverPassword({
 
   return (
     <div className="auth-form-wrapper">
+      <img src={olaSuperior} alt="" className="ola-superior" />
+      <img src={olaInferior} alt="" className="ola-inferior" />
       <div className="auth-header">
         <img
           src={logoPrincipal}
@@ -67,7 +71,7 @@ export default function RecoverPassword({
 
         <button
           type="button"
-          className="btn-secondary"
+          className="btn-primary"
           onClick={onSwitchMode}
           disabled={isLoading}
         >
