@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 import logoPrincipal from "../assets/Logo.png";
+import olaSuperior from "../assets/image 2.png";
+import olaInferior from "../assets/image 10 (1).png";
 
 export default function Register({
   onRegister,
@@ -54,6 +56,8 @@ export default function Register({
 
   return (
     <div className="auth-form-wrapper">
+      <img src={olaSuperior} alt="" className="ola-superior" />
+      <img src={olaInferior} alt="" className="ola-inferior" />
 
       <div className="auth-header">
         <img
@@ -157,7 +161,7 @@ export default function Register({
         {/* BACK LOGIN */}
         <button
           type="button"
-          className="btn-secondary"
+          className="btn-primary"
           onClick={onSwitchMode}
         >
           Volver al inicio de sesión
