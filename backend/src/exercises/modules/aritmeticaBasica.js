@@ -88,6 +88,25 @@ const PLANTILLAS = {
       });
     },
   },
+  multiplicacion_num: {
+    id: 'mult-num',
+    tipo: 'numeric',
+    generar: (rng) => {
+      const a = enteroAleatorio(rng, 2, 12);
+      const b = enteroAleatorio(rng, 2, 12);
+      const resultado = a * b;
+      return baseEjercicio('mult-num', 'numeric', {
+        a,
+        b,
+        operacion: 'multiplicacion',
+        resultado,
+        enunciado: `Completá la multiplicación: ${a} × ${b} = ___`,
+        explicacionError: `${a} × ${b} = ${resultado}. Recordá que podés sumar ${a} de forma sucesiva ${b} veces.`,
+        comodinPista: `Pista de Mate-Matico: si te cuesta el cálculo, recordá que ${a} × 10 es ${a * 10}.`,
+        puntos: PUNTOS_NUM,
+      });
+    },
+  },
 };
 
 function baseEjercicio(id, tipo, datos) {

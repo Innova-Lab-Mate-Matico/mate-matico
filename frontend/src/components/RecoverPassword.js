@@ -30,15 +30,21 @@ export default function RecoverPassword({
   };
 
   return (
-    <>
-      <img src={logoPrincipal} className="auth-logo" />
+    <div className="auth-form-wrapper">
+      <div className="auth-header">
+        <img
+          src={logoPrincipal}
+          className="auth-logo"
+          alt="Mate-Mático"
+        />
 
-      <h2 className="auth-title">Recuperar Contraseña</h2>
-      <p className="auth-subtitle">
-        Te enviaremos un link a tu correo
-      </p>
+        <h2 className="auth-title">Recuperar Contraseña</h2>
+        <p className="auth-subtitle">
+          Te enviaremos un link a tu correo
+        </p>
+      </div>
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} className="auth-form">
         <div className="form-group">
           <label>Correo Electrónico</label>
 
@@ -74,6 +80,6 @@ export default function RecoverPassword({
           {statusMsg}
         </div>
       )}
-    </>
+    </div>
   );
 }

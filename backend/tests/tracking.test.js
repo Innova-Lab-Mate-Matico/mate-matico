@@ -4,6 +4,7 @@ import request from 'supertest';
 import app from '../src/app.js';
 import { db, auth } from '../src/config/firebase.js';
 import { trackEvent } from '../src/services/tracking.service.js';
+import { resolverRespuestaPorcentajes } from '../src/exercises/modules/porcentajes.js';
 
 // Asegurar uso de emulador
 process.env.NODE_ENV = 'test';
@@ -103,6 +104,7 @@ describe('Telemetría y Tracking de Eventos (Hito 2)', () => {
     // Primero obtener el ejercicio para saber la semilla/operandos
     const getRes = await request(app).get('/api/modules/porcentajes/lessons/descuentos');
     const ejYerba = getRes.body.leccion.ejercicios[0];
+    const correctAns = resolverRespuestaPorcentajes(ejYerba.operandos, 'descuento_mc');
 
     const res = await request(app)
       .post('/api/exercises/validate')
@@ -113,7 +115,7 @@ describe('Telemetría y Tracking de Eventos (Hito 2)', () => {
         exerciseId: ejYerba.id,
         semilla: ejYerba.semilla,
         operandos: ejYerba.operandos,
-        answer: '2400',
+        answer: String(correctAns),
         tiempo_segundos: 12
       });
 
@@ -143,6 +145,7 @@ describe('Telemetría y Tracking de Eventos (Hito 2)', () => {
   it('4. Al resolver un ejercicio de forma incorrecta, debe registrar "ejercicio_completado" con resultado "incorrecto"', async () => {
     const getRes = await request(app).get('/api/modules/porcentajes/lessons/descuentos');
     const ejYerba = getRes.body.leccion.ejercicios[0];
+    const correctAns = resolverRespuestaPorcentajes(ejYerba.operandos, 'descuento_mc');
 
     const res = await request(app)
       .post('/api/exercises/validate')
@@ -153,7 +156,7 @@ describe('Telemetría y Tracking de Eventos (Hito 2)', () => {
         exerciseId: ejYerba.id,
         semilla: ejYerba.semilla,
         operandos: ejYerba.operandos,
-        answer: '1200',
+        answer: String(correctAns + 100),
         tiempo_segundos: 8
       });
 

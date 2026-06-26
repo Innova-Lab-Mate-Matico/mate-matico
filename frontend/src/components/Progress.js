@@ -1,4 +1,5 @@
-
+import React, { useState, useEffect } from 'react';
+import Mascota from './Mascota';
 
 /*
   MATE-MÁTICO — COMPONENTE PROGRESO
@@ -9,369 +10,236 @@
   - lecciones completadas,
   - puntos acumulados,
   - rachas activas,
+  - la mascota de aprendizaje activa,
   - información técnica de depuración.
+*/
 
-  Compatible con:
-  - Create React App
-  - React clásico
+const TITULOS_MODULOS = {
+  aritmetica: 'Base aritmética',
+  porcentajes: 'Porcentajes',
+  fracciones: 'Fracciones y decimales',
+};
 
+const TITULOS_LECCIONES = {
+  'suma-basica': 'Suma básica',
+  multiplicacion: 'Multiplicación',
+  'concepto-porcentaje': 'Concepto de porcentaje',
+  descuentos: 'Calcular descuentos',
+  'fracciones-basicas': 'Fracciones básicas',
+};
 
-export default function Progress({
-  apiCall
-}) {
-  const [progressData, setProgressData] =
-    useState(null);
-
-  const [loading, setLoading] =
-    useState(false);
-
-  const [showRaw, setShowRaw] =
-    useState(false);
-
+export default function Progress({ apiCall }) {
+  const [progressData, setProgressData] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const loadProgress = async () => {
     setLoading(true);
-
     try {
-      const data = await apiCall(
-        '/progress'
-      );
-
+      const data = await apiCall('/progress');
       setProgressData(data);
     } catch (err) {
-      console.error(
-        'Error al cargar progreso:',
-        err
-      );
+      console.error('Error al cargar progreso:', err);
     } finally {
       setLoading(false);
     }
   };
 
- 
+  useEffect(() => {
+    loadProgress();
+  }, []);
+
   const hasProgress =
     progressData &&
     progressData.progreso &&
-    Object.keys(
-      progressData.progreso
-    ).length > 0;
+    progressData.progreso.modulos &&
+    Object.keys(progressData.progreso.modulos).length > 0;
 
   return (
     <div className="card">
-      
-      <div
-        style={{
-          display: 'flex',
-          justifyContent:
-            'space-between',
-          alignItems:
-            'center',
-          marginBottom:
-            '15px',
-        }}
-      >
-        <h2>
-          Progreso del Alumno
-        </h2>
+      <div className="progress-header">
+        <h2 style={{ margin: 0, color: '#163b74' }}>Mi Progreso y Logros</h2>
 
         <button
           type="button"
           onClick={loadProgress}
           className="btn-primary"
           disabled={loading}
+          style={{ height: '38px', padding: '0 16px', border: 'none' }}
         >
-          {loading
-            ? 'Sincronizando...'
-            : 'Cargar de Firestore'}
+          {loading ? 'Sincronizando...' : 'Actualizar'}
         </button>
       </div>
 
-      
-      {!progressData &&
-        !loading && (
-          <p
-            style={{
-              color: '#666',
-              fontStyle:
-                'italic',
-            }}
-          >
-            Haz clic en
-            "Cargar de
-            Firestore" para
-            sincronizar tus
-            avances.
-          </p>
-        )}
+      {loading && !progressData && (
+        <div style={{ textAlign: 'center', padding: '20px', color: '#666' }}>
+          Cargando tu progreso...
+        </div>
+      )}
 
-      
       {progressData && (
         <div
           style={{
             display: 'flex',
-            flexDirection:
-              'column',
+            flexDirection: 'column',
             gap: '20px',
           }}
         >
-      
+          {/* Tarjeta de Mascota Activa */}
+          {progressData.gamificacion?.rolActual && (
+            <div>
+              <h4 style={{ marginBottom: '10px', color: '#4b5563' }}>Tu Mascota de Aprendizaje</h4>
+              <Mascota rol={progressData.gamificacion.rolActual} />
+            </div>
+          )}
+
+          {/* Estadísticas en Tarjetas Premium */}
           <div
             style={{
               display: 'flex',
               gap: '15px',
+              flexWrap: 'wrap',
             }}
           >
             <div
+              className="stat-card"
               style={{
-                border:
-                  '1px solid #ccc',
-                padding: '10px',
-                flex: 1,
-                textAlign:
-                  'center',
+                backgroundColor: '#f7f2ff',
+                border: '1px solid rgba(123, 97, 255, 0.1)',
+                borderRadius: '16px',
+                padding: '20px',
+                flex: '1 1 120px',
+                textAlign: 'center',
+                boxShadow: '0 4px 10px rgba(123, 97, 255, 0.02)',
               }}
             >
-              <strong>
-                {progressData
-                  .gamificacion
-                  ?.puntosTotales ??
-                  0}{' '}
-                Pts
-              </strong>
-
-              <div
-                style={{
-                  fontSize:
-                    '11px',
-                  color: '#666',
-                }}
-              >
-                Puntos Totales
+              <div style={{ fontSize: '28px', fontWeight: 'bold', color: '#7b61ff', marginBottom: '4px' }}>
+                {progressData.gamificacion?.puntosTotales ?? 0}
+              </div>
+              <div style={{ fontSize: '13px', fontWeight: '600', color: '#4b5563' }}>
+                Puntos Acumulados
               </div>
             </div>
 
             <div
+              className="stat-card"
               style={{
-                border:
-                  '1px solid #ccc',
-                padding: '10px',
-                flex: 1,
-                textAlign:
-                  'center',
+                backgroundColor: '#fff9e6',
+                border: '1px solid rgba(217, 119, 6, 0.1)',
+                borderRadius: '16px',
+                padding: '20px',
+                flex: '1 1 120px',
+                textAlign: 'center',
+                boxShadow: '0 4px 10px rgba(217, 119, 6, 0.02)',
               }}
             >
-              <strong>
-                {progressData
-                  .gamificacion
-                  ?.rachaDias ??
-                  0}{' '}
-                Días
-              </strong>
-
-              <div
-                style={{
-                  fontSize:
-                    '11px',
-                  color: '#666',
-                }}
-              >
-                Racha de días
+              <div style={{ fontSize: '28px', fontWeight: 'bold', color: '#d97706', marginBottom: '4px' }}>
+                {progressData.gamificacion?.rachaDias ?? 0}
+              </div>
+              <div style={{ fontSize: '13px', fontWeight: '600', color: '#4b5563' }}>
+                Días de Racha Activos
               </div>
             </div>
           </div>
 
-  
+          {/* Listado de Lecciones Completadas */}
           <div>
-            <h4>
-              Lecciones
-              Completadas
-            </h4>
+            <h4 style={{ marginBottom: '12px', color: '#4b5563' }}>Lecciones Superadas</h4>
 
             {hasProgress ? (
               <div
                 style={{
-                  display:
-                    'flex',
-                  flexDirection:
-                    'column',
-                  gap: '10px',
-                  marginTop:
-                    '10px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '15px',
                 }}
               >
-                {Object.entries(
-                  progressData.progreso
-                ).map(
-                  ([
-                    moduleId,
-                    modInfo,
-                  ]) => {
-                    const completedLessons =
-                      Object.entries(
-                        modInfo.lecciones ??
-                          modInfo.lessons ??
-                          {}
-                      ).filter(
-                        ([_, l]) =>
-                          l.completada ||
-                          l.completed
-                      );
+                {Object.entries(progressData.progreso.modulos).map(([moduleId, modInfo]) => {
+                  const completedLessons = Object.entries(
+                    modInfo.lecciones ?? modInfo.lessons ?? {}
+                  ).filter(([_, l]) => l.completada || l.completed);
 
-                    return (
+                  const tituloModulo = TITULOS_MODULOS[moduleId] || (moduleId.charAt(0).toUpperCase() + moduleId.slice(1));
+
+                  return (
+                    <div
+                      key={moduleId}
+                      style={{
+                        backgroundColor: '#ffffff',
+                        border: '1px solid rgba(123, 97, 255, 0.1)',
+                        borderRadius: '16px',
+                        padding: '16px',
+                        boxShadow: '0 4px 12px rgba(123, 97, 255, 0.02)',
+                      }}
+                    >
                       <div
-                        key={
-                          moduleId
-                        }
                         style={{
-                          border:
-                            '1px solid #ddd',
-                          padding:
-                            '10px',
-                          backgroundColor:
-                            '#fff',
+                          fontWeight: 'bold',
+                          fontSize: '0.95rem',
+                          color: '#163b74',
+                          borderBottom: '1px solid #f3f4f6',
+                          paddingBottom: '8px',
+                          marginBottom: '10px',
                         }}
                       >
+                        Módulo: {tituloModulo} ({completedLessons.length} superadas)
+                      </div>
+
+                      {completedLessons.length > 0 ? (
                         <div
                           style={{
-                            fontWeight:
-                              'bold',
-                            textTransform:
-                              'capitalize',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '8px',
                           }}
                         >
-                          Módulo:{' '}
-                          {
-                            moduleId
-                          }{' '}
-                          (
-                          {
-                            completedLessons.length
-                          }{' '}
-                          completadas)
+                          {completedLessons.map(([lessonId, l]) => (
+                             <div
+                               key={lessonId}
+                               className="progress-lesson-item"
+                             >
+                               <span style={{ color: '#334155', fontWeight: '500' }}>
+                                 🧉 Lección: <strong>{TITULOS_LECCIONES[lessonId] || lessonId}</strong>
+                               </span>
+                               <span style={{ color: '#64748b', fontSize: '11px' }}>
+                                 Completada el: {(() => {
+                                   const dateStr = l.actualizadoEn ?? l.completadoEn ?? l.completedAt;
+                                   if (!dateStr) return 'Recientemente';
+                                   const d = new Date(dateStr);
+                                   return isNaN(d.getTime()) ? 'Recientemente' : d.toLocaleDateString();
+                                 })()}
+                               </span>
+                             </div>
+                          ))}
                         </div>
-
-                        {completedLessons.length >
-                        0 ? (
-                          <ul
-                            style={{
-                              marginTop:
-                                '5px',
-                              paddingLeft:
-                                '20px',
-                            }}
-                          >
-                            {completedLessons.map(
-                              ([
-                                lessonId,
-                                l,
-                              ]) => (
-                                <li
-                                  key={
-                                    lessonId
-                                  }
-                                  style={{
-                                    fontSize:
-                                      '13px',
-                                  }}
-                                >
-                                  Lección:{' '}
-                                  <strong>
-                                    {
-                                      lessonId
-                                    }
-                                  </strong>{' '}
-                                  ➔{' '}
-                                  {new Date(
-                                    l.completadoEn ??
-                                      l.completedAt
-                                  ).toLocaleDateString()}
-                                </li>
-                              )
-                            )}
-                          </ul>
-                        ) : (
-                          <span
-                            style={{
-                              fontSize:
-                                '12px',
-                              color:
-                                '#999',
-                            }}
-                          >
-                            Ninguna
-                            lección
-                            completada.
-                          </span>
-                        )}
-                      </div>
-                    );
-                  }
-                )}
+                      ) : (
+                        <span style={{ fontSize: '12px', color: '#94a3b8', fontStyle: 'italic' }}>
+                          Ninguna lección completada aún en este módulo.
+                        </span>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             ) : (
-              <p
+              <div
                 style={{
-                  color: '#666',
-                  fontSize:
-                    '13px',
+                  backgroundColor: '#f8fafc',
+                  border: '1px dotted #cbd5e1',
+                  borderRadius: '12px',
+                  padding: '20px',
+                  textAlign: 'center',
+                  color: '#64748b',
+                  fontSize: '13px',
                 }}
               >
-                No has
-                completado
-                ninguna
-                lección
-                todavía.
-              </p>
+                No has completado ninguna lección todavía. ¡Pasa por el catálogo de lecciones para empezar!
+              </div>
             )}
           </div>
 
-        
-          <div
-            style={{
-              marginTop:
-                '15px',
-            }}
-          >
-            <button
-              type="button"
-              onClick={() =>
-                setShowRaw(
-                  !showRaw
-                )
-              }
-              style={{
-                width: '100%',
-                fontSize:
-                  '12px',
-              }}
-            >
-              {showRaw
-                ? 'Ocultar JSON'
-                : 'Ver JSON de Depuración'}
-            </button>
 
-            {showRaw && (
-              <pre
-                className="progress-pre"
-                style={{
-                  marginTop:
-                    '10px',
-                }}
-              >
-                {JSON.stringify(
-                  progressData,
-                  null,
-                  2
-                )}
-              </pre>
-            )}
-          </div>
         </div>
       )}
     </div>
   );
-}*/
-
-export default function Progress() {
-  return null;
 }

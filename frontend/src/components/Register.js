@@ -55,15 +55,18 @@ export default function Register({
   return (
     <div className="auth-form-wrapper">
 
-      <img
-        src={logoPrincipal}
-        alt="Mate-Mático"
-        className="auth-logo"
-      />
+      <div className="auth-header">
+        <img
+          src={logoPrincipal}
+          alt="Mate-Mático"
+          className="auth-logo"
+        />
 
-      <h2 className="auth-title">
-        Ingresá tus datos
-      </h2>
+        <h2 className="auth-title">Ingresá tus datos</h2>
+        <p className="auth-subtitle">
+          Crea tu cuenta para empezar a aprender
+        </p>
+      </div>
 
       <form onSubmit={handleSubmit} className="auth-form">
 

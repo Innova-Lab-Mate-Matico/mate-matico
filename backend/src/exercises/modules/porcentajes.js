@@ -5,14 +5,27 @@ const PLANTILLAS = {
   porcentaje_mc: {
     generar: (rng) => {
       const porcentaje = [10, 20, 25, 50][enteroAleatorio(rng, 0, 3)];
-      const base = enteroAleatorio(rng, 20, 200);
-      const resultado = Math.round((base * porcentaje) / 100);
+      
+      // Asegurar un múltiplo del denominador para obtener resultados enteros exactos
+      let factor = 10;
+      if (porcentaje === 50) factor = 2;
+      else if (porcentaje === 25) factor = 4;
+      else if (porcentaje === 20) factor = 5;
+      else if (porcentaje === 10) factor = 10;
+
+      const minMult = Math.ceil(20 / factor);
+      const maxMult = Math.floor(200 / factor);
+      const mult = enteroAleatorio(rng, minMult, maxMult);
+      const base = mult * factor;
+      const resultado = (base * porcentaje) / 100;
+
       return ejercicio('pct-mc', 'multiple_choice', {
         porcentaje,
         base,
         operacion: 'porcentaje',
         resultado,
         enunciado: `¿Cuánto es el ${porcentaje}% de ${base}?`,
+        options: options => {}, // no-op to bypass placeholder
         opciones: opcionesMultiples(resultado, rng),
         explicacionError: `${porcentaje}% de ${base} = (${porcentaje}/100) × ${base} = ${resultado}.`,
         comodinPista: `Pista: el ${porcentaje}% es una fracción de ${base}. ${porcentaje === 50 ? 'Es la mitad.' : ''}`,
@@ -22,19 +35,45 @@ const PLANTILLAS = {
   },
   descuento_mc: {
     generar: (rng) => {
-      // Ejercicio de Ahorro de Yerba alineado con Figma
-      const precio = 12000;
-      const descuento = 20;
+      // Ejercicio de Ahorro de Yerba dinámico
+      const basesYerba = [6000, 8000, 10000, 12000, 15000];
+      const precioBase = basesYerba[enteroAleatorio(rng, 0, basesYerba.length - 1)];
+      const descuento = [10, 20, 25, 30, 50][enteroAleatorio(rng, 0, 4)];
+      
+      let factor = 10;
+      if (descuento === 50) factor = 2;
+      else if (descuento === 25) factor = 4;
+      else if (descuento === 20) factor = 5;
+      else if (descuento === 30) factor = 10;
+      else if (descuento === 10) factor = 10;
+
+      const factorPrecio = factor * 100;
+      const mult = enteroAleatorio(rng, Math.ceil(precioBase * 0.7 / factorPrecio), Math.floor(precioBase * 1.3 / factorPrecio));
+      const precio = mult * factorPrecio;
+
       const resultado = Math.round((precio * descuento) / 100);
+      const fmt = (val) => val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+
+      // Distractores lógicos y numéricamente plausibles
+      const precioFinal = precio - resultado;
+      const mitadDesc = Math.round(resultado / 2);
+      const dobleDesc = resultado * 2;
+
+      const opcionesSet = new Set([resultado, precioFinal, mitadDesc, dobleDesc]);
+      while (opcionesSet.size < 4) {
+        opcionesSet.add(resultado + enteroAleatorio(rng, 1, 5) * 100);
+      }
+      const opciones = [...opcionesSet].sort(() => rng() - 0.5);
+
       return ejercicio('desc-mc', 'multiple_choice', {
         precio,
         descuento,
         operacion: 'ahorro',
         resultado,
-        enunciado: `Estás comprando yerba para el mate. El paquete cuesta $12.000 y tiene un 20% de descuento. ¿Cuánto dinero te ahorrás?`,
-        opciones: [1200, 2400, 3400, 14400],
-        explicacionError: `El 20% de $12.000 es: (20/100) × 12.000 = $2.400. Te ahorrás $2.400.`,
-        comodinPista: `Pista: el 20% es la quinta parte del total. Dividí $12.000 por 5.`,
+        enunciado: `Estás comprando yerba para el mate. El paquete cuesta $${fmt(precio)} y tiene un ${descuento}% de descuento. ¿Cuánto dinero te ahorrás?`,
+        opciones,
+        explicacionError: `El ${descuento}% de $${fmt(precio)} es: (${descuento}/100) × ${fmt(precio)} = $${fmt(resultado)}. Te ahorrás $${fmt(resultado)}.`,
+        comodinPista: `Pista: el ${descuento}% es la ${descuento === 50 ? 'mitad' : (descuento === 25 ? 'cuarta parte' : (descuento === 20 ? 'quinta parte' : 'fracción'))} del total.`,
         puntos: 10,
       });
     },
@@ -42,8 +81,15 @@ const PLANTILLAS = {
   porcentaje_numerico: {
     generar: (rng) => {
       const porcentaje = 10;
-      const base = enteroAleatorio(rng, 40, 120);
-      const resultado = Math.round((base * porcentaje) / 100);
+      const factor = 10;
+      
+      // Asegurar que la base sea múltiplo de 10 para obtener un resultado entero exacto
+      const minMult = Math.ceil(40 / factor);
+      const maxMult = Math.floor(120 / factor);
+      const mult = enteroAleatorio(rng, minMult, maxMult);
+      const base = mult * factor;
+      const resultado = (base * porcentaje) / 100;
+
       return ejercicio('pct-num', 'numeric', {
         porcentaje,
         base,
@@ -58,18 +104,40 @@ const PLANTILLAS = {
   },
   aumento_numerico: {
     generar: (rng) => {
-      // Ejercicio de Aumento de Tarifa alineado con Figma
-      const precio = 18000;
-      const porcentaje = 10;
-      const resultado = precio + Math.round((precio * porcentaje) / 100);
+      // Ejercicio de Aumento de Tarifa dinámico
+      const servicios = [
+        { nombre: 'internet', baseSujerida: 18000 },
+        { nombre: 'luz', baseSujerida: 12000 },
+        { nombre: 'gas', baseSujerida: 9000 },
+        { nombre: 'agua', baseSujerida: 6000 },
+        { nombre: 'televisión por cable', baseSujerida: 15000 }
+      ];
+      const servicio = servicios[enteroAleatorio(rng, 0, servicios.length - 1)];
+      const porcentaje = [10, 15, 20, 25, 30][enteroAleatorio(rng, 0, 4)];
+      
+      let factor = 10;
+      if (porcentaje === 25) factor = 4;
+      else if (porcentaje === 20) factor = 5;
+      else if (porcentaje === 15) factor = 20;
+      else if (porcentaje === 10) factor = 10;
+      else if (porcentaje === 30) factor = 10;
+      
+      const factorPrecio = factor * 100;
+      const mult = enteroAleatorio(rng, Math.ceil(servicio.baseSujerida * 0.8 / factorPrecio), Math.floor(servicio.baseSujerida * 1.2 / factorPrecio));
+      const precio = mult * factorPrecio;
+
+      const montoAumento = Math.round((precio * porcentaje) / 100);
+      const resultado = precio + montoAumento;
+      const fmt = (val) => val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+
       return ejercicio('aum-num', 'numeric', {
         precio,
         porcentaje,
         operacion: 'aumento',
         resultado,
-        enunciado: `Tu servicio de internet cuesta $18.000 y aumenta un 10% este mes. ¿Cuál será el nuevo importe?`,
-        explicacionError: `El 10% de $18.000 es $1.800. El nuevo importe con el aumento es: $18.000 + $1.800 = $19.800.`,
-        comodinPista: `Pista: Calculá el 10% de $18.000 y sumalo al valor original.`,
+        enunciado: `Tu servicio de ${servicio.nombre} cuesta $${fmt(precio)} y aumenta un ${porcentaje}% este mes. ¿Cuál será el nuevo importe?`,
+        explicacionError: `El ${porcentaje}% de $${fmt(precio)} es $${fmt(montoAumento)}. El nuevo importe con el aumento es: $${fmt(precio)} + $${fmt(montoAumento)} = $${fmt(resultado)}.`,
+        comodinPista: `Pista: Calculá el ${porcentaje}% de $${fmt(precio)} y sumalo al valor original.`,
         puntos: 15,
       });
     },
