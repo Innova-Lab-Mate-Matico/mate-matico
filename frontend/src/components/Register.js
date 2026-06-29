@@ -86,6 +86,9 @@ useState(false);
  {showPassword ? <FaEyeSlash /> : <FaEye />}
  </button>
  </div>
+ <small style={{ display: "block", color: "#6b7280", marginTop: "4px", fontSize: "0.78rem" }}>
+    Debe tener entre 8 y 12 caracteres, incluir mayúscula, minúscula, número y un carácter especial (ej: *,-,$,#).
+  </small>
  </div>
  {/* CONFIRM PASSWORD */}
  <div className="form-group">
