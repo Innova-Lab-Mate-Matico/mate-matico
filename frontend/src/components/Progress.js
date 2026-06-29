@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Mascota from './Mascota';
+import './Progress.css';
 
 /*
   MATE-MÁTICO — COMPONENTE PROGRESO
@@ -55,7 +56,7 @@ export default function Progress({ apiCall }) {
     Object.keys(progressData.progreso.modulos).length > 0;
 
   return (
-    <div className="card">
+    <div className="card progress-card">
       <div className="progress-header">
         <h2 style={{ margin: 0, color: '#163b74' }}>Mi Progreso y Logros</h2>
 

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import luzIcon from '../assets/luz.png';
 import dudaIcon from '../assets/duda.png';
 import loLograsteIcon from '../assets/lo lograste.png';
+import './Modules.css';
 
 /*
   MATE-MÁTICO — COMPONENTE LECCIONES Y MÓDULOS
@@ -339,7 +340,7 @@ export default function Modules({
     !selectedModuleId
   ) {
     return (
-      <div className="card">
+      <div className="card modules-card">
         Cargando catálogo...
       </div>
     );
@@ -351,7 +352,7 @@ export default function Modules({
   */
   if (!selectedModuleId) {
     return (
-      <div className="card">
+      <div className="card modules-card">
         <h3>
           Módulos de Aprendizaje
         </h3>
@@ -377,28 +378,13 @@ export default function Modules({
                   mod.id
                 )
               }
-              style={{
-                border:
-                  '1px solid #ccc',
-                padding: '15px',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                marginBottom: '10px',
-              }}
             >
               <div>
                 <strong>
                   {mod.title}
                 </strong>
 
-                <p
-                  style={{
-                    margin:
-                      '5px 0 0 0',
-                    fontSize: '13px',
-                    color: '#555',
-                  }}
-                >
+                <p>
                   {
                     mod.description
                   }
@@ -407,7 +393,10 @@ export default function Modules({
                 <div
                   style={{
                     marginTop:
-                      '10px',
+                      '15px',
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    gap: '6px'
                   }}
                 >
                   <span className="badge">
@@ -447,7 +436,7 @@ export default function Modules({
     !activeLesson
   ) {
     return (
-      <div className="card">
+      <div className="card modules-card">
         {/* Navegación de retorno */}
         <button
           className="module-back-btn"
@@ -494,7 +483,7 @@ export default function Modules({
                         );
 
                       return (
-                        <button
+                        <div
                           key={lesson.id}
                           className={`lesson-btn-card ${
                             completed
@@ -506,8 +495,24 @@ export default function Modules({
                               lesson
                             )
                           }
+                          role="button"
+                          tabIndex={0}
+                          style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            width: '100%',
+                            cursor: 'pointer'
+                          }}
                         >
-                          <span className="lesson-btn-left">
+                          <span 
+                            className="lesson-btn-left"
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '10px'
+                            }}
+                          >
                             <span className="lesson-icon">
                               {completed ? '✓' : '🧉'}
                             </span>
@@ -521,7 +526,7 @@ export default function Modules({
                               ? 'COMPLETADO'
                               : 'INICIAR ▶'}
                           </span>
-                        </button>
+                        </div>
                       );
                     }
                   )}
@@ -666,7 +671,7 @@ export default function Modules({
       : progressPercent;
 
     return (
-      <div className="card">
+      <div className="card modules-card">
         {/* Cabecera con progreso */}
         <div className="exercise-progress-header">
           <button

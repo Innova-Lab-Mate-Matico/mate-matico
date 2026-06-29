@@ -1,0 +1,127 @@
+.onboarding-wizard-container h1,
+.onboarding-wizard-container .auth-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1.3;
+    color: #163b74;
+    margin-top: 0;
+    margin-bottom: 12px;
+    text-align: center;
+}
+
+.onboarding-wizard-container h2 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    line-height: 1.3;
+    color: #163b74;
+    margin-top: 0;
+    margin-bottom: 12px;
+    text-align: center;
+}
+
+.onboarding-wizard-container .intereses-heading {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: #1A1A1A;
+    margin-top: 0;
+    margin-bottom: 12px;
+    text-align: left;
+}
+
+.onboarding-wizard-container h3 {
+    font-size: 1.15rem;
+    font-weight: 650;
+    line-height: 1.3;
+    color: #163b74;
+}
+
+.onboarding-wizard-container h4 {
+    font-size: 1.0rem;
+    font-weight: 600;
+    color: #163b74;
+}
+
+.onboarding-wizard-container p,
+.onboarding-wizard-container .auth-subtitle {
+    font-size: 0.9rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #4a5568;
+    margin-top: 0;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+/* Adjust card widths to fit tags better and make layout proportional */
+.onboarding-wizard-container .intereses-card,
+.onboarding-wizard-container .recomendacion-card {
+    max-width: 480px;
+    width: 100%;
+}
+
+.onboarding-wizard-container .edad-container,
+.onboarding-wizard-container .nivel-container {
+    max-width: 480px;
+    width: 100%;
+}
+
+/* Allow tags-container to display tags horizontally and wrap beautifully */
+.onboarding-wizard-container .tags-container {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    margin-top: 15px;
+    width: 100%;
+}
+
+.onboarding-wizard-container .tag-button {
+    font-size: 0.85rem;
+    padding: 6px 14px;
+    border-radius: 20px;
+    text-align: center;
+}
+
+/* Bottom navigation buttons styling */
+.onboarding-wizard-container .continuar,
+.onboarding-wizard-container button.continuar {
+    font-size: 0.95rem;
+    font-weight: 600;
+    height: 46px;
+    padding: 0 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(30, 58, 95, 0.1);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.onboarding-wizard-container .onboarding-back-btn,
+.onboarding-wizard-container button.onboarding-back-btn {
+    font-size: 0.95rem;
+    font-weight: 600;
+    height: 46px;
+    padding: 0 24px;
+    border-radius: 12px;
+    border: 1px solid #D1D5DB;
+    background-color: #ffffff;
+    color: #4a5568;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.onboarding-wizard-container .onboarding-back-btn:hover,
+.onboarding-wizard-container button.onboarding-back-btn:hover {
+    background-color: #f3f4f6;
+    color: #1a1a1a;
+}
+
+/* Ensure the textarea in step 5 is clean */
+.onboarding-wizard-container textarea {
+    font-size: 0.9rem;
+    line-height: 1.4;
+}

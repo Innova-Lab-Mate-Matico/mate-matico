@@ -1,1744 +1,423 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap');
+/*
+=======================================================================
+===
+ 1. ESTILOS BASE COMPILADOS POR EL GRUPO (NUEVAS PESTAÑAS REMOTAS)
 
-/* ==========================================================================
-   1. ESTILOS BASE COMPILADOS POR EL GRUPO (NUEVAS PESTAÑAS REMOTAS)
-   ========================================================================== */
+=======================================================================
+=== */
 .App {
-  text-align: center;
+ text-align: center;
 }
-
 .App-logo {
-  height: 40vmin;
-  pointer-events: none;
+ height: 40vmin;
+ pointer-events: none;
 }
-
 @media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+ .App-logo {
+ animation: App-logo-spin infinite 20s linear;
+ }
 }
-
 .App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+ background-color: #282c34;
+ min-height: 100vh;
+ display: flex;
+ flex-direction: column;
+ align-items: center;
+ justify-content: center;
+ font-size: calc(10px + 2vmin);
+ color: white;
 }
-
 .App-link {
-  color: #61dafb;
+ color: #61dafb;
 }
-
 @keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+ from {
+ transform: rotate(0deg);
+ }
+ to {
+ transform: rotate(360deg);
+ }
 }
+/*
+=======================================================================
+===
+ 2. ESTILOS AGREGADOS DE ALESS (LANDING BASE)
 
-
-/* ==========================================================================
-   2. ESTILOS AGREGADOS DE ALESS (LANDING BASE)
-   ========================================================================== */
+=======================================================================
+=== */
 body {
-    margin: 0;
-    padding: 0;
-    font-family: 'Poppins', sans-serif !important;
-    background: linear-gradient(
-      135deg,
-      #ffffff 0%,
-      #f7f2ff 50%,
-      #e8dbff 100%
-    ) no-repeat center center fixed;
-    background-size: cover;
-    color: #333333;
-    min-height: 100vh;
+ margin: 0;
+ padding: 0;
+ font-family: "DynaPuff", system-ui;
+ background-color: #f4f4f9; /* Fondo claro para dar contraste */
 }
-
-input, button, select, textarea {
-    font-family: 'Poppins', sans-serif !important;
-}
-
 header {
-    display: flex;
-    flex-direction: column; 
-    align-items: center;    
-    justify-content: center; 
-    background-color: #ffffff;
-    padding-top: 20px;    
-    padding-bottom: 20px;
-    border-bottom: none;
-    text-align: center;
+ display: flex;
+ flex-direction: column;
+ align-items: center;
+ justify-content: center;
+ background-color: lightgrey;
+ padding-top: 20px;
+ padding-bottom: 20px;
+ border-bottom: none;
+ text-align: center;
 }
-
 .logo {
-    width: 150px;
-    height: auto;
-    margin-bottom: 15px; 
+ width: 150px;
+ height: auto;
+ margin-bottom: 15px;
 }
-
 h1 {
-    font-family: "DynaPuff", system-ui;
-    font-size: 36px;
-    color: black;
-    margin: 5px 0;
+ font-family: "DynaPuff", system-ui;
+ font-size: 36px;
+ color: black;
+ margin: 5px 0;
 }
-
 h3 {
-    margin: 5px 0;
+ margin: 5px 0;
 }
-
 nav {
-    display: flex;
-    justify-content: flex-end; 
-    align-items: center;
-    padding-right: 10%;
-    padding-top: 10px;
-    padding-bottom: 10px;
-    font-family: "DynaPuff", system-ui;
-    background-color: grey;
+ display: flex;
+ justify-content: flex-end;
+ align-items: center;
+ padding-right: 10%;
+ padding-top: 10px;
+ padding-bottom: 10px;
+ font-family: "DynaPuff", system-ui;
+ background-color: grey;
 }
-
 nav ul {
-    list-style: none;
-    display: flex;
-    margin: 0;
-    padding: 0;
+ list-style: none;
+ display: flex;
+ margin: 0;
+ padding: 0;
 }
-
 nav ul li {
-    margin-right: 20px;
+ margin-right: 20px;
 }
-
 nav ul li:last-child {
-    margin-right: 0;
+ margin-right: 0;
 }
-
 nav ul li a {
-    text-decoration: none;
-    font-weight: bold;
-    color: black; 
-    transition: color 0.2s;
+ text-decoration: none;
+ font-weight: bold;
+ color: black;
+ transition: color 0.2s;
 }
-
 nav ul li a:hover {
-    color: #e0e0e0;
+ color: #e0e0e0;
 }
-
 section {
-    padding: 40px 10%;
+ padding: 40px 10%;
 }
-
 .contenedor-volver {
-    text-align: center; 
-    margin-top: 30px;   
-    margin-bottom: 50px;
+ text-align: center;
+ margin-top: 30px;
+ margin-bottom: 50px;
 }
-
 .link-volver {
-    color: #666;             
-    text-decoration: none;   
-    font-weight: bold;       
-    font-size: 0.9rem;       
-    transition: color 0.3s;  
+ color: #666;
+ text-decoration: none;
+ font-weight: bold;
+ font-size: 0.9rem;
+ transition: color 0.3s;
 }
-
 .link-volver:hover {
-    color: #000;             
+ color: #000;
 }
+/*
+=======================================================================
+===
+ 3. ESTILOS COMPARTIDOS INYECTADOS (FONDO BLANCO OFICIAL MATE-MATICO)
 
-
-/* ==========================================================================
-   3. ESTILOS COMPARTIDOS INYECTADOS (FONDO BLANCO OFICIAL MATE-MATICO)
-   ========================================================================== */
+=======================================================================
+=== */
 .intereses-page,
 .recomendacion-page {
-    font-family: 'Poppins', 'Segoe UI', Helvetica, Arial, sans-serif;
-    background-color: #FFFFFF; 
-    min-height: 100vh;
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center; 
-    box-sizing: border-box;
-    padding: 60px 20px;
-    position: relative;
-    overflow: hidden;
+ font-family: 'Poppins', 'Segoe UI', Helvetica, Arial, sans-serif;
+ background-color: #FFFFFF;
+ min-height: 100vh;
+ width: 100%;
+ display: flex;
+ flex-direction: column;
+ align-items: center;
+ justify-content: center;
+ box-sizing: border-box;
+ padding: 60px 20px;
+ position: relative;
+ overflow: hidden;
 }
-
 /* Estructura de Tarjetas Internas */
 .intereses-card,
 .recomendacion-card {
-    background-color: #FFFFFF;
-    width: 100%;
-    max-width: 360px;
-    box-sizing: border-box;
-    z-index: 2;
+ background-color: #FFFFFF;
+ width: 100%;
+ max-width: 360px;
+ box-sizing: border-box;
+ z-index: 2;
 }
-
 .intereses-card { padding: 10px 0; }
 .recomendacion-card { padding: 10px 0; }
-
 /* Tipografías Protegidas */
 .intereses-page .auth-title,
 .recomendacion-page .auth-title {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: #111111;
-    margin-bottom: 10px;
-    line-height: 1.2;
+ font-size: 1.5rem;
+ font-weight: 700;
+ color: #111111;
+ margin-bottom: 10px;
+ line-height: 1.2;
 }
-
 .intereses-page .auth-subtitle,
 .recomendacion-page .auth-subtitle {
-    font-size: 0.9rem;
-    font-weight: 400;
-    color: #444444;
-    line-height: 1.4;
+ font-size: 0.9rem;
+ font-weight: 400;
+ color: #444444;
+ line-height: 1.4;
 }
+/*
+=======================================================================
+===
+ 4. ESTILOS EXCLUSIVOS: InteresesSeleccion
 
-
-/* ==========================================================================
-   4. ESTILOS EXCLUSIVOS: InteresesSeleccion
-   ========================================================================== */
+=======================================================================
+=== */
 .intereses-section {
-    margin-top: 35px;
+ margin-top: 35px;
 }
-
 .intereses-heading {
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: #1A1A1A;
-    margin-bottom: 15px;
+ font-size: 1.1rem;
+ font-weight: 600;
+ color: #1A1A1A;
+ margin-bottom: 15px;
 }
-
 .tags-container {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    align-items: flex-start;
+ display: flex;
+ flex-direction: column;
+ gap: 10px;
+ align-items: flex-start;
 }
-
 .tag-button {
-    font-family: 'Poppins', sans-serif;
-    background-color: #FFFFFF;
-    border: 1px solid #D1D5DB;
-    border-radius: 20px;
-    padding: 10px 20px;
-    font-size: 0.95rem;
-    font-weight: 400;
-    color: #333333;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    text-align: left;
+ font-family: 'Poppins', sans-serif;
+ background-color: #FFFFFF;
+ border: 1px solid #D1D5DB;
+ border-radius: 20px;
+ padding: 10px 20px;
+ font-size: 0.95rem;
+ font-weight: 400;
+ color: #333333;
+ cursor: pointer;
+ transition: all 0.2s ease;
+ text-align: left;
 }
-
 .tag-button:hover { background-color: #F3F4F6; }
-.tag-button.selected { background-color: #E0E7FF; border-color: #4F46E5; color: #4F46E5; }
+.tag-button.selected { background-color: #E0E7FF; border-color:
+#4F46E5; color: #4F46E5; }
+/*
+=======================================================================
+===
+ 5. ESTILOS EXCLUSIVOS: RecomendacionModulo (Mascota Matecito)
 
-
-/* ==========================================================================
-   5. ESTILOS EXCLUSIVOS: RecomendacionModulo (Mascota Matecito)
-   ========================================================================== */
-.ola-superior { position: absolute; top: 0; right: 0; width: 320px; height: auto; z-index: 1; }
-.ola-inferior { position: absolute; bottom: 0; left: 0; width: 320px; height: auto; z-index: 1; }
-
+=======================================================================
+=== */
+.ola-superior { position: absolute; top: 0; right: 0; width: 320px;
+height: auto; z-index: 1; }
+.ola-inferior { position: absolute; bottom: 0; left: 0; width: 320px;
+height: auto; z-index: 1; }
 .mate-mascot-container {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 20px;
-    margin-top: 15px;
+ display: flex;
+ align-items: center;
+ gap: 12px;
+ margin-bottom: 20px;
+ margin-top: 15px;
 }
-
 .mate-avatar { width: 65px; height: 65px; object-fit: contain; }
-
 .speech-bubble {
-    background-color: #FFEED4;
-    border-radius: 12px;
-    padding: 10px 14px;
-    position: relative;
-    font-size: 0.85rem;
-    color: #4A3B2C;
-    font-weight: 500;
-    line-height: 1.3;
+ background-color: #FFEED4;
+ border-radius: 12px;
+ padding: 10px 14px;
+ position: relative;
+ font-size: 0.85rem;
+ color: #4A3B2C;
+ font-weight: 500;
+ line-height: 1.3;
 }
-
 .speech-bubble::before {
-    content: '';
-    position: absolute;
-    left: -8px;
-    top: 50%;
-    transform: translateY(-50%);
-    border-width: 5px 8px 5px 0;
-    border-style: solid;
-    border-color: transparent #FFEED4 transparent transparent;
+ content: '';
+ position: absolute;
+ left: -8px;
+ top: 50%;
+ transform: translateY(-50%);
+ border-width: 5px 8px 5px 0;
+ border-style: solid;
+ border-color: transparent #FFEED4 transparent transparent;
 }
-
 .modulo-detalle-box {
-    border: 1px solid #E5E7EB;
-    border-radius: 16px;
-    padding: 20px;
-    margin-bottom: 10px;
+ border: 1px solid #E5E7EB;
+ border-radius: 16px;
+ padding: 20px;
+ margin-bottom: 10px;
 }
-
 .modulo-header-destacado {
-    background-color: #F0F4F8;
-    padding: 12px;
-    border-radius: 8px;
-    text-align: center;
-    margin-bottom: 15px;
+ background-color: #F0F4F8;
+ padding: 12px;
+ border-radius: 8px;
+ text-align: center;
+ margin-bottom: 15px;
 }
-
-.modulo-header-destacado h3 { font-size: 1.05rem; font-weight: 700; color: #1A1A1A; margin: 0 0 4px 0; }
-.modulo-header-destacado p { font-size: 0.85rem; color: #555555; margin: 0; line-height: 1.3; }
-
-.modulo-cuerpo-aprendizajes h4 { font-size: 1.05rem; font-weight: 700; color: #B522CA; margin: 0 0 12px 0; text-align: center; }
-.modulo-cuerpo-aprendizajes ul { list-style: none; padding: 0; margin: 0 0 20px 0; display: flex; flex-direction: column; gap: 8px; }
-.modulo-cuerpo-aprendizajes li { font-size: 0.9rem; color: #444444; display: flex; align-items: center; gap: 8px; font-weight: 400; }
+.modulo-header-destacado h3 { font-size: 1.05rem; font-weight: 700;
+color: #1A1A1A; margin: 0 0 4px 0; }
+.modulo-header-destacado p { font-size: 0.85rem; color: #555555;
+margin: 0; line-height: 1.3; }
+.modulo-cuerpo-aprendizajes h4 { font-size: 1.05rem; font-weight: 700;
+color: #B522CA; margin: 0 0 12px 0; text-align: center; }
+.modulo-cuerpo-aprendizajes ul { list-style: none; padding: 0; margin:
+0 0 20px 0; display: flex; flex-direction: column; gap: 8px; }
+.modulo-cuerpo-aprendizajes li { font-size: 0.9rem; color: #444444;
+display: flex; align-items: center; gap: 8px; font-weight: 400; }
 .check-icon { color: #B522CA; font-weight: 700; }
-
-.tiempo-estimado-box { background-color: #F6EFFB; border-radius: 12px; padding: 12px 15px; display: flex; align-items: center; gap: 12px; }
+.tiempo-estimado-box { background-color: #F6EFFB; border-radius: 12px;
+padding: 12px 15px; display: flex; align-items: center; gap: 12px; }
 .clock-icon-placeholder { font-size: 1.6rem; }
 .tiempo-texto { display: flex; flex-direction: column; }
 .tiempo-titulo { font-size: 0.9rem; font-weight: 600; color: #1A1A1A; }
 .tiempo-duracion { font-size: 0.85rem; color: #666666; }
+/*
+=======================================================================
+===
+ 6. ESTRUCTURA GENERAL DE BOTÓN ANCLA (MALLADO COMPACTO PC)
 
-
-/* ==========================================================================
-   6. ESTRUCTURA GENERAL DE BOTÓN ANCLA (MALLADO COMPACTO PC)
-   ========================================================================== */
+=======================================================================
+=== */
 .action-container {
-    width: 100%;
-    max-width: 360px;
-    margin-top: 25px;
-    padding: 0;
-    box-sizing: border-box;
-    z-index: 2;
+ width: 100%;
+ max-width: 360px;
+ margin-top: 25px;
+ padding: 0;
+ box-sizing: border-box;
+ z-index: 2;
 }
-
 .action-container a {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-    height: 50px;
-    background-color: #1A345D;
-    border: 2px solid #FFFFFF;
-    border-radius: 12px;
-    text-decoration: none;
-    transition: background-color 0.2s ease;
-    box-sizing: border-box;
+ display: flex;
+ justify-content: center;
+ align-items: center;
+ width: 100%;
+ height: 50px;
+ background-color: #1A345D;
+ border: 2px solid #FFFFFF;
+ border-radius: 12px;
+ text-decoration: none;
+ transition: background-color 0.2s ease;
+ box-sizing: border-box;
 }
-
 .action-container a:hover { background-color: #132747; }
-.btn-primary-text { font-family: 'Poppins', sans-serif; color: #FFFFFF; font-size: 1rem; font-weight: 600; }
+.btn-primary-text { font-family: 'Poppins', sans-serif; color: #FFFFFF;
+font-size: 1rem; font-weight: 600; }
+/*
+=======================================================================
+===
+ 7. SECCIÓN DE EDAD (Y REGLAS UNIFICADAS BOTÓN CONTINUAR)
 
-
-/* ==========================================================================
-   7. SECCIÓN DE EDAD (Y REGLAS UNIFICADAS BOTÓN CONTINUAR)
-   ========================================================================== */
+=======================================================================
+=== */
 .edad-container {
-    padding: 20px;
-    text-align: center;
-    font-family: 'Poppins', sans-serif;
+ padding: 20px;
+ text-align: center;
+ font-family: 'Poppins', sans-serif;
 }
-
 .edad-opciones {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    margin: 20px 0;
+ display: flex;
+ flex-direction: column;
+ gap: 12px;
+ margin: 20px 0;
 }
-
 .edad-opciones button {
-    font-family: 'Poppins', sans-serif;
-    padding: 12px;
-    border-radius: 8px;
-    border: 1px solid #D1D5DB;
-    background: #FFFFFF;
-    cursor: pointer;
-    font-size: 0.95rem;
-    color: #333333;
-    transition: background-color 0.2s ease;
+ font-family: 'Poppins', sans-serif;
+ padding: 12px;
+ border-radius: 8px;
+ border: 1px solid #D1D5DB;
+ background: #FFFFFF;
+ cursor: pointer;
+ font-size: 0.95rem;
+ color: #333333;
+ transition: background-color 0.2s ease;
 }
-
 .edad-opciones button:hover {
-    background-color: #F3F4F6;
+ background-color: #F3F4F6;
 }
-
 /* Botón unificado y protegido para ambos formularios */
 .continuar {
-    display: inline-flex;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-    max-width: 360px;
-    height: 50px; 
-    background-color: #1E3A5F;
-    color: #FFFFFF;
-    font-family: 'Poppins', sans-serif;
-    font-weight: 600;
-    font-size: 1rem;
-    border: none;
-    border-radius: 12px;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
+ display: inline-flex;
+ justify-content: center;
+ align-items: center;
+ width: 100%;
+ max-width: 360px;
+ height: 50px;
+ background-color: #1E3A5F;
+ color: #FFFFFF;
+ font-family: 'Poppins', sans-serif;
+ font-weight: 600;
+ font-size: 1rem;
+ border: none;
+ border-radius: 12px;
+ cursor: pointer;
+ transition: background-color 0.2s ease;
 }
-
 .continuar:hover {
-    background-color: #142843;
+ background-color: #142843;
 }
+/*
+=======================================================================
+===
+ 8. NUEVO COMPONENTE: SELECCIÓN DE NIVEL
 
-
-/* ==========================================================================
-   8. NUEVO COMPONENTE: SELECCIÓN DE NIVEL
-   ========================================================================== */
+=======================================================================
+=== */
 .nivel-container {
-    padding: 20px;
-    text-align: center;
-    font-family: 'Poppins', sans-serif;
+ padding: 20px;
+ text-align: center;
+ font-family: 'Poppins', sans-serif;
 }
-
 .barra {
-    height: 6px;
-    background: #E5E7EB;
-    border-radius: 10px;
-    margin: 20px 0;
+ height: 6px;
+ background: #E5E7EB;
+ border-radius: 10px;
+ margin: 20px 0;
 }
-
 .progreso {
-    width: 40%;
-    height: 100%;
-    background: #9747FF; /* Violeta del diseño */
-    border-radius: 10px;
+ width: 40%;
+ height: 100%;
+ background: #9747FF; /* Violeta del diseño */
+ border-radius: 10px;
 }
-
 .niveles {
-    display: flex;
-    justify-content: space-between;
-    font-size: 12px;
-    color: #666666;
-    margin-bottom: 20px;
-    font-family: 'Poppins', sans-serif;
+ display: flex;
+ justify-content: space-between;
+ font-size: 12px;
+ color: #666666;
+ margin-bottom: 20px;
+ font-family: 'Poppins', sans-serif;
 }
+/*
+=======================================================================
+===
+ 9. BREAKPOINTS REGLAMENTARIOS (TABLETS Y CONTENEDORES MÁXIMOS PC)
 
-
-/* ==========================================================================
-   9. BREAKPOINTS REGLAMENTARIOS (TABLETS Y CONTENEDORES MÁXIMOS PC)
-   ========================================================================== */
+=======================================================================
+=== */
 @media (max-width: 992px) {
-  .auth-logo { 
-    width: 180px; 
-  }
-  .intereses-page .ola-superior, .intereses-page .ola-inferior,
-  .recomendacion-page .ola-superior, .recomendacion-page .ola-inferior { 
-    width: 180px; 
-  }
+ .auth-logo {
+ width: 180px;
+ }
+ .intereses-page .ola-superior, .intereses-page .ola-inferior,
+ .recomendacion-page .ola-superior, .recomendacion-page .ola-inferior
+{
+ width: 180px;
+ }
 }
-
 @media (min-width: 768px) {
-  .edad-container,
-  .nivel-container {
-    max-width: 400px;
-    margin: auto;
-  }
+ .edad-container,
+ .nivel-container {
+ max-width: 400px;
+ margin: auto;
+ }
 }
-
-/* ==========================================================================
-   10. ESTILOS DE VISTAS SEPARADAS Y UNIFICACIÓN
-   ========================================================================== */
-
-/* Fondo degradado estilo login aplicado a toda la página de visitantes */
-.visitor-page {
-  background: transparent;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  position: relative;
-  overflow-x: hidden;
-  box-sizing: border-box;
-}
-
-/* Permitir que la cabecera y navbar se integren de forma transparente en el fondo degradado */
-.visitor-page header,
-.visitor-page nav {
-  background: transparent !important;
-}
-
-/* Navbar de visitantes con estilo de pestañas limpias */
-.visitor-navbar {
-  display: flex;
-  justify-content: space-between; 
-  align-items: center;
-  padding: 15px 10%;
-  font-family: "Poppins", sans-serif;
-  background-color: transparent !important;
-  z-index: 20;
-}
-
-.visitor-navbar .nav-brand {
-  font-size: 1.3rem;
-  font-weight: 700;
-  color: #163b74;
-}
-
-.visitor-navbar ul {
-  list-style: none;
-  display: flex;
-  margin: 0;
-  padding: 0;
-  gap: 15px;
-}
-
-.visitor-navbar ul li button.nav-tab-btn {
-  background: transparent;
-  border: none;
-  font-family: "Poppins", sans-serif;
-  font-weight: 600;
-  font-size: 0.95rem;
-  color: #4a5568;
-  cursor: pointer;
-  padding: 8px 18px;
-  border-radius: 20px;
-  transition: all 0.3s ease;
-}
-
-.visitor-navbar ul li button.nav-tab-btn:hover {
-  color: #163b74;
-  background-color: rgba(22, 59, 116, 0.05);
-}
-
-.visitor-navbar ul li button.nav-tab-btn.active {
-  color: #ffffff;
-  background-color: #163b74;
-}
-
-/* Tarjeta limpia y elevada para FAQ's y Opiniones en la página de visitantes */
-.visitor-view-card {
-  background-color: #ffffff;
-  border-radius: 16px;
-  padding: 35px;
-  box-shadow: 0 10px 30px rgba(123, 97, 255, 0.08);
-  max-width: 600px;
-  width: 100%;
-  box-sizing: border-box;
-  z-index: 2;
-  margin: 20px auto;
-  border: 1px solid rgba(123, 97, 255, 0.1);
-}
-
-.visitor-view-card h2 {
-  font-size: 1.8rem;
-  color: #163b74;
-  margin-bottom: 25px;
-  text-align: center;
-  font-family: 'Poppins', sans-serif;
-  font-weight: 700;
-}
-
-.visitor-view-card p {
-  color: #4a5568;
-  font-size: 0.95rem;
-  line-height: 1.6;
-}
-
-.visitor-view-card .contenedor-volver {
-  text-align: center;
-  margin-top: 30px;
-}
-
-.visitor-view-card .btn-secondary {
-  min-width: 150px;
-  height: 44px;
-  font-size: 0.9rem;
-  margin: 0 auto;
-}
-
-/* Evitar doble degradado o altura fija innecesaria del contenedor interno de Auth en visitor-page */
-.visitor-page .auth-container {
-  background: transparent !important;
-  min-height: auto !important;
-  padding: 0 !important;
-  box-shadow: none !important;
-}
-
-/* Cabecera compacta y profesional del Dashboard */
-.dashboard-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 15px 5%;
-  background-color: #ffffff;
-  border-bottom: 1px solid #e2e8f0;
-  margin-bottom: 20px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.02);
-}
-
-.dashboard-header-left {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.dashboard-logo {
-  height: 48px;
-  width: auto;
-}
-
-@media (min-width: 768px) {
-  .dashboard-logo {
-    height: 64px;
-  }
-}
-
-.dashboard-header-left h2 {
-  font-size: 1.1rem !important;
-  margin: 0;
-  color: #163b74;
-  font-family: "Poppins", sans-serif;
-  font-weight: 800 !important;
-  letter-spacing: 0.5px;
-}
-
-@media (min-width: 768px) {
-  .dashboard-header-left h2 {
-    font-size: 1.5rem !important;
-  }
-}
-
-.dashboard-header-right {
-  display: flex;
-  gap: 8px;
-  font-family: "Poppins", sans-serif;
-  font-weight: 600;
-  font-size: 0.85rem;
-}
-
-@media (min-width: 768px) {
-  .dashboard-header-right {
-    gap: 20px;
-    font-size: 0.95rem;
-  }
-}
-
-.dashboard-header-right span {
-  display: inline-flex;
-  align-items: center;
-  background-color: #f7f2ff;
-  color: #7b61ff;
-  padding: 6px 12px;
-  border-radius: 12px;
-  box-shadow: 0 2px 5px rgba(123, 97, 255, 0.05);
-}
-
-.dashboard-header-right span:first-child {
-  background-color: #fff9e6;
-  color: #d97706;
-}
-
-/* ==========================================================================
-   11. DISEÑO PREMIUM PARA EL DASHBOARD Y COMPONENTES
-   ========================================================================== */
-
-/* Ajustar el contenedor de la aplicación */
-.app-container {
-  width: 100%;
-  max-width: 100%;
-  margin: 0;
-  padding: 12px;
-  box-sizing: border-box;
-  z-index: 10;
-  position: relative;
-}
-
-@media (min-width: 768px) {
-  .app-container {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 20px;
-  }
-}
-
-/* Títulos y fuentes */
-h1, h2, h3, h4, h5, h6 {
-  font-family: 'Poppins', sans-serif !important;
-  font-weight: 700 !important;
-  color: #163b74;
-}
-
-/* Modificar el botón de volver en todos los componentes */
-button:not(.tab-btn):not(.lesson-btn-card):not(.btn-primary):not(.btn-secondary):not(.eye-button) {
-  font-family: 'Poppins', sans-serif;
-  background-color: #f3f4f6;
-  border: 1px solid #e5e7eb;
-  padding: 8px 18px;
-  border-radius: 12px;
-  font-weight: 600;
-  font-size: 0.9rem;
-  color: #4a5568;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-button:not(.tab-btn):not(.lesson-btn-card):not(.btn-primary):not(.btn-secondary):not(.eye-button):hover {
-  background-color: #e5e7eb;
-  color: #163b74;
-}
-
-/* Estilos para el catálogo de módulos */
-.module-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 15px;
-  margin-top: 20px;
-}
-
-@media (min-width: 768px) {
-  .module-grid {
-    grid-template-columns: 1fr 1fr;
-  }
-}
-
-.module-card {
-  background: #ffffff !important;
-  border: 1px solid rgba(123, 97, 255, 0.1) !important;
-  padding: 20px !important;
-  border-radius: 16px !important;
-  cursor: pointer;
-  box-shadow: 0 4px 15px rgba(123, 97, 255, 0.04) !important;
-  transition: all 0.3s ease !important;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  margin-bottom: 0 !important;
-}
-
-.module-card:hover {
-  transform: translateY(-4px);
-  border-color: #7b61ff !important;
-  box-shadow: 0 10px 25px rgba(123, 97, 255, 0.1) !important;
-}
-
-.module-card strong {
-  font-size: 1.1rem;
-  color: #163b74;
-  font-weight: 700;
-}
-
-.module-card p {
-  color: #64748b !important;
-  font-size: 0.88rem !important;
-  line-height: 1.5;
-  margin-top: 8px !important;
-}
-
-/* Nivel grupos en lecciones */
-.level-group {
-  background: #ffffff !important;
-  border: 1px solid rgba(123, 97, 255, 0.1) !important;
-  padding: 20px !important;
-  border-radius: 16px !important;
-  margin-bottom: 16px !important;
-  box-shadow: 0 4px 15px rgba(123, 97, 255, 0.03) !important;
-}
-
-/* ===== Module Detail Page (VISTA 2) ===== */
-
-.module-back-btn {
-  background: none !important;
-  border: none !important;
-  color: #7b61ff !important;
-  font-family: 'Poppins', sans-serif !important;
-  font-size: 0.88rem !important;
-  font-weight: 600 !important;
-  cursor: pointer !important;
-  padding: 0 !important;
-  margin-bottom: 16px !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  gap: 4px !important;
-  height: auto !important;
-  transition: color 0.2s ease !important;
-}
-
-.module-back-btn:hover {
-  color: #6346eb !important;
-  background: none !important;
-  box-shadow: none !important;
-}
-
-.module-detail-header {
-  text-align: center;
-  margin-bottom: 24px;
-  padding-bottom: 20px;
-  border-bottom: 1px solid #f1f5f9;
-}
-
-.module-detail-title {
-  font-size: 1.5rem !important;
-  font-weight: 800 !important;
-  color: #163b74 !important;
-  margin: 0 0 6px 0 !important;
-}
-
-.module-detail-desc {
-  font-size: 0.9rem !important;
-  color: #64748b !important;
-  margin: 0 !important;
-  font-weight: 400 !important;
-}
-
-.level-header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding-bottom: 12px;
-  margin-bottom: 14px !important;
-  border-bottom: 1px solid #f1f5f9;
-}
-
-.level-badge {
-  width: 28px;
-  height: 28px;
-  min-width: 28px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #7b61ff, #a78bfa);
-  color: white;
-  font-size: 0.8rem;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: 'Poppins', sans-serif;
-}
-
-.level-title {
-  font-size: 1rem;
-  color: #163b74;
-  font-weight: 700;
-  font-family: 'Poppins', sans-serif;
-}
-
-/* Lesson cards buttons */
-.lesson-btn-card {
-  border-radius: 12px !important;
-  border: 1px solid rgba(123, 97, 255, 0.1) !important;
-  font-family: 'Poppins', sans-serif !important;
-  transition: all 0.2s ease !important;
-  font-size: 0.95rem !important;
-  padding: 14px 18px !important;
-  margin-bottom: 8px !important;
-  cursor: pointer;
-  display: flex !important;
-  justify-content: space-between !important;
-  align-items: center !important;
-  width: 100% !important;
-  height: auto !important;
-  text-align: left !important;
-}
-
-.lesson-btn-card:hover {
-  transform: scale(1.01);
-  box-shadow: 0 4px 12px rgba(123, 97, 255, 0.08);
-}
-
-.lesson-btn-card.completed {
-  background-color: #ecfdf5 !important;
-  border-color: #a7f3d0 !important;
-  color: #065f46 !important;
-}
-
-.lesson-btn-card:not(.completed) {
-  background-color: #ffffff !important;
-  color: #4b5563 !important;
-}
-
-.lesson-btn-card:not(.completed):hover {
-  background-color: #f9fafb !important;
-  border-color: #7b61ff !important;
-  color: #163b74 !important;
-}
-
-.lesson-btn-left {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.lesson-icon {
-  font-size: 1.1rem;
-  width: 24px;
-  text-align: center;
-}
-
-.lesson-name {
-  font-weight: 600;
-  font-size: 0.95rem;
-  color: inherit;
-}
-
-.lesson-action {
-  font-size: 0.78rem;
-  font-weight: 700;
-  color: #7b61ff;
-  letter-spacing: 0.5px;
-  white-space: nowrap;
-}
-
-.lesson-action-done {
-  color: #059669;
-}
-
-/* Exercise card styling */
-.exercise-card {
-  background-color: #ffffff !important;
-  border-radius: 16px !important;
-  border: 1px solid rgba(123, 97, 255, 0.1) !important;
-  padding: 20px !important;
-  box-shadow: 0 4px 15px rgba(123, 97, 255, 0.03) !important;
-  margin-bottom: 15px;
-}
-
-/* ===== Exercise Step-by-Step Flow ===== */
-
-.exercise-progress-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 20px;
-}
-
-.exercise-exit-btn {
-  width: 36px;
-  height: 36px;
-  min-width: 36px;
-  border-radius: 50%;
-  border: 1.5px solid #e2e8f0;
-  background: #f8fafc;
-  color: #64748b;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
-  padding: 0;
-}
-
-.exercise-exit-btn:hover {
-  background: #fee2e2;
-  border-color: #fca5a5;
-  color: #ef4444;
-}
-
-.exercise-progress-bar {
-  flex: 1;
-  height: 10px;
-  background: #e2e8f0;
-  border-radius: 5px;
-  overflow: hidden;
-}
-
-.exercise-progress-fill {
-  height: 100%;
-  background: linear-gradient(90deg, #7b61ff, #a78bfa);
-  border-radius: 5px;
-  transition: width 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  min-width: 0;
-}
-
-.exercise-counter {
-  font-size: 13px;
-  font-weight: 700;
-  color: #7b61ff;
-  min-width: 36px;
-  text-align: center;
-  background: rgba(123, 97, 255, 0.08);
-  padding: 4px 10px;
-  border-radius: 8px;
-}
-
-.exercise-step {
-  animation: exerciseSlideIn 0.4s ease-out;
-}
-
-@keyframes exerciseSlideIn {
-  from {
-    opacity: 0;
-    transform: translateY(24px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.exercise-advance-hint {
-  text-align: center;
-  margin-top: 16px;
-  font-size: 13px;
-  font-weight: 500;
-  color: #7b61ff;
-  animation: hintPulse 1s ease-in-out infinite;
-}
-
-@keyframes hintPulse {
-  0%, 100% { opacity: 0.6; }
-  50% { opacity: 1; }
-}
-
-/* Global waves background */
-.global-wave {
-  position: fixed;
-  z-index: -1;
-  pointer-events: none;
-  width: 250px;
-  opacity: 0.6;
-}
-
-.global-wave.ola-superior {
-  top: 0;
-  right: 0;
-  width: 320px;
-}
-
-.global-wave.ola-inferior {
-  bottom: 0;
-  left: 0;
-  width: 320px;
-}
-
-@media (min-width: 1024px) {
-  .global-wave.ola-superior {
-    width: 450px;
-  }
-  .global-wave.ola-inferior {
-    width: 450px;
-  }
-}
-
-@media (max-width: 576px) {
-  .global-wave.ola-superior,
-  .global-wave.ola-inferior {
-    width: 160px;
-    opacity: 0.4;
-  }
-}
-
-/* Rediseñar las Pestañas (Segmented Controls) */
-.tab-bar {
-  display: flex;
-  flex-direction: row !important; /* Forzar fila en desktop y mobile */
-  justify-content: center;
-  align-items: center;
-  background-color: rgba(255, 255, 255, 0.8) !important;
-  backdrop-filter: blur(10px);
-  padding: 6px !important;
-  border-radius: 30px !important;
-  gap: 8px !important;
-  max-width: 650px;
-  margin: 0 auto 30px !important;
-  border: 1px solid rgba(123, 97, 255, 0.1) !important;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02) !important;
-  width: 100%;
-  box-sizing: border-box;
-}
-
-.tab-btn {
-  flex: 1;
-  border: none !important;
-  background: transparent !important;
-  padding: 10px 15px !important;
-  font-size: 0.9rem !important;
-  font-weight: 600 !important;
-  color: #4a5568 !important;
-  border-radius: 25px !important;
-  cursor: pointer;
-  transition: all 0.3s ease !important;
-  text-align: center;
-  white-space: nowrap;
-}
-
-@media (max-width: 576px) {
-  .tab-bar {
-    border-radius: 16px !important;
-    gap: 4px !important;
-  }
-  .tab-btn {
-    font-size: 0.75rem !important;
-    padding: 8px 10px !important;
-    border-radius: 12px !important;
-  }
-}
-
-.tab-btn:hover {
-  background-color: rgba(123, 97, 255, 0.05) !important;
-  color: #163b74 !important;
-}
-
-.tab-btn.active-tab {
-  background-color: #163b74 !important;
-  color: #ffffff !important;
-  box-shadow: 0 4px 12px rgba(22, 59, 116, 0.2) !important;
-}
-
-/* Rediseñar las tarjetas principales */
-.card {
-  background: #ffffff !important;
-  border: 1px solid rgba(123, 97, 255, 0.1) !important;
-  padding: 16px !important;
-  border-radius: 16px !important;
-  box-shadow: 0 10px 30px rgba(123, 97, 255, 0.05) !important;
-  box-sizing: border-box;
-  transition: all 0.3s ease;
-  max-width: 650px;
-  margin: 0 auto 20px;
-}
-
-@media (min-width: 768px) {
-  .card {
-    padding: 30px !important;
-    border-radius: 24px !important;
-    margin: 0 auto 30px;
-  }
-}
-
-/* Rediseñar los badges de perfil */
-.badge {
-  display: inline-block !important;
-  padding: 8px 16px !important;
-  border-radius: 12px !important;
-  font-size: 0.88rem !important;
-  font-weight: 600 !important;
-  margin-bottom: 8px !important;
-  font-family: 'Poppins', sans-serif !important;
-  border: 1px solid transparent !important;
-  margin-right: 8px;
-}
-
-.badge-gold {
-  background-color: #fff9e6 !important;
-  color: #d97706 !important;
-  border-color: rgba(217, 119, 6, 0.1) !important;
-}
-
-.badge-success {
-  background-color: #ecfdf5 !important;
-  color: #065f46 !important;
-  border-color: rgba(6, 95, 70, 0.1) !important;
-}
-
-.badge:not(.badge-gold):not(.badge-success) {
-  background-color: #f7f2ff !important;
-  color: #7b61ff !important;
-  border-color: rgba(123, 97, 255, 0.1) !important;
-}
-
-/* Cajas de mascotas */
-.mascota-box {
-  display: flex !important;
-  align-items: center;
-  gap: 15px;
-  padding: 15px !important;
-  background-color: #f8fafc !important;
-  border-radius: 16px !important;
-  border: 1px solid #e2e8f0 !important;
-  margin-top: 15px !important;
-  margin-bottom: 25px !important;
-}
-
-/* Estilo de botones en tarjetas */
-.card button:not(.option-btn):not(.lesson-btn-card):not(.module-back-btn):not(.exercise-exit-btn):not(.btn-check) {
-  font-family: 'Poppins', sans-serif !important;
-  height: 48px !important;
-  border-radius: 12px !important;
-  font-weight: 600 !important;
-  font-size: 0.95rem !important;
-  cursor: pointer !important;
-  transition: all 0.3s ease !important;
-  border: 1px solid #e2e8f0 !important;
-}
-
-.card button:not(.option-btn):not(.lesson-btn-card):not(.module-back-btn):not(.exercise-exit-btn):not(.btn-check):not([style*="background-color"]):not([style*="red"]) {
-  background-color: #163b74 !important;
-  color: white !important;
-  border: none !important;
-}
-
-.card button:not(.option-btn):not(.lesson-btn-card):not(.module-back-btn):not(.exercise-exit-btn):not(.btn-check):not([style*="background-color"]):not([style*="red"]):hover {
-  background-color: #112d59 !important;
-  box-shadow: 0 4px 12px rgba(22, 59, 116, 0.15) !important;
-}
-
-/* Botón cerrar sesión rojo suave */
-.card button:not(.option-btn):not(.lesson-btn-card):not(.module-back-btn):not(.exercise-exit-btn):not(.btn-check)[style*="background-color"] {
-  background-color: #fee2e2 !important;
-  color: #991b1b !important;
-  border: 1px solid #fecaca !important;
-}
-
-.card button:not(.option-btn):not(.lesson-btn-card):not(.module-back-btn):not(.exercise-exit-btn):not(.btn-check)[style*="background-color"]:hover {
-  background-color: #fca5a5 !important;
-}
-
-/* Dashboard Header flotante */
-.dashboard-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px 14px !important;
-  background-color: rgba(255, 255, 255, 0.85) !important;
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(123, 97, 255, 0.1) !important;
-  margin-bottom: 20px !important;
-  box-shadow: 0 8px 24px rgba(123, 97, 255, 0.05) !important;
-  border-radius: 16px !important;
-  margin-top: 10px !important;
-  width: 100% !important;
-  box-sizing: border-box;
-}
-
-@media (min-width: 768px) {
-  .dashboard-header {
-    padding: 12px 24px !important;
-    margin-bottom: 30px !important;
-    border-radius: 20px !important;
-    margin-top: 15px !important;
-    margin-left: auto !important;
-    margin-right: auto !important;
-    max-width: 650px;
-    width: calc(100% - 40px) !important;
-  }
-}
-
-.dashboard-header-right span {
-  display: inline-flex;
-  align-items: center;
-  background-color: #f7f2ff !important;
-  color: #7b61ff !important;
-  padding: 6px 12px !important;
-  border-radius: 12px !important;
-  box-shadow: 0 2px 5px rgba(123, 97, 255, 0.05) !important;
-}
-
-.dashboard-header-right span:first-child {
-  background-color: #fff9e6 !important;
-  color: #d97706 !important;
-}
-
-/* --- ESTILOS ADICIONALES PARA EJERCICIOS Y RETROALIMENTACIÓN --- */
-
-.options-container {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-top: 10px;
-  margin-bottom: 15px;
-}
-
-.option-btn {
-  display: flex !important;
-  align-items: center;
-  justify-content: flex-start;
-  width: 100%;
-  padding: 12px 18px !important;
-  border-radius: 12px !important;
-  font-size: 0.95rem !important;
-  font-weight: 500 !important;
-  background-color: #ffffff !important;
-  color: #374151 !important;
-  border: 2px solid #e5e7eb !important;
-  cursor: pointer;
-  transition: all 0.2s ease !important;
-  text-align: left;
-  box-sizing: border-box;
-}
-
-.option-btn:hover:not(:disabled) {
-  background-color: #f3f4f6 !important;
-  border-color: #7b61ff !important;
-  transform: translateY(-1px);
-}
-
-.option-btn.selected {
-  border-color: #7b61ff !important;
-  background-color: #f5f3ff !important;
-  color: #7b61ff !important;
-}
-
-.option-btn.correct {
-  border-color: #10b981 !important;
-  background-color: #f0fdf4 !important;
-  color: #166534 !important;
-}
-
-.option-btn.incorrect {
-  border-color: #ef4444 !important;
-  background-color: #fef2f2 !important;
-  color: #991b1b !important;
-}
-
-.option-btn:disabled {
-  cursor: not-allowed;
-  opacity: 0.8;
-}
-
-.numeric-input {
-  width: 100%;
-  padding: 12px 16px;
-  font-size: 1rem;
-  border-radius: 12px;
-  border: 2px solid #d1d5db;
-  outline: none;
-  transition: all 0.2s ease;
-  margin-bottom: 15px;
-  box-sizing: border-box;
-  font-family: 'Poppins', sans-serif;
-}
-
-.numeric-input:focus:not(:disabled) {
-  border-color: #7b61ff;
-  box-shadow: 0 0 0 3px rgba(123, 97, 255, 0.15);
-}
-
-.numeric-input:disabled {
-  background-color: #f3f4f6;
-  color: #9ca3af;
-  border-color: #e5e7eb;
-  cursor: not-allowed;
-}
-
-.feedback-card {
-  display: flex;
-  align-items: flex-start;
-  gap: 15px;
-  padding: 15px 18px !important;
-  border-radius: 16px !important;
-  margin-top: 10px;
-  margin-bottom: 15px;
-  animation: slideIn 0.3s ease;
-}
-
-.feedback-card.error {
-  background-color: #fef2f2 !important;
-  border: 1px solid rgba(239, 68, 68, 0.2) !important;
-}
-
-.feedback-card.pista {
-  background-color: #fffbeb !important;
-  border: 1px solid rgba(245, 158, 11, 0.2) !important;
-}
-
-.feedback-img {
-  width: 60px;
-  height: 60px;
-  object-fit: contain;
-  flex-shrink: 0;
-}
-
-.feedback-text {
-  font-size: 0.9rem;
-  line-height: 1.5;
-  color: #374151;
-  margin: 0;
-}
-
-.feedback-text strong {
-  display: block;
-  font-size: 0.95rem;
-  margin-bottom: 4px;
-}
-
-.feedback-card.error .feedback-text strong {
-  color: #991b1b;
-}
-
-.feedback-card.pista .feedback-text strong {
-  color: #b45309;
-}
-
-.badge-error {
-  background-color: #fef2f2 !important;
-  color: #ef4444 !important;
-  border-color: rgba(239, 68, 68, 0.1) !important;
-}
-
-.btn-check-container {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 10px;
-}
-
-.btn-check {
-  background-color: #7b61ff !important;
-  color: white !important;
-  border: none !important;
-  padding: 8px 24px !important;
-  border-radius: 12px !important;
-  font-weight: 600 !important;
-  cursor: pointer !important;
-  transition: all 0.2s ease !important;
-}
-
-.btn-check:hover:not(:disabled) {
-  background-color: #6346eb !important;
-  box-shadow: 0 4px 12px rgba(123, 97, 255, 0.25) !important;
-}
-
-.btn-check:disabled {
-  background-color: #e5e7eb !important;
-  color: #9ca3af !important;
-  cursor: not-allowed;
-  box-shadow: none !important;
-}
-
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* ==========================================================================
-   UNIFICACIÓN DE BOTONES Y ESCALA TIPOGRÁFICA COHERENTE (SYMMETRY & TYPO)
-   ========================================================================== */
-
-/* Escala Tipográfica Unificada */
-h1 {
-  font-size: 2.2rem !important;
-  font-weight: 800 !important;
-  line-height: 1.2 !important;
-  color: #163b74;
-}
-
-h2 {
-  font-size: 1.6rem !important;
-  font-weight: 700 !important;
-  line-height: 1.3 !important;
-  color: #163b74;
-}
-
-h3 {
-  font-size: 1.25rem !important;
-  font-weight: 650 !important;
-  line-height: 1.4 !important;
-  color: #163b74;
-}
-
-h4 {
-  font-size: 1.05rem !important;
-  font-weight: 600 !important;
-  line-height: 1.4 !important;
-  color: #163b74;
-}
-
-p {
-  font-size: 0.95rem !important;
-  line-height: 1.6 !important;
-  color: #4a5568 !important;
-}
-
-@media (max-width: 576px) {
-  h1 {
-    font-size: 1.8rem !important;
-  }
-  h2 {
-    font-size: 1.35rem !important;
-  }
-  h3 {
-    font-size: 1.15rem !important;
-  }
-  h4 {
-    font-size: 1.0rem !important;
-  }
-  p {
-    font-size: 0.88rem !important;
-  }
-}
-
-/* Clases de Botones Globales y Simétricos */
-.btn-primary,
-.btn-secondary,
-.btn-danger {
-  font-family: 'Poppins', sans-serif !important;
-  height: 48px !important;
-  border-radius: 12px !important;
-  font-weight: 600 !important;
-  font-size: 0.95rem !important;
-  cursor: pointer !important;
-  transition: all 0.2s ease !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  box-sizing: border-box !important;
-  padding: 0 20px !important;
-  text-decoration: none !important;
-  border: none !important;
-}
-
-/* Botón Primario */
-.btn-primary {
-  background-color: #163b74 !important;
-  color: #ffffff !important;
-}
-
-.btn-primary:hover:not(:disabled) {
-  background-color: #112d59 !important;
-  box-shadow: 0 4px 12px rgba(22, 59, 116, 0.15) !important;
-}
-
-.btn-primary:disabled {
-  background-color: #e2e8f0 !important;
-  color: #94a3b8 !important;
-  cursor: not-allowed !important;
-  box-shadow: none !important;
-}
-
-/* Botón Secundario */
-.btn-secondary {
-  background-color: #f1f5f9 !important;
-  color: #475569 !important;
-  border: 1px solid #e2e8f0 !important;
-}
-
-.btn-secondary:hover:not(:disabled) {
-  background-color: #e2e8f0 !important;
-  color: #1e293b !important;
-}
-
-.btn-secondary:disabled {
-  background-color: #f8fafc !important;
-  color: #cbd5e1 !important;
-  cursor: not-allowed !important;
-}
-
-/* Botón Danger / Peligro */
-.btn-danger {
-  background-color: #fee2e2 !important;
-  color: #991b1b !important;
-  border: 1px solid #fecaca !important;
-}
-
-.btn-danger:hover:not(:disabled) {
-  background-color: #fca5a5 !important;
-  color: #7f1d1d !important;
-}
-
-.btn-danger:disabled {
-  background-color: #fcf2f2 !important;
-  color: #fca5a5 !important;
-  cursor: not-allowed !important;
-}
-
-/* ==========================================================================
-   ONBOARDING TYPOGRAPHY & LAYOUT SCOPED FIXES
-   ========================================================================== */
-.onboarding-wizard-container h1,
-.onboarding-wizard-container .auth-title {
-    font-size: 1.5rem !important;
-    font-weight: 700 !important;
-    line-height: 1.3 !important;
-    color: #163b74 !important;
-    margin-top: 0 !important;
-    margin-bottom: 12px !important;
-    text-align: center !important;
-}
-
-.onboarding-wizard-container h2 {
-    font-size: 1.25rem !important;
-    font-weight: 700 !important;
-    line-height: 1.3 !important;
-    color: #163b74 !important;
-    margin-top: 0 !important;
-    margin-bottom: 12px !important;
-    text-align: center !important;
-}
-
-.onboarding-wizard-container .intereses-heading {
-    font-size: 1.05rem !important;
-    font-weight: 600 !important;
-    color: #1A1A1A !important;
-    margin-top: 0 !important;
-    margin-bottom: 12px !important;
-    text-align: left !important;
-}
-
-.onboarding-wizard-container h3 {
-    font-size: 1.15rem !important;
-    font-weight: 650 !important;
-    line-height: 1.3 !important;
-    color: #163b74 !important;
-}
-
-.onboarding-wizard-container h4 {
-    font-size: 1.0rem !important;
-    font-weight: 600 !important;
-    color: #163b74 !important;
-}
-
-.onboarding-wizard-container p,
-.onboarding-wizard-container .auth-subtitle {
-    font-size: 0.9rem !important;
-    font-weight: 400 !important;
-    line-height: 1.5 !important;
-    color: #4a5568 !important;
-    margin-top: 0 !important;
-    margin-bottom: 20px !important;
-    text-align: center !important;
-}
-
-/* Adjust card widths to fit tags better and make layout proportional */
-.onboarding-wizard-container .intereses-card,
-.onboarding-wizard-container .recomendacion-card {
-    max-width: 480px !important;
-    width: 100% !important;
-}
-
-.onboarding-wizard-container .edad-container,
-.onboarding-wizard-container .nivel-container {
-    max-width: 480px !important;
-    width: 100% !important;
-}
-
-/* Allow tags-container to display tags horizontally and wrap beautifully */
-.onboarding-wizard-container .tags-container {
-    display: flex !important;
-    flex-direction: row !important;
-    flex-wrap: wrap !important;
-    gap: 8px !important;
-    justify-content: center !important;
-    margin-top: 15px !important;
-    width: 100% !important;
-}
-
-.onboarding-wizard-container .tag-button {
-    font-size: 0.85rem !important;
-    padding: 6px 14px !important;
-    border-radius: 20px !important;
-    text-align: center !important;
-}
-
-/* Bottom navigation buttons styling */
-.onboarding-wizard-container .continuar,
-.onboarding-wizard-container button.continuar {
-    font-size: 0.95rem !important;
-    font-weight: 600 !important;
-    height: 46px !important;
-    padding: 0 20px !important;
-    border-radius: 12px !important;
-    box-shadow: 0 4px 12px rgba(30, 58, 95, 0.1) !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-}
-
-.onboarding-wizard-container .onboarding-back-btn,
-.onboarding-wizard-container button.onboarding-back-btn {
-    font-size: 0.95rem !important;
-    font-weight: 600 !important;
-    height: 46px !important;
-    padding: 0 24px !important;
-    border-radius: 12px !important;
-    border: 1px solid #D1D5DB !important;
-    background-color: #ffffff !important;
-    color: #4a5568 !important;
-    cursor: pointer !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    transition: all 0.2s ease !important;
-}
-
-.onboarding-wizard-container .onboarding-back-btn:hover,
-.onboarding-wizard-container button.onboarding-back-btn:hover {
-    background-color: #f3f4f6 !important;
-    color: #1a1a1a !important;
-}
-
-/* Ensure the textarea in step 5 is clean */
-.onboarding-wizard-container textarea {
-    font-size: 0.9rem !important;
-    line-height: 1.4 !important;
-}
-
-/* Recommended badge style for onboarding recommendation in modules catalog */
-.badge-recommended {
-  background-color: #7b61ff !important;
-  color: #ffffff !important;
-  border-color: #7b61ff !important;
-}
-
-/* tab-bar responsive text */
-.tab-text-short {
-  display: none;
-}
-
-@media (max-width: 576px) {
-  .tab-text-full {
-    display: none;
-  }
-  .tab-text-short {
-    display: inline;
-  }
-}
-
-/* Progress Page custom responsive classes */
-.progress-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  margin-bottom: 20px;
-  gap: 16px;
-  width: 100%;
-}
-
-.progress-header h2 {
-  flex: 1;
-  min-width: 280px;
-  margin: 0;
-}
-
-.progress-lesson-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background-color: #f8fafc;
-  padding: 8px 12px;
-  border-radius: 8px;
-  font-size: 13px;
-  gap: 12px;
-}
-
-@media (max-width: 576px) {
-  .progress-header {
-    flex-direction: column;
-    align-items: stretch;
-    text-align: center;
-    gap: 12px;
-  }
-  .progress-header h2 {
-    font-size: 1.35rem;
-    min-width: 100%;
-  }
-  .progress-lesson-item {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 6px;
-    padding: 12px 14px;
-  }
-}
-

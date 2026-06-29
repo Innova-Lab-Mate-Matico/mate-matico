@@ -3,6 +3,7 @@ import EdadSelector from './EdadSelector';
 import NivelSelector from './NivelSelector';
 import InteresesSeleccion from './InteresesSeleccion';
 import RecomendacionModulo from './RecomendacionModulo';
+import './OnboardingWizard.css';
 
 export default function OnboardingWizard({ apiCall, onComplete }) {
   const [step, setStep] = useState(1);

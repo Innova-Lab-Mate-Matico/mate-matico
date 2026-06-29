@@ -1,5 +1,6 @@
 import React from 'react';
 import Mascota from './Mascota';
+import './Profile.css';
 
 /*
   MATE-MÁTICO — COMPONENTE PERFIL
@@ -14,7 +15,7 @@ export default function Profile({
   const rol = user.rolActual || 'principiante';
 
   return (
-    <div className="card">
+    <div className="card profile-card">
       <h2 style={{ marginBottom: '10px' }}>
         Perfil de Usuario
       </h2>
