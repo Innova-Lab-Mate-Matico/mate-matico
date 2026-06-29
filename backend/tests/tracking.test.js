@@ -12,6 +12,8 @@ process.env.FIRESTORE_EMULATOR_HOST = 'localhost:8080';
 
 const TEST_UID = 'test-usuario-telemetria';
 const originalVerifyIdToken = auth.verifyIdToken;
+const originalCreateUser = auth.createUser;
+const originalCreateCustomToken = auth.createCustomToken;
 
 describe('Telemetría y Tracking de Eventos (Hito 2)', () => {
   before(() => {
@@ -22,10 +24,22 @@ describe('Telemetría y Tracking de Eventos (Hito 2)', () => {
       }
       throw new Error('auth/argument-error');
     };
+    auth.createUser = async (data) => {
+      return {
+        uid: 'test-usuario-nuevo-registro',
+        email: data.email,
+        displayName: data.displayName,
+      };
+    };
+    auth.createCustomToken = async (uid) => {
+      return 'custom-token-mock';
+    };
   });
 
   after(() => {
     auth.verifyIdToken = originalVerifyIdToken;
+    auth.createUser = originalCreateUser;
+    auth.createCustomToken = originalCreateCustomToken;
   });
 
   before(async () => {
@@ -123,7 +137,7 @@ describe('Telemetría y Tracking de Eventos (Hito 2)', () => {
     assert.strictEqual(res.body.correcto, true);
 
     // Pequeño delay para permitir que el tracking asíncrono termine de persistir
-    await new Promise((resolve) => setTimeout(resolve, 150));
+    await new Promise((resolve) => setTimeout(resolve, 500));
 
     // Verificar en eventos
     const query = await db.collection('eventos')
@@ -140,6 +154,22 @@ describe('Telemetría y Tracking de Eventos (Hito 2)', () => {
     assert.strictEqual(evData.metadata.subtema, 'descuentos');
     assert.strictEqual(evData.metadata.dificultad, 'medio');
     assert.strictEqual(evData.metadata.tiempo_segundos, 12);
+
+    // Verificar que también se registraron leccion_completada y progreso_actualizado
+    const leccionCompQuery = await db.collection('eventos')
+      .where('usuario_id', '==', TEST_UID)
+      .where('tipo_evento', '==', 'leccion_completada')
+      .get();
+    assert.strictEqual(leccionCompQuery.size, 1);
+    assert.strictEqual(leccionCompQuery.docs[0].data().metadata.leccion_id, 'descuentos');
+
+    const progresoActQuery = await db.collection('eventos')
+      .where('usuario_id', '==', TEST_UID)
+      .where('tipo_evento', '==', 'progreso_actualizado')
+      .get();
+    assert.strictEqual(progresoActQuery.size, 1);
+    assert.strictEqual(progresoActQuery.docs[0].data().metadata.tema, 'porcentajes');
+    assert.strictEqual(progresoActQuery.docs[0].data().metadata.porcentaje_progreso, 50);
   });
 
   it('4. Al resolver un ejercicio de forma incorrecta, debe registrar "ejercicio_completado" con resultado "incorrecto"', async () => {
@@ -185,5 +215,39 @@ describe('Telemetría y Tracking de Eventos (Hito 2)', () => {
       .get();
 
     assert.strictEqual(query.size, 0);
+  });
+
+  it('6. Al registrar un usuario, debe registrar "usuario_registrado" y "usuario_inicio_sesion"', async () => {
+    const { registerUser } = await import('../src/services/auth.service.js');
+    await registerUser({
+      email: 'nuevo-registro@inova.edu.ar',
+      password: 'password123',
+      displayName: 'Nuevo Usuario',
+    });
+
+    // Pequeño delay para permitir que el tracking asíncrono termine de persistir
+    await new Promise((resolve) => setTimeout(resolve, 150));
+
+    // Verificar en la colección de eventos
+    const regQuery = await db.collection('eventos')
+      .where('usuario_id', '==', 'test-usuario-nuevo-registro')
+      .where('tipo_evento', '==', 'usuario_registrado')
+      .get();
+    assert.strictEqual(regQuery.size, 1);
+    assert.strictEqual(regQuery.docs[0].data().metadata.proveedor, 'password');
+
+    const loginQuery = await db.collection('eventos')
+      .where('usuario_id', '==', 'test-usuario-nuevo-registro')
+      .where('tipo_evento', '==', 'usuario_inicio_sesion')
+      .get();
+    assert.strictEqual(loginQuery.size, 1);
+    assert.strictEqual(loginQuery.docs[0].data().metadata.proveedor, 'password');
+
+    // Limpiar
+    await db.collection('usuarios').doc('test-usuario-nuevo-registro').delete();
+    const snap = await db.collection('eventos').where('usuario_id', '==', 'test-usuario-nuevo-registro').get();
+    const batch = db.batch();
+    snap.forEach((doc) => batch.delete(doc.ref));
+    await batch.commit();
   });
 });

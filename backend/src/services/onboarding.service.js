@@ -1,19 +1,8 @@
 import { db } from '../config/firebase.js';
 import { COLECCION_USUARIOS, dbToUsuario, usuarioToDb } from '../models/usuario.model.js';
-import { BigQuery } from '@google-cloud/bigquery';
-import { getFirebaseServiceAccount } from '../config/env.js';
+import { trackEvent } from './tracking.service.js';
 
 const usuariosCol = () => db.collection(COLECCION_USUARIOS);
-
-// Inicializar cliente de BigQuery utilizando las mismas credenciales de la cuenta de servicio
-const credentials = getFirebaseServiceAccount();
-const bigquery = new BigQuery({
-  projectId: credentials.project_id,
-  credentials: {
-    client_email: credentials.client_email,
-    private_key: credentials.private_key,
-  },
-});
 
 /**
  * Motor de Recomendación Inicial
@@ -71,44 +60,17 @@ export async function guardarOnboardingUsuario(uid, respuestas) {
     onboarding: onboardingData
   }));
 
-  // Envío en tiempo real a BigQuery (Load Job) como un proceso complementario (apto para Sandbox gratuito)
-  if (process.env.NODE_ENV === 'test' || process.env.FIRESTORE_EMULATOR_HOST) {
-    const updatedDoc = await ref.get();
-    const data = dbToUsuario(updatedDoc.data());
-    data.uid = updatedDoc.id;
-    return data;
-  }
-
+  // Reemplazo de BigQuery por trackEvent de Firestore
   try {
-    const datasetId = 'onboarding_data';
-    const tableId = 'usuarios_onboarding';
-
-    const row = {
-      usuario_id: uid,
+    await trackEvent(uid, 'onboarding_finalizado', {
       edad: onboardingData.edad,
       nivel_educativo: onboardingData.nivelEducativo,
       objetivo: onboardingData.objetivo,
       confianza_math: onboardingData.confianzaMath,
-      modulo_recomendo: onboardingData.moduloRecomendado,
-      fecha_registro: new Date().toISOString(),
-    };
-
-    const ndjson = JSON.stringify(row) + '\n';
-    const table = bigquery.dataset(datasetId).table(tableId);
-
-    const writeStream = table.createWriteStream({
-      sourceFormat: 'NEWLINE_DELIMITED_JSON',
-      writeDisposition: 'WRITE_APPEND',
+      modulo_recomendado: onboardingData.moduloRecomendado,
     });
-
-    writeStream.on('error', (err) => {
-      console.error('[BigQuery Stream Error] Falló el stream del usuario onboarding a BigQuery:', err.message);
-    });
-
-    writeStream.write(ndjson);
-    writeStream.end();
-  } catch (bqError) {
-    console.error('Error al insertar datos de onboarding en BigQuery:', bqError);
+  } catch (error) {
+    console.error('Error al registrar telemetría de onboarding:', error);
   }
 
   const updatedDoc = await ref.get();
