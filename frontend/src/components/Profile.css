@@ -1,0 +1,110 @@
+/* Card and typography style for Profile */
+.card.profile-card {
+  background: #ffffff;
+  border: 1px solid rgba(123, 97, 255, 0.1);
+  padding: 16px;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(123, 97, 255, 0.05);
+  box-sizing: border-box;
+  transition: all 0.3s ease;
+  max-width: 650px;
+  margin: 0 auto 20px;
+}
+
+@media (min-width: 768px) {
+  .card.profile-card {
+    padding: 30px;
+    border-radius: 24px;
+    margin: 0 auto 30px;
+  }
+}
+
+.card.profile-card h2, 
+.card.profile-card h3, 
+.card.profile-card h4 {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  color: #163b74;
+}
+
+/* Badges */
+.profile-card .badge {
+  display: inline-block;
+  padding: 8px 16px;
+  border-radius: 12px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+  font-family: 'Poppins', sans-serif;
+  border: 1px solid transparent;
+  margin-right: 8px;
+}
+
+.profile-card .badge-gold {
+  background-color: #fff9e6;
+  color: #d97706;
+  border-color: rgba(217, 119, 6, 0.1);
+}
+
+.profile-card .badge-success {
+  background-color: #ecfdf5;
+  color: #065f46;
+  border-color: rgba(6, 95, 70, 0.1);
+}
+
+.profile-card .badge:not(.badge-gold):not(.badge-success) {
+  background-color: #f7f2ff;
+  color: #7b61ff;
+  border-color: rgba(123, 97, 255, 0.1);
+}
+
+/* Buttons inside the profile card */
+.profile-card .btn-primary,
+.profile-card .btn-danger {
+  font-family: 'Poppins', sans-serif;
+  height: 48px;
+  width: 100%;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  padding: 0 20px;
+  text-decoration: none;
+  border: none;
+  margin: 0; /* Evita que hereden margin-top de Auth.css */
+}
+
+.profile-card .profile-actions {
+  display: flex;
+  align-items: stretch;
+  gap: 12px;
+  margin-top: 25px;
+  width: 100%;
+}
+
+.profile-card .btn-primary {
+  background-color: #163b74;
+  color: #ffffff;
+  border: 1px solid transparent;
+}
+
+.profile-card .btn-primary:hover:not(:disabled) {
+  background-color: #112d59;
+  box-shadow: 0 4px 12px rgba(22, 59, 116, 0.15);
+}
+
+.profile-card .btn-danger {
+  background-color: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+}
+
+.profile-card .btn-danger:hover:not(:disabled) {
+  background-color: #fca5a5;
+  color: #7f1d1d;
+}

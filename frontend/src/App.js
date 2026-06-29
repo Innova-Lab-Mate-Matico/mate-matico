@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider, signInWithPopup, sendPasswordResetEmail } from 'firebase/auth';
 import './App.css'; // Tus estilos globales
+import './styles/Dashboard.css';
 import Auth from './components/Auth';
 import Profile from './components/Profile';
 import Modules from './components/Modules';

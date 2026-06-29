@@ -1,416 +1,232 @@
 /* =========================
-   CONTENEDOR GENERAL (AUTH)
+ CONTENEDOR GENERAL (AUTH)
 ========================= */
-
 .auth-container {
-  min-height: 100vh;
-  width: 100%;
-
-  display: flex;
-  justify-content: center;
-  align-items: center;
-
-  position: relative;
-  isolation: isolate;
-
-  padding: 20px;
-
-  background: linear-gradient(
-    135deg,
-    #ffffff 0%,
-    #f7f2ff 50%,
-    #e8dbff 100%
-  );
-
-  overflow-x: hidden;
-  overflow-y: auto;
+ min-height: 100vh;
+ width: 100%;
+ display: flex;
+ justify-content: center;
+ align-items: center;
+ position: relative;
+ isolation: isolate;
+ padding: 20px;
+ background: linear-gradient(
+ 135deg,
+ #ffffff 0%,
+ #f7f2ff 50%,
+ #e8dbff 100%
+ );
+ overflow-x: hidden;
+ overflow-y: auto;
 }
-
 /* =========================
-   CARD (LOGIN / REGISTER / RECOVER)
+ CARD (LOGIN / REGISTER / RECOVER)
 ========================= */
-
 .auth-card {
-  width: 100%;
-  max-width: 420px;
-
-  position: relative;
-  z-index: 10;
-
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+ width: 100%;
+ max-width: 420px;
+ position: relative;
+ z-index: 10;
+ display: flex;
+ flex-direction: column;
+ gap: 10px;
 }
-
 /* =========================
-   WRAPPER DE FORMULARIO
+ LOGO Y TEXTOS
 ========================= */
-
-.auth-form-wrapper {
-  position: relative;
-  overflow: hidden;
-  background: #ffffff;
-  padding: 35px;
-  border-radius: 24px;
-  box-shadow: 0 10px 30px rgba(123, 97, 255, 0.06);
-  border: 1px solid rgba(123, 97, 255, 0.08);
-  box-sizing: border-box;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-
-/* Card-scoped waves style */
-.auth-form-wrapper .ola-superior,
-.auth-form-wrapper .ola-inferior {
-  position: absolute;
-  z-index: 0;
-  pointer-events: none;
-  width: 180px;
-  opacity: 0.8;
-  transition: width 0.3s ease;
-}
-
-.auth-form-wrapper .ola-superior {
-  top: 0;
-  right: 0;
-}
-
-.auth-form-wrapper .ola-inferior {
-  bottom: 0;
-  left: 0;
-}
-
-@media (max-width: 576px) {
-  .auth-form-wrapper .ola-superior,
-  .auth-form-wrapper .ola-inferior {
-    width: 120px;
-  }
-}
-
-/* =========================
-   LOGO Y TEXTOS
-========================= */
-
-.auth-header {
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-bottom: 10px;
-  position: relative;
-  z-index: 1;
-}
-
 .auth-logo {
-  width: 250px;
-  max-width: 100%;
-  margin: 0 auto 15px;
-  display: block;
+ width: 180px;
+ margin: 0 auto 10px;
+ display: block;
 }
-
 .auth-title {
-  font-size: 1.4rem;
-  font-weight: 800;
-  color: #163b74;
-  margin: 0 0 8px 0;
-  text-align: center;
-  font-family: "Poppins", sans-serif;
+ font-size: 1rem;
+ font-weight: 700;
+ color: #777a80;
+ margin-bottom: 5px;
 }
-
 .auth-subtitle {
-  font-size: 0.95rem;
-  font-weight: 500;
-  color: #64748b;
-  margin: 0 0 15px 0;
-  text-align: center;
-  line-height: 1.4;
+ font-size: 0.95rem;
+ font-weight: 600;
+ color: #333131;
+ margin-bottom: 20px;
+ text-align: center;
 }
-
 /* =========================
-   FORMULARIOS
+ OLAS (FONDO DECORATIVO)
 ========================= */
-
-.auth-form {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-  width: 100%;
-  box-sizing: border-box !important;
-  position: relative;
-  z-index: 1;
+.auth-container .ola-superior,
+.auth-container .ola-inferior {
+ position: absolute;
+ z-index: 0;
+ pointer-events: none;
 }
-
+.auth-container .ola-superior {
+ top: 0;
+ right: 0;
+ width: 220px;
+}
+.auth-container .ola-inferior {
+ bottom: 0;
+ left: 0;
+ width: 220px;
+}
+/* =========================
+ FORMULARIOS
+========================= */
 .form-group {
-  text-align: left;
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  box-sizing: border-box !important;
+ text-align: left;
+ display: flex;
+ flex-direction: column;
 }
-
 .form-group label {
-  font-weight: 600;
-  font-size: 14px;
-  margin-bottom: 6px;
-  color: #334155;
+ font-weight: 600;
+ font-size: 14px;
+ margin-bottom: 6px;
+ color: #333;
 }
-
 .form-group input {
-  width: 100%;
-  height: 50px;
-
-  border-radius: 12px;
-  border: 1px solid #cbd5e1;
-
-  padding: 0 14px;
-
-  font-size: 14px;
-  transition: all 0.2s ease;
-  box-sizing: border-box !important;
-  color: #1e293b;
-  background-color: #ffffff;
+ width: 100%;
+ height: 48px;
+ border-radius: 12px;
+ border: 1px solid #ddd;
+ padding: 0 14px;
+ font-size: 14px;
+ transition: 0.2s;
 }
-
 .form-group input:focus {
-  outline: none;
-  border-color: #7b61ff;
-  box-shadow: 0 0 0 3px rgba(123,97,255,0.15);
+ outline: none;
+ border-color: #7b61ff;
+ box-shadow: 0 0 0 3px rgba(123,97,255,0.15);
 }
-
 /* PASSWORD INPUT */
 .password-input {
-  position: relative;
-  display: flex;
-  align-items: center;
-  width: 100%;
-  box-sizing: border-box !important;
+ position: relative;
+ display: flex;
+ align-items: center;
 }
-
 .password-input input {
-  padding-right: 42px;
-  width: 100%;
-  box-sizing: border-box !important;
+ padding-right: 42px;
 }
-
 /* OJO */
 .eye-button {
-  position: absolute;
-  right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-
-  background: transparent;
-  border: none;
-  cursor: pointer;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  color: #64748b;
-  padding: 0 !important;
-  height: auto !important;
+ position: absolute;
+ right: 12px;
+ top: 50%;
+ transform: translateY(-50%);
+ background: transparent;
+ border: none;
+ cursor: pointer;
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ color: #666;
 }
-
 /* =========================
-   BOTONES
+ BOTONES
 ========================= */
-
 .btn-primary {
-  width: 100%;
-  height: 50px;
-
-  background: #163b74;
-  color: white;
-
-  border: none;
-  border-radius: 12px;
-
-  font-weight: 600;
-  font-size: 15px;
-
-  cursor: pointer;
-  box-sizing: border-box !important;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+ width: 100%;
+ height: 50px;
+ background: #163b74;
+ color: white;
+ border: none;
+ border-radius: 12px;
+ font-weight: 600;
+ font-size: 15px;
+ cursor: pointer;
+ margin-top: 10px;
 }
-
-.btn-primary:hover:not(:disabled) {
-  background-color: #112d59;
-}
-
-.btn-primary:disabled {
-  background: #e2e8f0;
-  color: #94a3b8;
-  cursor: not-allowed;
-}
-
 .btn-google {
-  width: 100%;
-  height: 50px;
-
-  background: white;
-  border: 1px solid #cbd5e1;
-
-  border-radius: 12px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  gap: 10px;
-
-  font-size: 14px;
-  font-weight: 600;
-  color: #334155;
-
-  cursor: pointer;
-  box-sizing: border-box !important;
-  transition: all 0.2s ease;
+ width: 100%;
+ height: 50px;
+ background: white;
+ border: 1px solid #ddd;
+ border-radius: 12px;
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ gap: 10px;
+ font-size: 14px;
+ cursor: pointer;
+ margin-top: 10px;
 }
-
-.btn-google:hover {
-  background-color: #f8fafc;
-  border-color: #94a3b8;
-}
-
 .google-icon {
-  width: 18px;
-  height: 18px;
-  flex-shrink: 0;
-  display: block;
+ width: 18px;
+ height: 18px;
+ flex-shrink: 0;
+ display: block;
 }
-
 .btn-secondary {
-  width: 100%;
-  height: 50px;
-
-  background: #f1f5f9;
-  border: 1px solid #e2e8f0;
-  color: #4a5568;
-
-  border-radius: 12px;
-
-  font-weight: 600;
-  font-size: 15px;
-
-  cursor: pointer;
-  box-sizing: border-box !important;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+ width: 100%;
+ height: 50px;
+ background: #163b74;
+ border: none;
+ color: white;
+ border-radius: 12px;
+ font-weight: 600;
+ cursor: pointer;
+ margin-top: 10px;
 }
-
-.btn-secondary:hover {
-  background-color: #e2e8f0;
-  color: #1e293b;
-}
-
-/* LINK ENLACE */
-.forgot-password-link {
-  display: block;
-  text-align: center;
-  font-size: 13px;
-  color: #7b61ff;
-  cursor: pointer;
-  margin: 5px 0;
-  text-decoration: underline;
-  font-weight: 600;
-  transition: color 0.2s ease;
-}
-
-.forgot-password-link:hover {
-  color: #6346eb;
-}
-
 /* =========================
-   FEEDBACK
+ FEEDBACK
 ========================= */
-
 .feedback-box {
-  margin-top: 15px;
-  padding: 12px;
-  border-radius: 10px;
-  font-size: 14px;
-  text-align: center;
-  font-weight: 500;
-  position: relative;
-  z-index: 1;
+ margin-top: 15px;
+ padding: 12px;
+ border-radius: 10px;
+ font-size: 14px;
 }
-
 .correct {
-  background: #e9f8ec;
-  color: #1b7a33;
-  border: 1px solid rgba(27, 122, 51, 0.1);
+ background: #e9f8ec;
+ color: #1b7a33;
 }
-
 .incorrect {
-  background: #ffe9e9;
-  color: #b12626;
-  border: 1px solid rgba(177, 38, 38, 0.1);
+ background: #ffe9e9;
+ color: #b12626;
 }
-
 /* =========================
-   DESKTOP
+ DESKTOP
 ========================= */
-
 @media (min-width: 1024px) {
-  .auth-logo {
-    width: 280px;
-  }
-
-  .auth-card {
-    max-width: 420px;
-  }
+ .auth-logo {
+ width: 200px;
+ }
+ .auth-card {
+ max-width: 420px;
+ }
 }
-
 /* =========================
-   MOBILE FIRST FIX
+ MOBILE FIRST FIX
 ========================= */
-
 @media (max-width: 576px) {
-
-  .auth-container {
-    padding: 16px;
-    align-items: center;
-  }
-
-  .auth-card {
-    width: 100%;
-    max-width: 380px;
-  }
-
-  .auth-form-wrapper {
-    padding: 25px 20px;
-    border-radius: 20px;
-  }
-
-  .auth-logo {
-    width: 180px;
-  }
-
-  .auth-title {
-    font-size: 1.2rem;
-  }
-
-  .auth-subtitle {
-    font-size: 0.88rem;
-    margin-bottom: 10px;
-  }
-
-  .btn-primary,
-  .btn-secondary,
-  .btn-google,
-  .form-group input,
-  .password-input input {
-    height: 48px !important;
-    min-height: 48px !important;
-    font-size: 14px !important;
-    box-sizing: border-box !important;
-  }
+ .auth-container {
+ padding: 16px;
+ align-items: center;
+ }
+ .auth-card {
+ width: 100%;
+ max-width: 380px;
+ }
+ .auth-logo {
+ width: 130px;
+ }
+ .auth-title {
+ font-size: 1.2rem;
+ }
+ .auth-subtitle {
+ font-size: 0.85rem;
+ }
+ .ola-superior,
+ .ola-inferior {
+ width: 100px;
+ opacity: 0.5;
+ }
+ .btn-primary,
+ .btn-secondary,
+ .btn-google,
+ .form-group input {
+ min-height: 44px;
+ height: auto;
+ }
 }
