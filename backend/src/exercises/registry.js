@@ -23,7 +23,7 @@ export const LECCION_GENERADORES = {
     descuentos: ['descuento_mc', 'aumento_numerico'], // alineado con Figma Yerba + Internet
   },
   fracciones: {
-    'fracciones-basicas': ['fraccion_decimal_mc'],
+    'fracciones-basicas': ['fraccion_decimal_mc', 'decimal_fraccion_mc', 'fraccion_comparar_mc'],
   },
 };
 

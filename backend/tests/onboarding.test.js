@@ -48,9 +48,9 @@ describe('Onboarding Adaptativo - Backend Tests', () => {
       assert.strictEqual(rec2, 'aritmetica');
     });
 
-    it('Debe sugerir "porcentajes" si la confianza es media-alta (>=3) y muestra interés en temas prácticos de la vida cotidiana', () => {
+    it('Debe sugerir "porcentajes" si la confianza es media-alta (>=4) y muestra interés en temas prácticos de la vida cotidiana', () => {
       const rec = calcularRecomendacionOnboarding({
-        confianzaMath: 3,
+        confianzaMath: 4,
         edad: 14,
         intereses: ['Ahorro', 'finanzas'],
         nivelEducativo: 'primaria'
@@ -58,9 +58,9 @@ describe('Onboarding Adaptativo - Backend Tests', () => {
       assert.strictEqual(rec, 'porcentajes');
     });
 
-    it('Debe sugerir "porcentajes" a usuarios adultos (edad >= 18) con confianza matemática suficiente (>=3)', () => {
+    it('Debe sugerir "porcentajes" a usuarios adultos (edad >= 18) con confianza matemática suficiente (>=4)', () => {
       const rec = calcularRecomendacionOnboarding({
-        confianzaMath: 3,
+        confianzaMath: 4,
         edad: 18,
         intereses: ['videojuegos'],
         nivelEducativo: 'ninguno'
