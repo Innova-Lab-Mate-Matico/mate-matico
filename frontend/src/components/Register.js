@@ -26,23 +26,17 @@ useState(false);
  if (!isFormValid) return;
  setIsLoading(true);
  try {
- await onRegister({
- displayName: displayName.trim(),
- email: email.trim(),
- password: password,
-
- });
+  await onRegister(
+    email.trim(),
+    password,
+    displayName.trim()
+  );
  } catch (err) {
  console.error(err);
  } finally {
  setIsLoading(false);
  }
  };
- console.log("REGISTER PAYLOAD:", {
- email,
- password,
- displayName: displayName.trim(),
- });
  return (
  <div className="auth-form-wrapper">
  <img

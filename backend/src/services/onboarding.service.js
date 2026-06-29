@@ -20,8 +20,8 @@ const bigquery = new BigQuery({
  * Algoritmo determinista basado en el perfil cognitivo y de intereses del usuario.
  */
 export function calcularRecomendacionOnboarding({ confianzaMath, edad, intereses, nivelEducativo }) {
-  // Regla 1: Si la confianza matemática es muy baja (1 o 2), empezamos con Aritmética Básica.
-  if (confianzaMath <= 2) {
+  // Regla 1: Si la confianza matemática es baja o media-baja (<= 3), empezamos con Aritmética Básica.
+  if (confianzaMath <= 3) {
     return 'aritmetica';
   }
 
