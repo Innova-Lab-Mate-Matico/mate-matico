@@ -6,6 +6,7 @@ import Auth from './components/Auth';
 import Profile from './components/Profile';
 import Modules from './components/Modules';
 import Progress from './components/Progress';
+import MultipleChoice from './components/MultipleChoice';
 
 // --- TUS COMPONENTES INYECTADOS (Unificados con tus flujos nuevos) ---
 import Header from './components/Header';
@@ -449,17 +450,18 @@ const apiCall = async (path, options = {}, customToken = null) => {
                   }}
                 />
               )}
-
               {activeTab === 'lecciones' && (
-                <Modules
-                  apiCall={apiCall}
-                  onAnswerSuccess={handleAnswerSuccess}
-                  progress={progress}
-                  onRefreshProgress={loadUserProgress}
-                />
-              )}
-
-              {activeTab === 'progreso' && (
+        <div>
+          <Modules
+          apiCall={apiCall}
+          onAnswerSuccess={handleAnswerSuccess}
+          progress={progress}
+          onRefreshProgress={loadUserProgress}
+        />
+       <MultipleChoice />
+       </div>
+    )}
+           {activeTab === 'progreso' && (
                 <Progress apiCall={apiCall} />
               )}
             </div>
