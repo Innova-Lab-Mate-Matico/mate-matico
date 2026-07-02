@@ -3,6 +3,7 @@ import EdadSelector from './EdadSelector';
 import NivelSelector from './NivelSelector';
 import InteresesSeleccion from './InteresesSeleccion';
 import RecomendacionModulo from './RecomendacionModulo';
+import './OnboardingWizard.css';
 
 export default function OnboardingWizard({ apiCall, onComplete }) {
   const [step, setStep] = useState(1);
@@ -79,7 +80,7 @@ export default function OnboardingWizard({ apiCall, onComplete }) {
   };
 
   return (
-    <div style={{ maxWidth: '600px', margin: '0 auto' }}>
+    <div className="onboarding-wizard-container" style={{ maxWidth: '600px', margin: '0 auto' }}>
       {errorMsg && (
         <div style={{
           color: '#721c24',
@@ -147,6 +148,7 @@ export default function OnboardingWizard({ apiCall, onComplete }) {
           <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', marginTop: '20px' }}>
             <button
               type="button"
+              className="onboarding-back-btn"
               onClick={() => setStep(2)}
               style={{
                 padding: '12px 24px',
@@ -213,6 +215,7 @@ export default function OnboardingWizard({ apiCall, onComplete }) {
           <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', marginTop: '25px' }}>
             <button
               type="button"
+              className="onboarding-back-btn"
               onClick={() => setStep(4)}
               disabled={loading}
               style={{

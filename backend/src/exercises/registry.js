@@ -16,14 +16,14 @@ import {
 export const LECCION_GENERADORES = {
   aritmetica: {
     'suma-basica': ['suma_mc', 'suma_numerica'],
-    multiplicacion: ['multiplicacion_mc', 'resta_mc'],
+    multiplicacion: ['multiplicacion_mc', 'multiplicacion_num'],
   },
   porcentajes: {
     'concepto-porcentaje': ['porcentaje_mc', 'porcentaje_numerico'],
     descuentos: ['descuento_mc', 'aumento_numerico'], // alineado con Figma Yerba + Internet
   },
   fracciones: {
-    'fracciones-basicas': ['fraccion_decimal_mc'],
+    'fracciones-basicas': ['fraccion_decimal_mc', 'decimal_fraccion_mc', 'fraccion_comparar_mc'],
   },
 };
 
@@ -57,19 +57,29 @@ function buildMetaTipos() {
 }
 
 export function generarEjerciciosLeccion(moduleId, lessonId, semillaBase = null) {
-  const tipos = LECCION_GENERADORES[moduleId]?.[lessonId];
-  if (!tipos?.length) return [];
+  const tiposOriginales = LECCION_GENERADORES[moduleId]?.[lessonId];
+  if (!tiposOriginales?.length) return [];
 
   const generar = GENERADORES_MODULO[moduleId];
   if (!generar) return [];
 
   const base = semillaBase ?? semillaNueva();
 
+  // Asegurar al menos 5 ejercicios ciclando los tipos de plantilla originales
+  const tipos = [];
+  for (let i = 0; i < Math.max(5, tiposOriginales.length); i++) {
+    tipos.push(tiposOriginales[i % tiposOriginales.length]);
+  }
+
   return tipos
     .map((tipo, index) => {
       const semilla = base + index * 9973;
       const datosEjercicio = generar(tipo, semilla);
       if (!datosEjercicio) return null;
+
+      // Hacer el ID único agregando el índice para evitar colisiones
+      // cuando la misma plantilla se cicla varias veces
+      datosEjercicio.id = `${datosEjercicio.id}-${index}`;
 
       // Instanciar usando la Fábrica
       datosEjercicio.semilla = semilla;
@@ -84,6 +94,10 @@ export function generarEjerciciosLeccion(moduleId, lessonId, semillaBase = null)
  * Reconstruye el ejercicio para validar usando semilla + operandos enviados por el front.
  */
 export function reconstruirEjercicio(moduleId, lessonId, exerciseId, semilla, operandos) {
+  // Los IDs de ejercicio ahora llevan un sufijo de índice (e.g. 'pct-mc-0').
+  // Extraer el ID base quitando el último segmento '-N' para comparar con el generador.
+  const baseExerciseId = exerciseId.replace(/-\d+$/, '');
+
   const meta = Object.values(META_TIPOS).find(
     (m) => m.moduleId === moduleId && m.lessonId === lessonId
   );
@@ -96,7 +110,7 @@ export function reconstruirEjercicio(moduleId, lessonId, exerciseId, semilla, op
 
   for (const tipo of tipos) {
     const ejercicio = generar(tipo, semilla);
-    if (ejercicio?.id !== exerciseId) continue;
+    if (ejercicio?.id !== baseExerciseId) continue;
 
     const respuesta = resolver(operandos ?? ejercicio.operandos, tipo);
     return FabricaEjercicios.crear({

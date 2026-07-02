@@ -1,0 +1,118 @@
+/* Card and layout style for Progress */
+.card.progress-card {
+  background: #ffffff;
+  border: 1px solid rgba(123, 97, 255, 0.1);
+  padding: 16px;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(123, 97, 255, 0.05);
+  box-sizing: border-box;
+  transition: all 0.3s ease;
+  max-width: 650px;
+  margin: 0 auto 20px;
+}
+
+@media (min-width: 768px) {
+  .card.progress-card {
+    padding: 30px;
+    border-radius: 24px;
+    margin: 0 auto 30px;
+  }
+}
+
+.card.progress-card h2,
+.card.progress-card h3,
+.card.progress-card h4 {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  color: #163b74;
+}
+
+.progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+  gap: 16px;
+  width: 100%;
+}
+
+.progress-header h2 {
+  flex: 1;
+  min-width: 280px;
+  margin: 0;
+}
+
+.progress-lesson-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #f8fafc;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  gap: 12px;
+}
+
+@media (max-width: 576px) {
+  .progress-header {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+    gap: 12px;
+  }
+  .progress-header h2 {
+    font-size: 1.35rem;
+    min-width: 100%;
+  }
+  .progress-lesson-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    padding: 12px 14px;
+  }
+}
+
+/* Cajas de mascotas */
+.progress-card .mascota-box {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 15px;
+  background-color: #f8fafc;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  margin-top: 15px;
+  margin-bottom: 25px;
+}
+
+/* Badges */
+.progress-card .badge {
+  display: inline-block;
+  padding: 8px 16px;
+  border-radius: 12px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+  font-family: 'Poppins', sans-serif;
+  border: 1px solid transparent;
+  margin-right: 8px;
+}
+
+.progress-card .badge-gold {
+  background-color: #fff9e6;
+  color: #d97706;
+  border-color: rgba(217, 119, 6, 0.1);
+}
+
+.progress-card .badge-success {
+  background-color: #ecfdf5;
+  color: #065f46;
+  border-color: rgba(6, 95, 70, 0.1);
+}
+
+.progress-card .badge:not(.badge-gold):not(.badge-success) {
+  background-color: #f7f2ff;
+  color: #7b61ff;
+  border-color: rgba(123, 97, 255, 0.1);
+}

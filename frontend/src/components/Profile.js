@@ -1,5 +1,6 @@
 import React from 'react';
 import Mascota from './Mascota';
+import './Profile.css';
 
 /*
   MATE-MÁTICO — COMPONENTE PERFIL
@@ -14,7 +15,7 @@ export default function Profile({
   const rol = user.rolActual || 'principiante';
 
   return (
-    <div className="card">
+    <div className="card profile-card">
       <h2 style={{ marginBottom: '10px' }}>
         Perfil de Usuario
       </h2>
@@ -84,15 +85,17 @@ export default function Profile({
       </div>
 
       <div
+        className="profile-actions"
         style={{
-          marginTop: '20px',
+          marginTop: '25px',
           display: 'flex',
-          gap: '10px'
+          gap: '12px'
         }}
       >
         <button
           type="button"
           onClick={onRefresh}
+          className="btn-primary"
           style={{ flex: 1 }}
         >
           Sincronizar
@@ -101,12 +104,8 @@ export default function Profile({
         <button
           type="button"
           onClick={onLogout}
-          style={{
-            flex: 1,
-            backgroundColor: '#f8d7da',
-            color: '#721c24',
-            borderColor: '#f5c6cb'
-          }}
+          className="btn-danger"
+          style={{ flex: 1 }}
         >
           Cerrar Sesión
         </button>

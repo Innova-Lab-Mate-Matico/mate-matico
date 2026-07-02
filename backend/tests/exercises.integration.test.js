@@ -8,6 +8,7 @@ process.env.FIRESTORE_EMULATOR_HOST = 'localhost:8080';
 
 import app from '../src/app.js';
 import { auth, db } from '../src/config/firebase.js';
+import { resolverRespuestaPorcentajes } from '../src/exercises/modules/porcentajes.js';
 
 const originalVerifyIdToken = auth.verifyIdToken;
 const TEST_UID = 'test-usuario-ejercicios';
@@ -66,23 +67,23 @@ describe('Integración de Ejercicios y Figma - Backend Tests', () => {
       assert.strictEqual(res.status, 200);
       assert.strictEqual(res.body.success, true);
       assert.ok(Array.isArray(res.body.leccion.ejercicios));
-      assert.strictEqual(res.body.leccion.ejercicios.length, 2);
+      assert.strictEqual(res.body.leccion.ejercicios.length, 5);
 
       const [ej1, ej2] = res.body.leccion.ejercicios;
 
       // Ejercicio 1 (Yerba - Multiple Choice)
-      assert.strictEqual(ej1.id, 'desc-mc');
+      assert.strictEqual(ej1.id, 'desc-mc-0');
       assert.strictEqual(ej1.tipo, 'multiple_choice');
       assert.strictEqual(ej1.tipoGenerador, 'descuento_mc');
       assert.match(ej1.enunciado, /yerba/);
-      assert.deepStrictEqual(ej1.opciones, [1200, 2400, 3400, 14400]);
+      assert.strictEqual(ej1.opciones.length, 4);
       assert.strictEqual(ej1.respuestaCorrecta, undefined); // No debe viajar al cliente
 
       // Ejercicio 2 (Internet - Numérico)
-      assert.strictEqual(ej2.id, 'aum-num');
+      assert.strictEqual(ej2.id, 'aum-num-1');
       assert.strictEqual(ej2.tipo, 'numeric');
       assert.strictEqual(ej2.tipoGenerador, 'aumento_numerico');
-      assert.match(ej2.enunciado, /internet/);
+      assert.match(ej2.enunciado, /internet|luz|gas|agua|cable/);
       assert.strictEqual(ej2.opciones, undefined);
       assert.strictEqual(ej2.respuestaCorrecta, undefined);
     });
@@ -92,6 +93,7 @@ describe('Integración de Ejercicios y Figma - Backend Tests', () => {
     it('Debe validar correctamente la respuesta correcta del ejercicio de Yerba', async () => {
       const getRes = await request(app).get('/api/modules/porcentajes/lessons/descuentos');
       const ejYerba = getRes.body.leccion.ejercicios[0];
+      const correctAns = resolverRespuestaPorcentajes(ejYerba.operandos, 'descuento_mc');
 
       const res = await request(app)
         .post('/api/exercises/validate')
@@ -102,7 +104,7 @@ describe('Integración de Ejercicios y Figma - Backend Tests', () => {
           exerciseId: ejYerba.id,
           semilla: ejYerba.semilla,
           operandos: ejYerba.operandos,
-          answer: '2400' // Ahorro de Yerba: $2.400
+          answer: String(correctAns)
         });
 
       assert.strictEqual(res.status, 200);
@@ -113,6 +115,7 @@ describe('Integración de Ejercicios y Figma - Backend Tests', () => {
     it('Debe validar correctamente la respuesta correcta del ejercicio de Internet', async () => {
       const getRes = await request(app).get('/api/modules/porcentajes/lessons/descuentos');
       const ejInternet = getRes.body.leccion.ejercicios[1];
+      const correctAns = resolverRespuestaPorcentajes(ejInternet.operandos, 'aumento_numerico');
 
       const res = await request(app)
         .post('/api/exercises/validate')
@@ -123,7 +126,7 @@ describe('Integración de Ejercicios y Figma - Backend Tests', () => {
           exerciseId: ejInternet.id,
           semilla: ejInternet.semilla,
           operandos: ejInternet.operandos,
-          answer: 19800 // Internet final: $18.000 + 10% = $19.800
+          answer: Number(correctAns)
         });
 
       assert.strictEqual(res.status, 200);
@@ -134,6 +137,7 @@ describe('Integración de Ejercicios y Figma - Backend Tests', () => {
     it('Debe manejar explicaciones y comodines en respuestas erróneas consecutivas', async () => {
       const getRes = await request(app).get('/api/modules/porcentajes/lessons/descuentos');
       const ejYerba = getRes.body.leccion.ejercicios[0];
+      const correctAns = resolverRespuestaPorcentajes(ejYerba.operandos, 'descuento_mc');
 
       // Primer error
       const res1 = await request(app)
@@ -145,7 +149,7 @@ describe('Integración de Ejercicios y Figma - Backend Tests', () => {
           exerciseId: ejYerba.id,
           semilla: ejYerba.semilla,
           operandos: ejYerba.operandos,
-          answer: '1200'
+          answer: String(correctAns + 100)
         });
 
       assert.strictEqual(res1.status, 200);
@@ -162,13 +166,13 @@ describe('Integración de Ejercicios y Figma - Backend Tests', () => {
           exerciseId: ejYerba.id,
           semilla: ejYerba.semilla,
           operandos: ejYerba.operandos,
-          answer: '3400'
+          answer: String(correctAns + 200)
         });
 
       assert.strictEqual(res2.status, 200);
       assert.strictEqual(res2.body.correcto, false);
       assert.strictEqual(res2.body.habilitarComodin, true);
-      assert.match(res2.body.comodinPista, /quinta parte/);
+      assert.match(res2.body.comodinPista, /Pista:/);
       assert.match(res2.body.explicacionError, /ahorrás/);
     });
   });

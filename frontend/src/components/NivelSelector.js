@@ -64,6 +64,7 @@ const NivelSelector = ({ selectedNivel, onSelectNivel, onNext, onBack }) => {
       <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
         <button
           type="button"
+          className="onboarding-back-btn"
           onClick={onBack}
           style={{
             padding: '12px 24px',

@@ -100,7 +100,6 @@ ol {
 /* =========================
    CONTENEDOR PRINCIPAL
 ========================= */
-
 .app-container {
   width: 100%;
   max-width: var(--max-width);
@@ -108,21 +107,17 @@ ol {
   margin: 0 auto;
   padding: var(--spacing-sm);
 }
-
 /* =========================
-   HEADER
+HEADER
 ========================= */
-
 .header {
   border-bottom: 1px solid #ddd;
   padding-bottom: var(--spacing-sm);
   margin-bottom: var(--spacing-md);
 }
-
 /* =========================
    TABS
 ========================= */
-
 .tab-bar {
   display: flex;
   flex-direction: column;
@@ -130,7 +125,6 @@ ol {
 
   margin-bottom: var(--spacing-md);
 }
-
 .tab-btn {
   width: 100%;
 
@@ -154,21 +148,17 @@ ol {
   background: var(--color-primary);
   color: white;
 }
-
 /* =========================
    GRID GENERAL
 ========================= */
-
 .layout-grid {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-sm);
 }
-
 /* =========================
    CARDS
 ========================= */
-
 .card {
   background: #fafafa;
 
@@ -177,15 +167,13 @@ ol {
 
   padding: var(--spacing-sm);
 }
-
 /* =========================
    FORMULARIOS
 ========================= */
-
 .form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+display: flex;
+flex-direction: column;
+gap: 6px;
 }
 
 .form-group input,
@@ -198,7 +186,6 @@ ol {
   border: 1px solid #ccc;
   border-radius: var(--border-radius);
 }
-
 /* =========================
    UTILIDADES
 ========================= */

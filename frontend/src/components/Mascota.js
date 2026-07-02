@@ -1,9 +1,13 @@
 import React from 'react';
+import mateEscolar from '../assets/mate_escolar.png';
+import mateProfesor from '../assets/mate_profesor.png';
+import mateAcademico from '../assets/mate_academico.png';
 
 /*
   MATE-MÁTICO — COMPONENTE MASCOTA (REACT CLÁSICO)
   Este componente representa la mascota visual del usuario
-  según el nivel académico alcanzado.
+  según el nivel académico alcanzado, usando las ilustraciones
+  del personaje oficial de Mate-Mático.
 */
 
 export default function Mascota({ rol }) {
@@ -11,23 +15,26 @@ export default function Mascota({ rol }) {
     switch (rol) {
       case 'avanzado':
         return {
-          emoji: '🎓🧉📜',
-          outfit: 'Mate Académico (toga azul y birrete)',
-          accentColor: '#856404'
+          imgSrc: mateAcademico,
+          levelName: 'Nivel Experto',
+          description: '¡Felicitaciones! Has alcanzado el nivel máximo.',
+          accentColor: '#7b61ff'
         };
 
       case 'intermedio':
         return {
-          emoji: '👓🧉👔',
-          outfit: 'Mate Profesor (saco gris y camisa)',
-          accentColor: '#0c5460'
+          imgSrc: mateProfesor,
+          levelName: 'Nivel Intermedio',
+          description: '¡Excelente progreso! Seguí practicando.',
+          accentColor: '#163b74'
         };
 
       case 'principiante':
       default:
         return {
-          emoji: '👦🧉🎒',
-          outfit: 'Mate Escolar (guardapolvo blanco)',
+          imgSrc: mateEscolar,
+          levelName: 'Nivel Inicial',
+          description: '¡Comenzá a aprender y sumá puntos!',
           accentColor: '#383d41'
         };
     }
@@ -38,17 +45,34 @@ export default function Mascota({ rol }) {
   return (
     <div
       className="mascota-box"
-      style={{ borderColor: visual.accentColor }}
+      style={{ 
+        borderColor: visual.accentColor, 
+        display: 'flex', 
+        alignItems: 'center', 
+        gap: '20px',
+        padding: '15px',
+        borderRadius: '16px',
+        border: `2px solid ${visual.accentColor}`
+      }}
     >
-      <div style={{ fontSize: '48px', marginBottom: '8px' }}>
-        {visual.emoji}
-      </div>
+      <img
+        src={visual.imgSrc}
+        alt={visual.levelName}
+        style={{ 
+          width: '70px', 
+          height: '70px', 
+          objectFit: 'contain',
+          flexShrink: 0
+        }}
+      />
 
       <div>
-        <strong>Visual de Mascota Activo:</strong>
+        <strong style={{ color: '#163b74', fontSize: '1.15rem', fontWeight: '800', fontFamily: 'Poppins, sans-serif' }}>
+          {visual.levelName}
+        </strong>
 
-        <p style={{ fontSize: '13px', color: '#555' }}>
-          {visual.outfit}
+        <p style={{ fontSize: '13px', color: '#64748b', margin: '4px 0 0 0', fontWeight: '500' }}>
+          {visual.description}
         </p>
       </div>
     </div>

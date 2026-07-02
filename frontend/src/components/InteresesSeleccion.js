@@ -48,6 +48,7 @@ function InteresesSeleccion({ selectedIntereses = [], onToggleInteres, onNext, o
       <div className="action-container" style={{ display: 'flex', gap: '10px', marginTop: '25px', maxWidth: '360px', width: '100%' }}>
         <button
           type="button"
+          className="onboarding-back-btn"
           onClick={onBack}
           style={{
             padding: '12px 24px',

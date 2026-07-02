@@ -93,10 +93,15 @@ export async function loginWithPassword(email, password, apiKey) {
 
   const data = await res.json();
   if (!res.ok) {
+    const firebaseMsg = data.error?.message;
+    const isAuthError =
+      firebaseMsg === 'INVALID_LOGIN_CREDENTIALS' ||
+      firebaseMsg === 'EMAIL_NOT_FOUND' ||
+      firebaseMsg === 'INVALID_PASSWORD';
     const err = new Error(
-      data.error?.message === 'INVALID_LOGIN_CREDENTIALS'
-        ? 'Email o contraseña incorrectos'
-        : data.error?.message || 'Error de login'
+      isAuthError
+        ? 'Usuario no registrado o contraseña incorrecta. Por favor, registrate si sos un usuario nuevo.'
+        : firebaseMsg || 'Error de login'
     );
     err.status = 401;
     throw err;
