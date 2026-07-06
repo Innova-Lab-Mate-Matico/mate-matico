@@ -5,8 +5,15 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// 1. Cargar variables de entorno
+// 1. Cargar variables de entorno (con cascada de .env.local)
+dotenv.config({ path: path.resolve(__dirname, '../.env.local') });
 dotenv.config({ path: path.resolve(__dirname, '../.env') });
+
+// Si se fuerza producción, eliminamos las variables del emulador cargadas desde .env.local
+if (process.env.FORCE_PRODUCTION === 'true') {
+  delete process.env.FIRESTORE_EMULATOR_HOST;
+  delete process.env.FIREBASE_AUTH_EMULATOR_HOST;
+}
 
 // 2. Importaciones dinámicas para evitar inicializaciones tempranas de Firebase
 const { db } = await import('../src/config/firebase.js');
@@ -202,7 +209,12 @@ async function runSync() {
         const meta = evData.metadata || {};
         const moduleId = meta.tema;
         
-        if (userId && moduleId && (evData.tipo_evento === 'leccion_completada' || evData.tipo_evento === 'progreso_actualizado')) {
+        const isProgressTrigger = 
+          evData.tipo_evento === 'leccion_completada' || 
+          evData.tipo_evento === 'progreso_actualizado' || 
+          (evData.tipo_evento === 'ejercicio_completado' && meta?.resultado === 'correcto');
+
+        if (userId && moduleId && isProgressTrigger) {
           const key = `${userId}:${moduleId}`;
           if (!userModuleKeys.has(key)) {
             userModuleKeys.add(key);
