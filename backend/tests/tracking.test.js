@@ -29,6 +29,13 @@ describe('Telemetría y Tracking de Eventos (Hito 2)', () => {
   });
 
   before(async () => {
+    // Limpiar progreso huérfano de corridas previas en el emulador
+    try {
+      await db.collection('usuarios').doc(TEST_UID).collection('progreso').doc('porcentajes').delete();
+    } catch (err) {
+      // Ignorar si no existe
+    }
+
     // Crear usuario inicial en Firestore Emulator
     await db.collection('usuarios').doc(TEST_UID).set({
       uid: TEST_UID,
@@ -45,6 +52,7 @@ describe('Telemetría y Tracking de Eventos (Hito 2)', () => {
   after(async () => {
     // Limpiar base de datos
     try {
+      await db.collection('usuarios').doc(TEST_UID).collection('progreso').doc('porcentajes').delete();
       await db.collection('usuarios').doc(TEST_UID).delete();
       // Eliminar documentos en eventos
       const snap = await db.collection('eventos').where('usuario_id', '==', TEST_UID).get();
