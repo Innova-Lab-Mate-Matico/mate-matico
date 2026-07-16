@@ -1,6 +1,5 @@
 /* ==========================================
-   MULTIPLE CHOICE
-   Mobile First
+   CONTENEDOR
 ========================================== */
 
 .multiple-choice-container {
@@ -12,290 +11,355 @@
   align-items: center;
 
   padding: 20px;
-  background: #F5F5F5;
+
+  background: #F8FAFC;
 }
 
-.multiple-choice-card {
-  width: min(92vw, 360px);
-  min-height: 620px;
+/* ==========================================
+ }  TARJETA*/
 
-  background: #FFFFFF;
+.multiple-choice-card{
+  min-height:auto;
+  height:auto;
 
-  border-radius: 28px;
-
-  box-shadow: 0 8px 24px rgba(0,0,0,.08);
-
-  padding: 24px 20px;
-
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-
-.card-content{
   display:flex;
   flex-direction:column;
-  align-items:center;
-}
-
-.exercise-image,
-.feedback-icon{
-  width:120px;
-  margin-bottom:24px;
-}
-
-.question{
-  text-align:center;
-
-  font-size:1.1rem;
-  font-weight:700;
-
-  line-height:1.4;
-
-  color:#292829;
-
-  margin-bottom:24px;
-}
-
-.options {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.option {
-  width: 100%;
-  padding: 14px 16px;
-
-  background: #FFFFFF;
-
-  /* Siempre borde lila */
-  border: 2px solid #8B5CF6;
-  border-radius: 14px;
-
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: #292829;
-
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-/* Hover */
-.option:hover {
-  background: #F5F0FF;
-  border-color: #8B5CF6;
-}
-
-/* Opción seleccionada */
-.option.selected {
-  background: #EEE9FF;
-  border-color: #8B5CF6;
 }
 
 .feedback-card{
   text-align:center;
+
+  display:flex;
+  flex-direction:column;
+  height:100%;
+}
+
+.feedback-card .card-content{
+  
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  flex:1;
+}
+
+.feedback-card .card-footer{
+  margin-top:auto;
+}
+
+/* ==========================================
+   CONTENIDO
+========================================== */
+
+.card-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* ==========================================
+   PREGUNTA
+========================================== */
+
+.question {
+  font-family: "Poppins", sans-serif;
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 22px;
+
+  text-align: center;
+  color: #1A1A1A;
+
+  margin-bottom: 34px;
+}
+
+/* ==========================================
+   OPCIONES
+========================================== */
+
+.options {
+  width: 100%;
+
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.option {
+  width: 100%;
+  height: 36px;
+
+  padding: 0;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  background: #FFFFFF;
+
+  border: 1px solid #C80ED9;
+  border-radius: 18px;
+
+  font-family: "Poppins", sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1;
+
+  color: #1A1A1A;
+
+  cursor: pointer;
+  transition: .2s ease;
+}
+
+.option:hover {
+  background: #F8E5FB;
+}
+
+.option.selected {
+  background: #E59CEE;
+  border-color: #C80ED9;
+}
+
+/* ==========================================
+   FEEDBACK
+========================================== */
+
+.feedback-icon {
+  width: 95px;
+  margin-bottom: 10px;
 }
 
 .correct-title,
-.wrong-title{
+.wrong-title {
+  margin-bottom: 10px;
 
-  margin-top:10px;
-  margin-bottom:18px;
+  font-family: "Poppins", sans-serif;
+  font-size: 32px;
+  font-weight: 700;
 
-  font-size:1.8rem;
-  font-weight:700;
-
-  color:#0a0a0a;
+  color: #1A1A1A;
 }
 
-.feedback-text{
+.feedback-subtitle {
+  width: 230px;
 
-  color:#555;
+  font-family: "Poppins", sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 15px;
 
-  line-height:1.5;
+  color: #1A1A1A;
 
-  margin-bottom:20px;
+  margin-bottom: 20px;
 }
 
-.points{
+/* ==========================================
+   MARCO EXPLICACIÓN
+========================================== */
 
-  display:flex;
+.explanation-wrapper {
+  width: 100%;
 
-  justify-content:center;
+  background: #FFFFFF;
 
-  align-items:center;
+  border: 1px solid #B8B8B8;
+  border-radius: 12px;
 
-  gap:10px;
-
-  margin-top:10px;
+  padding: 12px;
 }
 
-.star-image{
-  width:36px;
+/* ==========================================
+   FONDO CELESTITO
+========================================== */
+
+.explanation-box {
+  background: #EFF6FE;
+
+  border-radius: 10px;
+
+  padding: 16px;
 }
 
-.points span{
+.explanation-box h3 {
+  margin-bottom: 12px;
 
-  font-size:1.2rem;
+  font-family: "Poppins", sans-serif;
+  font-size: 16px;
+  font-weight: 600;
 
-  font-weight:bold;
-
-  color:#6D4AFF;
+  color: #1A1A1A;
 }
 
-/* ===========================
+/* ==========================================
+   CAJA BLANCA DE LA CUENTA
+========================================== */
+
+.explanation-content {
+  background: #FFFFFF;
+
+  border-radius: 8px;
+
+  padding: 14px;
+
+  margin-top: 14px;
+}
+
+/* ==========================================
+   OPERACIÓN
+========================================== */
+
+.operation-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+
+  margin-bottom: 18px;
+}
+
+.pill {
+  background: #B2C7F9;
+
+  border-radius: 5px;
+
+  padding: 6px 12px;
+
+  font-family: "Poppins", sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+
+  color: #1A1A1A;
+}
+
+.operator {
+  font-family: "Poppins", sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+
+  color: #1A1A1A;
+}
+
+/* ==========================================
+   RESULTADO
+========================================== */
+
+.result-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  gap: 12px;
+
+  font-family: "Poppins", sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.result-row strong {
+  background: rgba(151, 71, 255, 0.28);
+
+  border-radius: 5px;
+
+  padding: 6px 18px;
+
+  font-size: 14px;
+  font-weight: 700;
+
+  color: #1A1A1A;
+}
+
+/* ==========================================
+   PUNTOS
+========================================== */
+
+.points {
+  width: 269px;
+  height: 86px;
+
+  background: #F6F3FD;
+
+  border-radius: 10px;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  gap: 16px;
+
+  margin-top: 20px;
+}
+
+.star-image {
+  width: 58px;
+}
+
+.points span {
+  font-family: "Poppins", sans-serif;
+  font-size: 24px;
+  font-weight: 600;
+
+  color: #1A1A1A;
+}
+
+/* ==========================================
    FOOTER
-=========================== */
+========================================== */
 
-.card-footer{
+.card-footer {
+  display: flex;
+  flex-direction: column;
 
-  display:flex;
-
-  flex-direction:column;
-
-  gap:18px;
+  gap: 24px;
 }
 
-.character-box{
+.character-box {
+  display: flex;
+  align-items: center;
 
-  display:flex;
-
-  align-items:flex-end;
-
-  gap:12px;
+  gap: 14px;
 }
 
-.mascot{
-
-  width:72px;
-
-  flex-shrink:0;
+.mascot {
+  width: 95px;
 }
 
-.speech-bubble{
-
-  position:relative;
-
-  flex:1;
-
-  background:#f8eba9;
-
-  border-radius:18px;
-
-  padding:12px 16px;
-
-  color:#292829;
-
-  font-size:.9rem;
-
-  line-height:1.35;
-
-  font-weight:600;
+.character-box .speech-bubble {
+  width: 150px;
+  font-size: 11px;
+  line-height: 13px;
 }
 
-/* Punta del globo */
-
-.speech-bubble::after{
-
-  content:"";
-
-  position:absolute;
-
-  left:-10px;
-
-  bottom:16px;
-
-  width:0;
-
-  height:0;
-
-  border-top:10px solid transparent;
-
-  border-bottom:10px solid transparent;
-
-  border-right:12px solid #f8eba9  ;
-}
-
-/* ===========================
+/* ==========================================
    BOTÓN
-=========================== */
+========================================== */
 
-.primary-button{
+.primary-button {
+  width: 100%;
+  height: 52px;
 
-  width:100%;
+  border: none;
+  border-radius: 12px;
 
-  height:48px;
+  background: #9747FF;
 
-  border:none;
+  color: white;
 
-  border-radius:14px;
+  font-family: "Poppins", sans-serif;
+  font-size: 20px;
+  font-weight: 500;
 
-  background:#6D4AFF;
+  cursor: pointer;
 
-  color:white;
-
-  font-size:1rem;
-
-  font-weight:700;
-
-  cursor:pointer;
-
-  transition:.2s;
+  transition: .2s ease;
 }
 
-.primary-button:hover{
-
-  background:#5C3BE0;
+.primary-button:hover {
+  opacity: .92;
 }
 
-/* ===========================
-   TABLET
-=========================== */
+/* TARJETAS 4 Y 5 */
 
-@media (min-width:768px){
-
-  .multiple-choice-card{
-
-    width:380px;
-  }
-
-  .exercise-image,
-  .feedback-icon{
-
-    width:135px;
-  }
-
-  .question{
-
-    font-size:1.2rem;
-  }
-
-  .mascot{
-
-    width:80px;
-  }
-}
-
-/* ===========================
-   DESKTOP
-=========================== */
-
-@media (min-width:1024px){
-
-  .multiple-choice-container{
-
-    padding:40px;
-  }
-
-  .multiple-choice-card{
-
-    width:390px;
-  }
-
-  .question{
-
-    font-size:1.25rem;
-  }
+.feedback-card .primary-button {
+  background: #1E3A5F;
 }

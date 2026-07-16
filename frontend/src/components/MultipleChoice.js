@@ -11,9 +11,9 @@ import descanso from "../assets/descanso.png";
 // Tarjeta 5
 import frame5 from "../assets/Frame 5.png";
 import imagen16 from "../assets/image16.png";
-import mateLibreta from "../assets/aprendamos juntos.png";
+import mateLibreta from "../assets/aprendamosJuntos.png";
 
-function MultipleChoice() {
+ function MultipleChoice({ onComplete })  {
   const [screen, setScreen] = useState("question");
   const [selectedOption, setSelectedOption] = useState(null);
 
@@ -36,10 +36,11 @@ function MultipleChoice() {
     }
   };
 
-  const restart = () => {
-    setSelectedOption(null);
-    setScreen("question");
-  };
+  const continuar = () => {
+  if (onComplete) {
+    onComplete();
+  }
+ };
 
   return (
     <div className="multiple-choice-container">
@@ -49,7 +50,7 @@ function MultipleChoice() {
       ========================== */}
 
       {screen === "question" && (
-        <div className="multiple-choice-card">
+        <div className=" app-card multiple-choice-card">
 
           <div className="card-content">
 
@@ -103,68 +104,103 @@ function MultipleChoice() {
           </div>
 
         </div>
-      )}
+      )}{/* =========================
+      TARJETA 4
+========================== */}
 
-      {/* =========================
-          TARJETA 4
-      ========================== */}
+{screen === "wrong" && (
+  <div className=" app-card multiple-choice-card feedback-card">
 
-      {screen === "wrong" && (
-        <div className="multiple-choice-card feedback-card">
+    <div className="card-content">
 
-          <div className="card-content">
+      <img
+        src={negativo}
+        alt="Incorrecto"
+        className="feedback-icon"
+      />
 
-            <img
-              src={negativo}
-              alt="Incorrecto"
-              className="feedback-icon"
-            />
+      <h2 className="wrong-title">
+        Casi lo tenés
+      </h2>
 
-            <h2 className="wrong-title">
-              ¡Seguí intentando!
-            </h2>
+      <p className="feedback-subtitle">
+        Esta vez no salió, pero estás más cerca de entenderlo.
+      </p>
 
-            <p className="feedback-text">
-              Multiplicá 8 × 73.
-              Podés separar 73 en 70 + 3 y después sumar los resultados.
-            </p>
+      <div className="explanation-box">
 
-          </div>
+        <h3>Explicación breve</h3>
 
-          <div className="card-footer">
+       <div className="operation-row">
 
-            <div className="character-box">
+      <span className="pill">
+       8 × (70 + 3)
+     </span>
 
-              <img
-                src={descanso}
-                alt="Mascota"
-                className="mascot"
-              />
+     <span className="operator">
+         =
+     </span>
 
-              <div className="speech-bubble">
-                No pasa nada. Todos aprendemos practicando.
-              </div>
+    <span className="pill">
+       560
+    </span>
 
-            </div>
+   <span className="operator">
+         +
+   </span>
 
-            <button
-              className="primary-button"
-              onClick={restart}
-            >
-              Intentar nuevamente
-            </button>
+   <span className="pill">
+      24
+  </span>
 
-          </div>
+ </div>
 
+        <div className="result-row">
+          <span>Respuesta</span>
+          <span>➜</span>
+          <strong>584</strong>
         </div>
-      )}
+
+      </div>
+
+    </div>
+
+    <div className="card-footer">
+
+      <div className="character-box">
+
+        <img
+          src={descanso}
+          alt="Mascota"
+          className="mascot"
+        />
+
+        <div className="speech-bubble">
+          Tomate tu tiempo. Los matemáticos también  aprenden mate a mate.
+        </div>
+
+      </div>
+
+      <button
+        className="primary-button"
+        onClick={continuar}
+      >
+        Continuar
+      </button>
+
+      </div>
+
+      </div>
+  )}
+
+  
 
       {/* =========================
           TARJETA 5
       ========================== */}
 
       {screen === "correct" && (
-        <div className="multiple-choice-card feedback-card">
+        <div className=" app-card multiple-choice-card feedback-card">
 
           <div className="card-content">
 
@@ -210,7 +246,7 @@ function MultipleChoice() {
 
             <button
               className="primary-button"
-              onClick={restart}
+              onClick={continuar}
             >
               Continuar
             </button>
