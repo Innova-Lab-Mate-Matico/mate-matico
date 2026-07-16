@@ -21,7 +21,7 @@
 .card-content{
     display:flex;
     flex-direction:column;
-    gap:18px;
+    gap: 10px;
    
 }
 
@@ -46,7 +46,7 @@
     width:100%;
     border:1px solid #B8B8B8;
     border-radius:16px;
-    padding:16px;
+    padding:12px;
     display:flex;
     justify-content:space-between;
     align-items:center;
@@ -68,9 +68,9 @@
     margin:0;
     color:#1A1A1A;
     font-family:Poppins;
-    font-size:16px;
+    font-size:14px;
     font-weight:600;
-    line-height:22px;
+    line-height:20px;
 }
 
 .exercise-text h3,
@@ -88,7 +88,7 @@
 }
 
 .work-image{
-    width:120px;
+    width:95px;
     object-fit:contain;
     flex-shrink:0;
 }
@@ -103,18 +103,18 @@
     width:170px;
     display:grid;
     grid-template-columns:repeat(7,1fr);
-    gap:6px;
+    gap:4px;
 }
 
 .calendar-day{
-    width:20px;
-    height:20px;
+    width:18px;
+    height:18px;
     border-radius:50%;
     display:flex;
     justify-content:center;
     align-items:center;
     font-family:Poppins;
-    font-size:13px;
+    font-size:11px;
     font-weight:700;
     color:#222221;
     transition:.3s;
@@ -173,7 +173,7 @@
 }
 
 .mascot{
-    width:82px;
+    width:68px;
 }
 
 .float{
@@ -292,12 +292,12 @@
     background:#FFF;
     border:1px solid #D9D9D9;
     border-radius:18px;
-    padding:16px;
+    padding: 12px;
 
     display:flex;
     flex-direction:column;
     align-items:center;
-    gap:12px;
+    gap: 8px;
 
     flex-shrink:0;
 }
@@ -319,19 +319,19 @@
 }
 
 .mini-icon{
-    width:28px;
-    height:28px;
+    width: 22px;
+    height: 22px;
 }
 
 .mini-calendar{
-    width:24px;
-    height:24px;
+    width: 20px;
+    height: 20px;
 }
 
 .hint-number{
     margin:0;
     color:#9747FF;
-    font-size:24px;
+    font-size: 20px;
     font-weight:600;
 }
 
@@ -343,11 +343,11 @@
     width:100%;
     background:#F8F8F8;
     border-radius:20px;
-    padding:14px;
+    padding:10px;
 
     display:flex;
     flex-direction:column;
-    gap:14px;
+    gap:10px;
 
     flex-shrink:0;
 }
@@ -355,13 +355,13 @@
 .operation-title{
     margin:0;
     text-align:center;
-    font-size:16px;
+    font-size:15px;
     font-weight:600;
 }
 
 .step-one{
     text-align:center;
-    font-size:20px;
+    font-size:18px;
     font-weight:700;
 }
 
@@ -370,9 +370,8 @@
     display:inline-flex;
     align-items:center;
     justify-content:center;
-    padding:35px 0;
+    padding:12px 0;
 }
-
 
 .equation-circle{
     position:absolute;
@@ -400,7 +399,7 @@
     width:70px;
 
     left:50%;
-    transform:translateX(-35px);
+    transform:translateX(-40px);
 
     top:-5px;
 }
@@ -410,12 +409,10 @@
     width:70px;
 
     left:50%;
-    transform:translateX(25px);
+    transform:translateX(-25px);
 
     top:45px;
 }
-
-/* Pasos */
 
 .step-two{
     display:flex;
