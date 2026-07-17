@@ -1,0 +1,544 @@
+/* --- 1. IMPORTACIONES Y CONFIGURACIÓN GLOBAL --- */
+@import url('../index.css');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --font-family-poppins: 'Poppins', sans-serif;
+  --shadow-sm-ejercicio: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+  --shadow-md-ejercicio: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+  --shadow-desktop-ejercicio: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+
+  /* --- Paleta de colores oficial --- */
+  --color-primario-ejercicio: #1E3A5F;      
+  --color-hover-ejercicio: #1D4C89;          
+  --color-bg-explicacion-ejercicio: #F8FAFC;
+  --color-bg-ejemplo-ejercicio: #FFF1D7;    
+  --color-texto-principal-ejercicio: #1A1A1A;
+  --color-bg-desktop-blur: #E2E8F0;          
+  --color-border-light-ejercicio: #E2E8F0;  
+}
+
+/* --- 2. ENCAPSULAMIENTO DEL WRAPPER RAÍZ (MOBILE FIRST) --- */
+.microleccion1-wrapper {
+  font-family: var(--font-family-poppins);
+  color: var(--color-texto-principal-ejercicio);
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  background-color: var(--color-bg-explicacion-ejercicio);
+  box-sizing: border-box;
+}
+
+/* --- 3. ESTRUCTURA BASE DE LA TARJETA (PANTALLA COMPLETA MÓVIL) --- */
+.microleccion1-card {
+  background-color: #ffffff;
+
+  width: var(--card-width-mobile);
+  height: 100%;
+
+  border-radius: var(--card-radius);
+  padding: var(--card-padding);
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  box-sizing: border-box;
+}
+
+.microleccion1__main-title {
+  font-family: var(--font-family-poppins);
+  font-weight: 700;
+  font-size: 24px;
+  color: var(--color-texto-principal-ejercicio);
+  text-align: center;
+  margin-bottom: 8px;
+  line-height: 1.3;
+}
+
+/* --- 4. ESTILOS DETALLADOS: MICROLECCION 1 --- */
+.microleccion1-card__section {
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.02);
+}
+
+.microleccion1-card__section--explicacion {
+  background-color: var(--color-bg-explicacion-ejercicio);
+  border: 1px solid var(--color-border-light-ejercicio);
+}
+
+.microleccion1-card__section--ejemplo {
+  background-color: var(--color-bg-ejemplo-ejercicio);
+  border: 1px solid transparent;
+}
+
+.microleccion1-card__image-box {
+  width: 60px;
+  height: 60px;
+  margin-bottom: 12px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.microleccion1-card__img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.microleccion1-card__title {
+  font-family: var(--font-family-poppins);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-texto-principal-ejercicio);
+  margin: 0 0 10px 0;
+}
+
+.microleccion1-card__description {
+  font-family: var(--font-family-poppins);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.6;
+  color: var(--color-texto-principal-ejercicio);
+  margin: 0;
+}
+
+.microleccion1-card__description strong {
+  font-weight: 700;
+}
+
+/* --- 5. ESTILOS DETALLADOS: MICROLECCION 2 --- */
+.microleccion2-hero {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  margin-bottom: 8px;
+  padding: 0 10px;
+}
+
+.microleccion2-hero__avatar {
+  width: 90px;
+  height: 90px;
+  object-fit: contain;
+}
+
+.microleccion2-dialog {
+  background-color: var(--color-bg-ejemplo-ejercicio);
+  border-radius: 16px 16px 16px 4px;
+  padding: 12px 16px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.02);
+}
+
+.microleccion2-dialog__text {
+  font-family: var(--font-family-poppins);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-texto-principal-ejercicio);
+  margin: 0;
+}
+
+.microleccion2-steps {
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-bg-explicacion-ejercicio);
+  border: 1px solid var(--color-border-light-ejercicio);
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.02);
+}
+
+.microleccion2-step {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px 0;
+  border-bottom: 1px solid #E2E8F0;
+}
+
+.microleccion2-step:first-of-type { padding-top: 4px; }
+.microleccion2-step:last-of-type { border-bottom: none; padding-bottom: 4px; }
+
+.microleccion2-step__header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.microleccion2-step__badge {
+  background-color: #9747FF;
+  color: #ffffff;
+  font-family: var(--font-family-poppins);
+  font-size: 11px;
+  font-weight: 700;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.microleccion2-step__title {
+  font-family: var(--font-family-poppins);
+  font-size: 13px;
+  font-weight: 600;
+  color: #64748b;
+  margin: 0;
+}
+
+.microleccion2-math {
+  font-family: var(--font-family-poppins);
+  font-size: 16px;
+  font-weight: 700;
+  text-align: center;
+  color: var(--color-texto-principal-ejercicio);
+  margin: 2px 0;
+}
+
+.math--blue { color: #3b82f6; }
+.math--magenta { color: #ec4899; }
+.math--green { color: #22c55e; }
+
+.microleccion2-success {
+  background-color: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 12px;
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.microleccion2-success__icon {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+}
+
+.microleccion2-success__content {
+  display: flex;
+  flex-direction: column;
+}
+
+.microleccion2-success__title {
+  font-family: var(--font-family-poppins);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-texto-principal-ejercicio);
+  margin: 0;
+}
+
+.microleccion2-success__text {
+  font-family: var(--font-family-poppins);
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--color-texto-principal-ejercicio);
+  margin: 0;
+}
+
+/* --- 6. ESTILOS DETALLADOS: DESCANSO (FORMATO EXACTO CON ONDAS) --- */
+.descanso-card-wrapper {
+  font-family: var(--font-family-poppins);
+  color: var(--color-texto-principal-ejercicio);
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  background-color: var(--color-bg-explicacion-ejercicio);
+  box-sizing: border-box;
+  position: relative;
+  overflow: hidden;
+}
+
+.descanso-card {
+  background-color: #ffffff;
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 40px 24px 60px 24px;
+  box-sizing: border-box;
+  animation: appCardFadeIn 0.5s ease-out;
+  position: relative;
+  z-index: 2;
+}
+
+/* Ondas decorativas de fondo */
+.descanso-card__wave-top {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 160px;
+  height: auto;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.descanso-card__wave-bottom {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 130px;
+  height: auto;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Cuerpo y contenedor de textos principales */
+.descanso-card__body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 20px;
+  flex-grow: 1;
+  justify-content: center;
+  width: 100%;
+}
+
+.descanso-card__header-inline {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  width: 100%;
+  text-align: left;
+  margin-bottom: 10px;
+  z-index: 2;
+}
+
+.descanso-card__header-text {
+  max-width: 65%;
+}
+
+.descanso-card__title {
+  font-family: var(--font-family-poppins);
+  规律: 700;
+  font-weight: 700;
+  font-size: 24px;
+  color: var(--color-texto-principal-ejercicio);
+  margin: 0 0 8px 0;
+  line-height: 1.2;
+}
+
+.descanso-card__description {
+  font-family: var(--font-family-poppins);
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--color-texto-principal-ejercicio);
+  margin: 0;
+}
+
+.descanso-card__avatar-mate {
+  width: 110px;
+  height: auto;
+  margin: 0;
+  object-fit: contain;
+}
+
+/* Contenedor central blanco para los logros */
+.descanso-card__features-box {
+  width: 100%;
+  background-color: #FFFFFF;
+  border: 1px solid var(--color-border-light-ejercicio);
+  border-radius: 16px;
+  padding: 16px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  z-index: 2;
+}
+
+/* Fila de Copa (Buen Trabajo) */
+.descanso-card__row-achievement {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background-color: rgba(229, 156, 238, 0.12); /* #E59CEE con opacidad */
+  padding: 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(229, 156, 238, 0.25);
+  text-align: left;
+}
+
+.descanso-card__icon-container {
+  width: 48px;
+  height: 48px;
+  background-color: #FFFFFF;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: var(--shadow-sm-ejercicio);
+  flex-shrink: 0;
+}
+
+.descanso-card__icon-img {
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
+}
+
+.descanso-card__subtitle {
+  font-family: var(--font-family-poppins);
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--color-texto-principal-ejercicio);
+  margin: 0;
+}
+
+.descanso-card__subdescription {
+  font-family: var(--font-family-poppins);
+  font-weight: 400;
+  font-size: 13px;
+  color: #4A4A4A;
+  margin: 0;
+}
+
+/* Fila de Motivación (Seguí así) */
+.descanso-card__row-motivation {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: rgba(214, 233, 250, 0.4); /* #D6E9FA con opacidad */
+  padding: 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(214, 233, 250, 0.6);
+  text-align: left;
+  gap: 10px;
+}
+
+.descanso-card__motivation-text {
+  font-family: var(--font-family-poppins);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--color-texto-principal-ejercicio);
+  margin: 0;
+}
+
+.descanso-card__motivation-img {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+/* Contenedor del Botón Ancla */
+.descanso-card__actions {
+  display: flex;
+  width: 100%;
+  z-index: 3;
+}
+
+/* Ajuste responsive PC heredado de tu diseño */
+@media (min-width: 480px) {
+  .descanso-card {
+    max-width: 412px;
+    min-height: unset;
+    height: 85vh;
+    border-radius: 32px;
+    border: 4px solid #FFFFFF;
+    box-shadow: var(--shadow-desktop-ejercicio);
+    overflow: hidden;
+  }
+}
+
+/* --- 7. BOTON ANCLA COMPARTIDO (INTERNO) --- */
+.microleccion1-card__actions,
+.microleccion2-card__actions,
+.descanso-card__actions{
+    display:flex;
+    width:100%;
+    margin-top:auto;
+    padding-top:20px;
+}
+
+.microleccion1-card__actions a,
+.microleccion2-card__actions a,
+.descanso-card__actions a{
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    width:100%;
+    height:48px;
+
+    background:#1E3A5F;
+    color:#fff;
+
+    border-radius:14px;
+
+    font-family:'Poppins',sans-serif;
+    font-size:16px;
+    font-weight:600;
+
+    text-decoration:none;
+
+    box-sizing:border-box;
+}
+
+.microleccion1-card__actions a:hover,
+.microleccion2-card__actions a:hover,
+.descanso-card__actions a:hover{
+    background:#1D4C89;
+}
+
+.microleccion1-card__actions a:hover,
+.microleccion1-card__actions a:active {
+  background-color: var(--color-hover-ejercicio);
+}
+
+@keyframes appCardFadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@media (min-width: 480px) {
+
+  .microleccion1-wrapper {
+    background-color: var(--color-bg-desktop-blur);
+    padding: 40px 20px;
+    align-items: center;
+  }
+
+  .microleccion1-card,
+  .microleccion2-card,
+  .descanso-card {
+    width: var(--card-width-desktop);
+    height: var(--card-height-desktop);
+
+    border-radius: var(--card-radius);
+
+    box-shadow: var(--shadow-desktop-ejercicio);
+
+    overflow-y: auto;
+  }
+
+  .descanso-card {
+    width: var(--card-width-desktop);
+    height: var(--card-height-desktop);
+
+    border-radius: var(--card-radius);
+
+    box-shadow: var(--shadow-desktop-ejercicio);
+
+    overflow-y: auto;
+  }
+}

@@ -1,0 +1,646 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+/* --- 1. CONFIGURACIÓN DEL WRAPPER COMÚN (MOBILE FIRST) --- */
+.exitos-card-wrapper,
+.finalizacion-card-wrapper,
+.progreso-card-wrapper {
+  font-family: 'Poppins', sans-serif;
+  color: #1A1A1A;
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  background-color: #F8FAFC;
+  box-sizing: border-box;
+  position: relative;
+  overflow: hidden;
+}
+
+.exitos-card,
+.finalizacion-card,
+.progreso-card {
+  background-color: #ffffff;
+  width: 100%;
+  min-height: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 24px;
+  box-sizing: border-box;
+  position: relative;
+  z-index: 2;
+}
+
+/* --- 2. CUERPO INTERNO Y FLUJO DE CONTENIDO --- */
+.exitos-card__body,
+.finalizacion-card__body,
+.progreso-card__body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 28px;
+  flex-grow: 1;
+  justify-content: center;
+  width: 100%;
+}
+
+/* Ajuste fino específico para compactar el flujo elástico de progreso y mantener tamaño idéntico */
+.progreso-card__body {
+  gap: 14px;
+}
+
+/* --- 3. SECCIÓN SUPERIOR: HERO / ENCABEZADOS --- */
+.exitos-card__top-hero,
+.finalizacion-card__top-hero,
+.progreso-card__top-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  width: 100%;
+}
+
+.exitos-card__large-check-container {
+  width: 96px;
+  height: 96px;
+  background-color: rgba(214, 233, 250, 0.4);
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.02);
+}
+
+.exitos-card__large-check-img {
+  width: 52px;
+  height: 52px;
+  object-fit: contain;
+}
+
+.exitos-card__main-title,
+.finalizacion-card__main-title,
+.progreso-card__main-title {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  font-size: 40px;
+  color: #1A1A1A;
+  margin: 0 0 6px 0;
+}
+
+/* Ajuste proporcional para que el título largo de progreso quepa exactamente en el mismo alto */
+.progreso-card__main-title {
+  font-size: 32px;
+}
+
+.exitos-card__main-description,
+.finalizacion-card__main-description,
+.progreso-card__main-description {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+  font-size: 20px;
+  color: #0c0c0c;
+  margin: 0;
+}
+
+.progreso-card__main-description {
+  font-size: 15px;
+  color: #4A4A4A;
+}
+
+/* --- 4. SECCIÓN CENTRAL: RECUADRO DE LOGROS DE ÉXITOS --- */
+.exitos-card__features-box {
+  width: 100%;
+  background-color: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 20px;
+  padding: 24px 20px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.02);
+}
+
+.exitos-card__metric-row-combined {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  text-align: left;
+  width: 100%;
+}
+
+.exitos-card__star-container-large {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.exitos-card__large-star-img {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+}
+
+.exitos-card__text-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.exitos-card__metric-points-large {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  font-size: 22px;  
+  color: #1A1A1A;
+  line-height: 1.1;
+}
+
+.exitos-card__metric-exercises-sub {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  color: #4A4A4A;
+}
+
+/* --- 5. SECCIÓN CENTRAL: RECUADRO BLANCO CON ÍCONO ABAJO (FINALIZACIÓN) --- */
+.finalizacion-card__features-box {
+  width: 100%;
+  background-color: #FFFFFF;
+  border: 1px solid #E2E8F0;  
+  border-radius: 20px;
+  padding: 24px 20px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;    
+  gap: 20px;                  
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.02);
+  z-index: 2;
+}
+
+.finalizacion-card__text-stack-vertical {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  width: 100%;
+  gap: 2px;
+}
+
+.finalizacion-card__metric-label-small {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+  font-size: 13px;
+  color: #1A1A1A;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.finalizacion-card__metric-points-highlight {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;          
+  font-size: 34px;            
+  color: #B62D93;            
+  line-height: 1.1;
+  margin-bottom: 16px;        
+}
+
+.finalizacion-card__metric-label-progress {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+  font-size: 15px;
+  color: #1A1A1A;
+}
+
+.finalizacion-card__metric-sublabel-progress {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 400;
+  font-size: 13px;
+  color: #4A4A4A;
+}
+
+.finalizacion-card__level-image-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+.finalizacion-card__level-img-wide {
+  width: 80%;
+  height: auto;
+  object-fit: contain;
+  display: block;
+}
+
+/* ==========================================================================
+   --- EXTRA: CLASES INDEPENDIENTES RECUADROS DE CONTENIDO TARJETA PROGRESO ---
+   ========================================================================== */
+.progreso-card__features-box {
+  width: 100%;
+  background-color: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 20px;
+  padding: 14px 18px; /* Proporcionalmente más compacto para igualar alturas generales */
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.02);
+  z-index: 2;
+}
+
+.progreso-card__text-stack-vertical {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.progreso-card__meta-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.progreso-card__metric-label-small {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+  font-size: 13px;
+  color: #4A4A4A;
+}
+
+/* Viñetas estéticas */
+.progreso-card__icon-bullet-check {
+  width: 12px;
+  height: 12px;
+  border: 2px solid #B62D93;
+  border-radius: 50%;
+  display: inline-block;
+  position: relative;
+}
+.progreso-card__icon-bullet-check::after {
+  content: '';
+  position: absolute;
+  left: 3px;
+  top: 1px;
+  width: 2px;
+  height: 5px;
+  border: solid #B62D93;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.progreso-card__icon-bullet-signal {
+  width: 12px;
+  height: 10px;
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 2px;
+}
+.progreso-card__icon-bullet-signal::before {
+  content: '';
+  width: 2px;
+  height: 50%;
+  background-color: #1E3A5F;
+  display: block;
+}
+.progreso-card__icon-bullet-signal::after {
+  content: '';
+  width: 2px;
+  height: 100%;
+  background-color: #1E3A5F;
+  display: block;
+  box-shadow: 4px 0 0 #1E3A5F;
+}
+
+/* Fila métricas internas lección */
+.progreso-card__counter-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.progreso-card__number-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.progreso-card__metric-points-highlight {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 400;
+  font-size: 15px;
+  color: #1A1A1A;
+  margin: 0;
+}
+
+.progreso-card__number-massive {
+  font-size: 32px;
+  font-weight: 700;
+  color: #B62D93;
+}
+
+.progreso-card__metric-label-progress {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  color: #1A1A1A;
+  margin: 2px 0 0 0;
+}
+
+.progreso-card__metric-sublabel-progress {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 400;
+  font-size: 12px;
+  color: #4A4A4A;
+  margin: 0;
+}
+
+.progreso-card__asset-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.progreso-card__asset-inline {
+  width: 55px;
+  height: auto;
+  object-fit: contain;
+}
+
+/* Barra de progreso de lecciones */
+.progreso-card__progress-bar-track {
+  width: 100%;
+  height: 6px;
+  background-color: #E2E8F0;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-top: 6px;
+}
+
+.progreso-card__progress-bar-fill {
+  height: 100%;
+  background-color: #B62D93;
+  border-radius: 10px;
+}
+
+/* Posición controlada de nivel.png debajo de la barra */
+.progreso-card__level-image-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  margin-top: 10px;
+}
+
+.progreso-card__level-img-wide {
+  width: 60%;
+  height: auto;
+  object-fit: contain;
+  display: block;
+}
+
+/* Fila interna del recuadro Nivel Actual */
+.progreso-card__level-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.progreso-card__level-title {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  font-size: 18px;
+  color: #1A1A1A;
+  margin: 2px 0;
+}
+
+.progreso-card__level-description {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 400;
+  font-size: 12px;
+  color: #1A1A1A;
+  line-height: 1.3;
+  margin: 0;
+}
+
+.progreso-card__medalla-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.progreso-card__medalla-img {
+  width: 46px;
+  height: auto;
+  object-fit: contain;
+}
+
+/* --- 6. BLOQUES MOTIVACIONALES INFERIORES --- */
+.exitos-card__motivation-box,
+.finalizacion-card__motivation-box,
+.progreso-card__motivation-box {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0 4px;
+}
+
+.exitos-card__motivation-avatar-container,
+.finalizacion-card__motivation-avatar-container,
+.progreso-card__motivation-avatar-container {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  flex-shrink: 0;
+}
+
+.exitos-card__motivation-avatar-massive,
+.finalizacion-card__motivation-avatar-massive,
+.progreso-card__motivation-avatar-massive {
+  width: 110px;
+  height: 110px;
+  object-fit: contain;
+}
+
+/* Cajas contenedoras con fondo crema #FFF1D7 y textos centrados entre sí */
+.exitos-card__motivation-text-stack,
+.finalizacion-card__motivation-text-stack,
+.progreso-card__motivation-text-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;      
+  text-align: center;      
+  margin-left: auto;        
+  gap: 4px;
+  max-width: 55%;
+  background-color: #FFF1D7;
+  border: 1px solid rgba(255, 241, 215, 0.9);
+  border-radius: 16px;
+  padding: 12px 16px;
+  box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.02);
+  box-sizing: border-box;
+}
+
+.exitos-card__motivation-line-top,
+.finalizacion-card__motivation-line-top,
+.progreso-card__motivation-line-top {
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: #1A1A1A;
+  line-height: 1;
+}
+
+.exitos-card__motivation-line-bottom,
+.finalizacion-card__motivation-line-bottom,
+.progreso-card__motivation-line-bottom {
+  font-family: 'Poppins', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: #4A4A4A;
+  line-height: 1.2;
+}
+
+/* --- 7. COMPONENTE COMPARTIDO: BOTÓN ANCLA GRUPAL --- */
+.exitos-card__actions,
+.finalizacion-card__actions,
+.progreso-card__actions {
+  display: flex;
+  width: 100%;
+  z-index: 3;
+}
+
+.exitos-card__btn-wrapper,
+.finalizacion-card__btn-wrapper,
+.progreso-card__btn-wrapper {
+  width: 100%;
+}
+
+/* Estilos inyectados sobre la etiqueta <a> pura del componente compartido */
+.exitos-card__btn-wrapper a,
+.finalizacion-card__btn-wrapper a,
+.progreso-card__btn-wrapper a {
+  display: block;
+  width: 100%;
+  text-align: center;
+  background-color: #1E3A5F;
+  color: #ffffff;
+  padding: 15px 0;
+  border-radius: 12px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+  font-size: 16px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  transition: background-color 0.2s ease-in-out;
+  text-decoration: none;
+}
+
+.exitos-card__btn-wrapper a:hover,
+.finalizacion-card__btn-wrapper a:hover,
+.progreso-card__btn-wrapper a:hover,
+.exitos-card__btn-wrapper a:active,
+.finalizacion-card__btn-wrapper a:active,
+.progreso-card__btn-wrapper a:active {
+  background-color: #1D4C89;
+}
+
+/* --- 8. CAPA MEDIA QUERY RESPONSIVE PARA ESCRITORIO --- */
+@media (min-width: 480px) {
+  .exitos-card-wrapper,
+  .finalizacion-card-wrapper,
+  .progreso-card-wrapper {
+    background-color: #E2E8F0;
+    padding: 40px 20px;
+  }
+
+  /* Vinculación estricta al alto de 85vh para simetría 1:1 absoluta */
+
+.exitos-card,
+.finalizacion-card,
+.progreso-card {
+  max-width: 412px;
+  min-height: auto;
+  height: auto;
+  border-radius: 20px;
+  border: 4px solid #FFFFFF;
+  box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
+  overflow: visible;
+}  
+
+}
+/* ================================
+   AJUSTE URGENTE RESPONSIVE CARDS
+   Igualar comportamiento a MultipleChoice
+================================ */
+
+.exitos-card-wrapper,
+.finalizacion-card-wrapper,
+.progreso-card-wrapper {
+  width: 100%;
+  min-height: 100vh;
+  padding: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow-x: hidden;
+}
+
+
+.exitos-card,
+.finalizacion-card,
+.progreso-card {
+  width: min(92vw, 390px);
+  min-height: 620px;
+  height: auto;
+  padding: 24px 20px;
+  border-radius: 28px;
+  overflow: hidden;
+}
+
+
+.exitos-card__body,
+.finalizacion-card__body,
+.progreso-card__body {
+  gap: 20px;
+  justify-content: flex-start;
+}
+
+
+.exitos-card__main-title,
+.finalizacion-card__main-title {
+  font-size: 28px;
+}
+
+
+.exitos-card__main-description,
+.finalizacion-card__main-description {
+  font-size: 15px;
+}
+
+
+.exitos-card__motivation-avatar-massive,
+.finalizacion-card__motivation-avatar-massive,
+.progreso-card__motivation-avatar-massive {
+  width: 80px;
+  height: 80px;
+}
+
+
+@media (min-width:768px){
+
+  .exitos-card,
+  .finalizacion-card,
+  .progreso-card {
+    width: 390px;
+  }
+
+}

@@ -1,0 +1,365 @@
+/* ==========================================
+   CONTENEDOR
+========================================== */
+
+.multiple-choice-container {
+  width: 100%;
+  min-height: 100vh;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  padding: 20px;
+
+  background: #F8FAFC;
+}
+
+/* ==========================================
+ }  TARJETA*/
+
+.multiple-choice-card{
+  min-height:auto;
+  height:auto;
+
+  display:flex;
+  flex-direction:column;
+}
+
+.feedback-card{
+  text-align:center;
+
+  display:flex;
+  flex-direction:column;
+  height:100%;
+}
+
+.feedback-card .card-content{
+  
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  flex:1;
+}
+
+.feedback-card .card-footer{
+  margin-top:auto;
+}
+
+/* ==========================================
+   CONTENIDO
+========================================== */
+
+.card-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* ==========================================
+   PREGUNTA
+========================================== */
+
+.question {
+  font-family: "Poppins", sans-serif;
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 22px;
+
+  text-align: center;
+  color: #1A1A1A;
+
+  margin-bottom: 34px;
+}
+
+/* ==========================================
+   OPCIONES
+========================================== */
+
+.options {
+  width: 100%;
+
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.option {
+  width: 100%;
+  height: 36px;
+
+  padding: 0;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  background: #FFFFFF;
+
+  border: 1px solid #C80ED9;
+  border-radius: 18px;
+
+  font-family: "Poppins", sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1;
+
+  color: #1A1A1A;
+
+  cursor: pointer;
+  transition: .2s ease;
+}
+
+.option:hover {
+  background: #F8E5FB;
+}
+
+.option.selected {
+  background: #E59CEE;
+  border-color: #C80ED9;
+}
+
+/* ==========================================
+   FEEDBACK
+========================================== */
+
+.feedback-icon {
+  width: 95px;
+  margin-bottom: 10px;
+}
+
+.correct-title,
+.wrong-title {
+  margin-bottom: 10px;
+
+  font-family: "Poppins", sans-serif;
+  font-size: 32px;
+  font-weight: 700;
+
+  color: #1A1A1A;
+}
+
+.feedback-subtitle {
+  width: 230px;
+
+  font-family: "Poppins", sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 15px;
+
+  color: #1A1A1A;
+
+  margin-bottom: 20px;
+}
+
+/* ==========================================
+   MARCO EXPLICACIÓN
+========================================== */
+
+.explanation-wrapper {
+  width: 100%;
+
+  background: #FFFFFF;
+
+  border: 1px solid #B8B8B8;
+  border-radius: 12px;
+
+  padding: 12px;
+}
+
+/* ==========================================
+   FONDO CELESTITO
+========================================== */
+
+.explanation-box {
+  background: #EFF6FE;
+
+  border-radius: 10px;
+
+  padding: 16px;
+}
+
+.explanation-box h3 {
+  margin-bottom: 12px;
+
+  font-family: "Poppins", sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+
+  color: #1A1A1A;
+}
+
+/* ==========================================
+   CAJA BLANCA DE LA CUENTA
+========================================== */
+
+.explanation-content {
+  background: #FFFFFF;
+
+  border-radius: 8px;
+
+  padding: 14px;
+
+  margin-top: 14px;
+}
+
+/* ==========================================
+   OPERACIÓN
+========================================== */
+
+.operation-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+
+  margin-bottom: 18px;
+}
+
+.pill {
+  background: #B2C7F9;
+
+  border-radius: 5px;
+
+  padding: 6px 12px;
+
+  font-family: "Poppins", sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+
+  color: #1A1A1A;
+}
+
+.operator {
+  font-family: "Poppins", sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+
+  color: #1A1A1A;
+}
+
+/* ==========================================
+   RESULTADO
+========================================== */
+
+.result-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  gap: 12px;
+
+  font-family: "Poppins", sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.result-row strong {
+  background: rgba(151, 71, 255, 0.28);
+
+  border-radius: 5px;
+
+  padding: 6px 18px;
+
+  font-size: 14px;
+  font-weight: 700;
+
+  color: #1A1A1A;
+}
+
+/* ==========================================
+   PUNTOS
+========================================== */
+
+.points {
+  width: 269px;
+  height: 86px;
+
+  background: #F6F3FD;
+
+  border-radius: 10px;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  gap: 16px;
+
+  margin-top: 20px;
+}
+
+.star-image {
+  width: 58px;
+}
+
+.points span {
+  font-family: "Poppins", sans-serif;
+  font-size: 24px;
+  font-weight: 600;
+
+  color: #1A1A1A;
+}
+
+/* ==========================================
+   FOOTER
+========================================== */
+
+.card-footer {
+  display: flex;
+  flex-direction: column;
+
+  gap: 24px;
+}
+
+.character-box {
+  display: flex;
+  align-items: center;
+
+  gap: 14px;
+}
+
+.mascot {
+  width: 95px;
+}
+
+.character-box .speech-bubble {
+  width: 150px;
+  font-size: 11px;
+  line-height: 13px;
+}
+
+/* ==========================================
+   BOTÓN
+========================================== */
+
+.primary-button {
+  width: 100%;
+  height: 52px;
+
+  border: none;
+  border-radius: 12px;
+
+  background: #9747FF;
+
+  color: white;
+
+  font-family: "Poppins", sans-serif;
+  font-size: 20px;
+  font-weight: 500;
+
+  cursor: pointer;
+
+  transition: .2s ease;
+}
+
+.primary-button:hover {
+  opacity: .92;
+}
+
+/* TARJETAS 4 Y 5 */
+
+.feedback-card .primary-button {
+  background: #1E3A5F;
+}
