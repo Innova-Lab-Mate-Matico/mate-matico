@@ -37,12 +37,18 @@ export function validateRegisterBody(req, res, next) {
     });
   }
 
-  // 4. Validar contraseña (mínimo 6 caracteres, estándar de Firebase Auth)
+  // 4. Validar contraseña (mínimo 8 caracteres, mayús + minús + número + especial, sin límite máximo)
   const passStr = String(password);
-  if (passStr.length < 6) {
+  const hasUpper = /[A-Z]/.test(passStr);
+  const hasLower = /[a-z]/.test(passStr);
+  const hasDigit = /\d/.test(passStr);
+  const hasSpecial = /[^A-Za-z0-9]/.test(passStr);
+  const isCorrectLength = passStr.length >= 8;
+
+  if (!hasUpper || !hasLower || !hasDigit || !hasSpecial || !isCorrectLength) {
     return res.status(400).json({
       success: false,
-      error: 'La contraseña debe tener al menos 6 caracteres.',
+      error: 'La contraseña debe tener al menos 8 caracteres, e incluir mayúscula, minúscula, número y un carácter especial.',
     });
   }
 
