@@ -7,6 +7,8 @@ import Auth from './components/Auth';
 import Profile from './components/Profile';
 import Modules from './components/Modules';
 import Progress from './components/Progress';
+import LessonFlow from './components/LessonFlow';
+
 
 // --- TUS COMPONENTES INYECTADOS (Unificados con tus flujos nuevos) ---
 import Header from './components/Header';
@@ -19,6 +21,7 @@ import OnboardingWizard from './components/OnboardingWizard';
 
 import olaSuperior from './assets/image 2.png';
 import olaInferior from './assets/image 10 (1).png';
+
 
 
 // URL base de la API backend
@@ -463,7 +466,7 @@ const apiCall = async (path, options = {}, customToken = null) => {
         <header className="dashboard-header">
           <div className="dashboard-header-left">
             <img className="dashboard-logo" src="./img/matemático.png" alt="el mate-mático" />
-            <h2>EL MATE-MÁTICO</h2>
+            <h2> MATE-MÁTICO</h2>
           </div>
           <div className="dashboard-header-right">
             <span>🔥 {user.rachaDias ?? 0} {user.rachaDias === 1 ? 'día' : 'días'}</span>
@@ -513,18 +516,21 @@ const apiCall = async (path, options = {}, customToken = null) => {
                   }}
                 />
               )}
-
               {activeTab === 'lecciones' && (
-                <Modules
-                  apiCall={apiCall}
-                  onAnswerSuccess={handleAnswerSuccess}
-                  progress={progress}
-                  onRefreshProgress={loadUserProgress}
-                  user={user}
-                />
-              )}
+           <div>
+           <Modules
+            apiCall={apiCall}
+           onAnswerSuccess={handleAnswerSuccess}
+            progress={progress}
+           onRefreshProgress={loadUserProgress}
+         />
 
-              {activeTab === 'progreso' && (
+         <LessonFlow />
+
+        </div>
+        )}
+
+           {activeTab === 'progreso' && (
                 <Progress apiCall={apiCall} />
               )}
             </div>
@@ -532,7 +538,7 @@ const apiCall = async (path, options = {}, customToken = null) => {
         </main>
 
         <footer className="footer">
-          <p>API Endpoint: <code>{API_BASE}</code></p>
+         
           <p style={{ marginTop: '5px' }}>
             Mate-Mático Monorepo MVP — React Frontend © 2026
           </p>
