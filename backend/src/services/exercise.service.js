@@ -108,9 +108,10 @@ export async function validarEjercicio(uid, body) {
       explicacionError:
         ejercicio.explicacionError ??
         'No te preocupes: en Mate-Matico podés intentar de nuevo las veces que necesites.',
-      habilitarComodin: erroresConsecutivos >= UMBRAL_COMODIN,
+      habilitarComodin: erroresConsecutivos === 1,
       comodinPista:
-        erroresConsecutivos >= UMBRAL_COMODIN ? ejercicio.comodinPista ?? null : null,
+        ejercicio.comodinPista ??
+        'Revisá los datos del enunciado y resolvé la operación paso a paso.',
       rolActual: user?.rolActual ?? 'principiante',
     };
   }

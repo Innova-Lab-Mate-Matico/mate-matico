@@ -88,7 +88,29 @@ export default function App() {
 /*
   Wrapper estándar para llamadas HTTP al backend.
 */
-const apiCall = async (path, options = {}, customToken = null) => {
+const refreshSessionToken = async () => {
+  const refreshToken = localStorage.getItem('refreshToken');
+  if (!refreshToken || !firebaseClientConfig.apiKey) return null;
+
+  const res = await fetch(
+    `https://securetoken.googleapis.com/v1/token?key=${firebaseClientConfig.apiKey}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({ grant_type: 'refresh_token', refresh_token: refreshToken }),
+    }
+  );
+  if (!res.ok) return null;
+  const data = await res.json();
+  const nextToken = data.id_token;
+  if (!nextToken) return null;
+  setToken(nextToken);
+  localStorage.setItem('idToken', nextToken);
+  if (data.refresh_token) localStorage.setItem('refreshToken', data.refresh_token);
+  return nextToken;
+};
+
+const apiCall = async (path, options = {}, customToken = null, retried = false) => {
   const headers = {
     "Content-Type": "application/json",
     ...options.headers,
@@ -107,12 +129,17 @@ const apiCall = async (path, options = {}, customToken = null) => {
 
   const data = await res.json().catch(() => ({}));
 
-  // 🔴 DEBUG IMPORTANTE: ver respuesta real del backend
-  console.log("API RESPONSE:", {
-    status: res.status,
-    ok: res.ok,
-    data,
-  });
+  if (res.status === 401 && !retried) {
+    const refreshedToken = await refreshSessionToken();
+    if (refreshedToken) {
+      return apiCall(path, options, refreshedToken, true);
+    }
+  }
+
+  if (path === '/exercises/ai/generate' && res.ok && data.exercise) {
+    const { validationToken, ...exerciseForLog } = data.exercise;
+    console.info('Ejercicio generado por IA:', exerciseForLog);
+  }
 
   if (!res.ok) {
     console.log("API ERROR RAW:", data);
@@ -167,9 +194,10 @@ const apiCall = async (path, options = {}, customToken = null) => {
   /*
     Guardar token JWT localmente.
   */
-  const saveToken = (idToken) => {
+  const saveToken = (idToken, refreshToken = null) => {
     setToken(idToken);
     localStorage.setItem('idToken', idToken);
+    if (refreshToken) localStorage.setItem('refreshToken', refreshToken);
   };
 
   /*
@@ -181,6 +209,7 @@ const apiCall = async (path, options = {}, customToken = null) => {
     setProgress(null);
 
     localStorage.removeItem('idToken');
+    localStorage.removeItem('refreshToken');
 
     setStatus(
       'Sesión cerrada correctamente',
@@ -248,7 +277,7 @@ const apiCall = async (path, options = {}, customToken = null) => {
         return;
       }
 
-      saveToken(data.idToken);
+      saveToken(data.idToken, data.refreshToken);
       loadUserProgress(data.idToken);
 
       setStatus(
@@ -284,7 +313,7 @@ const apiCall = async (path, options = {}, customToken = null) => {
         }
       );
 
-      saveToken(data.idToken);
+      saveToken(data.idToken, data.refreshToken);
       loadUserProgress(data.idToken);
 
       setStatus(
@@ -358,7 +387,7 @@ const apiCall = async (path, options = {}, customToken = null) => {
         }
       );
 
-      saveToken(data.idToken);
+      saveToken(data.idToken, data.refreshToken);
       loadUserProgress(data.idToken);
 
       setStatus(

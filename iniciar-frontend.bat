@@ -1,6 +1,8 @@
 @echo off
 title Mate-Matico - Frontend prueba
 set "PATH=C:\Program Files\nodejs;%PATH%"
+set "PORT=5173"
+set "REACT_APP_API_BASE_URL=http://localhost:3000/api"
 
 cd /d "%~dp0frontend"
 

@@ -42,6 +42,16 @@ export default function Modules({
   const [activeLesson, setActiveLesson] =
     useState(null);
 
+  const [aiConfigOpen, setAiConfigOpen] = useState(false);
+  const [aiExercise, setAiExercise] = useState(null);
+  const [aiExerciseState, setAiExerciseState] = useState({});
+  const [aiGenerationError, setAiGenerationError] = useState('');
+  const [aiSettings, setAiSettings] = useState({
+    level: '0',
+    section: 'Suma y Resta',
+    structure: 'multiple_choice',
+  });
+
   const [exerciseStates, setExerciseStates] =
     useState({});
 
@@ -90,6 +100,13 @@ export default function Modules({
   const handleSelectModule = async (
     moduleId
   ) => {
+    setSelectedModuleId(moduleId);
+    setModuleDetail(null);
+    setActiveLesson(null);
+    setAiConfigOpen(false);
+    setAiExercise(null);
+    setExerciseStates({});
+    setErrorCount({});
     setLoading(true);
 
     try {
@@ -97,23 +114,18 @@ export default function Modules({
         `/modules/${moduleId}`
       );
 
-      setSelectedModuleId(moduleId);
-
       setModuleDetail(
         data.modulo ??
           data.module
       );
 
-      setActiveLesson(null);
-
-      setExerciseStates({});
-
-      setErrorCount({});
     } catch (err) {
       console.error(
         'Error al cargar detalle del módulo:',
         err
       );
+      setSelectedModuleId(null);
+      alert(`No se pudo abrir el módulo: ${err.message}`);
     } finally {
       setLoading(false);
     }
@@ -332,12 +344,86 @@ export default function Modules({
       setActiveLesson(null);
     };
 
+  const handleGenerateAiExercise = async () => {
+    setAiGenerationError('');
+    setLoading(true);
+    try {
+      const data = await apiCall('/exercises/ai/generate', {
+        method: 'POST',
+        body: JSON.stringify({
+          ...aiSettings,
+          level: Number(aiSettings.level),
+        }),
+      });
+      setAiExercise(data.exercise);
+      setAiExerciseState({});
+      setAiConfigOpen(false);
+    } catch (err) {
+      setAiGenerationError(err.message || 'No se pudo generar el ejercicio con Gemini.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSubmitAiAnswer = async () => {
+    if (!aiExercise || aiExerciseState.correcto) return;
+    const answer = aiExercise.type === 'multiple_choice'
+      ? aiExerciseState.selectedOption
+      : aiExerciseState.userInput;
+    if (!answer?.trim()) return;
+
+    try {
+      const result = await apiCall('/exercises/ai/validate', {
+        method: 'POST',
+        body: JSON.stringify({
+          exerciseId: aiExercise.id,
+          validationToken: aiExercise.validationToken,
+          attempt: (aiExerciseState.incorrectAttempts || 0) + 1,
+          answer,
+        }),
+      });
+      setAiExerciseState((prev) => ({
+        ...prev,
+        ...result,
+        checked: true,
+        // Conservamos el valor del intento resuelto hasta recibir el próximo ejercicio.
+        incorrectAttempts: result.correcto
+          ? (prev.incorrectAttempts || 0)
+          : (prev.incorrectAttempts || 0) + 1,
+        lockedIncorrectOptions: result.correcto
+          ? (prev.lockedIncorrectOptions || [])
+          : [...new Set([...(prev.lockedIncorrectOptions || []), answer])],
+        explicacionError: result.correcto
+          ? null
+          : (prev.explicacionError || aiExercise.explanation),
+      }));
+      if (!result.correcto) {
+        // La explicación queda reservada para el danger desde el segundo intento.
+        setAiExercise((prev) => ({ ...prev, explanation: '' }));
+      }
+      if (result.correcto) {
+        onAnswerSuccess(result);
+        setTimeout(() => handleGenerateAiExercise(), 1500);
+      }
+    } catch (err) {
+      alert(`No se pudo validar la respuesta: ${err.message}`);
+    }
+  };
+
+  const handleBackFromAi = () => {
+    setAiExercise(null);
+    setAiConfigOpen(false);
+    setAiExerciseState({});
+  };
+
   /*
     Estado de carga inicial.
   */
   if (
     loading &&
-    !selectedModuleId
+    !selectedModuleId &&
+    !aiConfigOpen &&
+    !aiExercise
   ) {
     return (
       <div className="card modules-card">
@@ -350,7 +436,7 @@ export default function Modules({
     VISTA 1:
     Catálogo de módulos.
   */
-  if (!selectedModuleId) {
+  if (!selectedModuleId && !aiConfigOpen && !aiExercise) {
     return (
       <div className="card modules-card">
         <h3>
@@ -422,6 +508,21 @@ export default function Modules({
               </div>
             </div>
           ))}
+
+          <div
+            className="module-card ai-module-card"
+            onClick={() => setAiConfigOpen(true)}
+            role="button"
+            tabIndex={0}
+          >
+            <div>
+              <strong>✨ Ejercicios Generados por IA</strong>
+              <p>
+                Elegí la dificultad, el tema y el tipo de respuesta para practicar sin límites.
+              </p>
+              <span className="badge badge-recommended">Nuevo</span>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -433,7 +534,9 @@ export default function Modules({
   */
   if (
     moduleDetail &&
-    !activeLesson
+    !activeLesson &&
+    !aiConfigOpen &&
+    !aiExercise
   ) {
     return (
       <div className="card modules-card">
@@ -534,6 +637,111 @@ export default function Modules({
               </div>
             )
           )}
+        </div>
+
+      </div>
+    );
+  }
+
+  if (selectedModuleId && !moduleDetail) {
+    return (
+      <div className="card modules-card">
+        <button className="module-back-btn" onClick={handleBackToCatalog}>← Volver al Catálogo</button>
+        Cargando módulo...
+      </div>
+    );
+  }
+
+  if (aiConfigOpen) {
+    return (
+      <div className="card modules-card">
+        <button className="module-back-btn" onClick={handleBackFromAi}>← Volver al Módulo</button>
+        <div className="module-detail-header">
+          <h2 className="module-detail-title">Ejercicios Generados por IA</h2>
+          <p className="module-detail-desc">Elegí cómo querés practicar. Cada respuesta correcta suma 10 puntos.</p>
+        </div>
+        <div className="ai-settings-card">
+          <label>
+            Nivel de Dificultad
+            <select value={aiSettings.level} onChange={(e) => setAiSettings((prev) => ({ ...prev, level: e.target.value }))}>
+              <option value="0">Básico</option>
+              <option value="1">Intermedio</option>
+              <option value="2">Avanzado</option>
+            </select>
+          </label>
+          <label>
+            Apartado Temático
+            <select value={aiSettings.section} onChange={(e) => setAiSettings((prev) => ({ ...prev, section: e.target.value }))}>
+              <option>Suma y Resta</option>
+              <option>Multiplicación</option>
+              <option>División</option>
+              <option>Fracciones</option>
+              <option>Ecuaciones</option>
+            </select>
+          </label>
+          <label>
+            Estructura de la Respuesta
+            <select value={aiSettings.structure} onChange={(e) => setAiSettings((prev) => ({ ...prev, structure: e.target.value }))}>
+              <option value="multiple_choice">Opción Múltiple (4 alternativas)</option>
+              <option value="input">Entrada Libre de Texto</option>
+            </select>
+          </label>
+          <button type="button" className="btn-check ai-generate-btn" disabled={loading} onClick={handleGenerateAiExercise}>
+            {loading ? 'Generando...' : 'Generar ejercicio'}
+          </button>
+          {aiGenerationError && <div className="feedback-card error"><div className="feedback-text"><strong>No se pudo generar todavía</strong>{aiGenerationError}</div></div>}
+        </div>
+      </div>
+    );
+  }
+
+  if (aiExercise) {
+    const isMultipleChoice = aiExercise.type === 'multiple_choice';
+    const isCorrect = aiExerciseState.correcto;
+    const isChecked = false;
+    const answer = isMultipleChoice ? aiExerciseState.selectedOption : aiExerciseState.userInput;
+    const incorrectAttempts = aiExerciseState.incorrectAttempts || 0;
+    const pointsForCurrentAttempt = incorrectAttempts === 0
+      ? 10
+      : incorrectAttempts === 1 ? 5 : 0;
+    const isSubmitDisabled = isCorrect || !answer?.trim();
+    return (
+      <div className="card modules-card">
+        <div className="exercise-progress-header">
+          <button onClick={handleBackFromAi} className="exercise-exit-btn">✕</button>
+          <div className="exercise-progress-bar"><div className="exercise-progress-fill" style={{ width: isCorrect ? '100%' : '35%' }} /></div>
+          <span className="exercise-counter">IA</span>
+        </div>
+        <div className="exercise-step" key={aiExercise.id}>
+          <div className="exercise-card">
+            <div className="exercise-ai-meta"><span>Ejercicio generado · {aiExercise.section}</span><span className="badge">✨ {pointsForCurrentAttempt} pts</span></div>
+            <div className="exercise-prompt">{aiExercise.description}</div>
+            {aiExerciseState.checked && !isCorrect && aiExerciseState.incorrectAttempts === 1 && (
+              <div className="feedback-card pista">
+                <img src={luzIcon} alt="Mate brillante" className="feedback-img" />
+                <div className="feedback-text"><strong>Consejo de Mate-Mático:</strong>{aiExercise.hint}</div>
+              </div>
+            )}
+            {aiExerciseState.checked && !isCorrect && aiExerciseState.incorrectAttempts >= 2 && (
+              <div className="feedback-card error">
+                <img src={dudaIcon} alt="Mate de duda" className="feedback-img" />
+                <div className="feedback-text"><strong>¡Sigamos practicando!</strong>{aiExerciseState.explicacionError}</div>
+              </div>
+            )}
+            {isMultipleChoice ? (
+              <div className="options-container">
+                {aiExercise.answers.map((option, index) => {
+                  const selected = aiExerciseState.selectedOption === option;
+                  const isLockedIncorrect = (aiExerciseState.lockedIncorrectOptions || []).includes(option);
+                  return <button key={`${aiExercise.id}-${index}`} type="button" disabled={isCorrect || isLockedIncorrect} onClick={() => setAiExerciseState((prev) => ({ ...prev, selectedOption: option }))} className={`option-btn${selected ? ' selected' : ''}${isLockedIncorrect ? ' incorrect' : ''}${selected && isCorrect ? ' correct' : ''}`}><span className="option-letter">{['A', 'B', 'C', 'D'][index]}.</span>{option}</button>;
+                })}
+              </div>
+            ) : <input type="text" className="numeric-input" placeholder="Escribí tu respuesta acá..." disabled={isCorrect} value={aiExerciseState.userInput ?? ''} onChange={(e) => setAiExerciseState((prev) => ({ ...prev, userInput: e.target.value }))} onKeyDown={(e) => { if (e.key === 'Enter' && !isSubmitDisabled) handleSubmitAiAnswer(); }} />}
+            {isChecked && !isCorrect && <div className="feedback-card error"><img src={dudaIcon} alt="Mate de duda" className="feedback-img" /><div className="feedback-text"><strong>¡Sigamos practicando!</strong>{aiExerciseState.explicacionError}</div></div>}
+            {isChecked && !isCorrect && aiExercise.explanation && <div className="feedback-card pista"><img src={luzIcon} alt="Mate brillante" className="feedback-img" /><div className="feedback-text"><strong>Explicación:</strong>{aiExercise.explanation}</div></div>}
+            {!isCorrect && <div className="btn-check-container"><button type="button" className="btn-check" disabled={isSubmitDisabled} onClick={handleSubmitAiAnswer}>Comprobar</button></div>}
+            {isCorrect && <div className="exercise-advance-hint">¡Correcto! Generando el siguiente ejercicio...</div>}
+          </div>
         </div>
       </div>
     );
@@ -658,8 +866,8 @@ export default function Modules({
     const selectedOption = exState.selectedOption || '';
     const numericValue = exState.userInput || '';
 
-    const hasHint = exState.comodinPista || (isChecked && !isCorrect && consecutiveErrors >= 2);
-    const hasError = isChecked && !isCorrect && exState.explicacionError;
+    const hasHint = isChecked && !isCorrect && consecutiveErrors === 1 && exState.comodinPista;
+    const hasError = isChecked && !isCorrect && consecutiveErrors >= 2 && exState.explicacionError;
 
     const isSubmitDisabled = isCorrect || (
       isMultipleChoice ? !selectedOption : !numericValue.trim()

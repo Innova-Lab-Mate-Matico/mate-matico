@@ -1,5 +1,6 @@
 import dotenv from 'dotenv';
 
+dotenv.config({ path: '.env.gemini' });
 dotenv.config();
 
 function required(name) {
@@ -41,6 +42,10 @@ export const env = {
   nodeEnv,
   isProduction: nodeEnv === 'production',
   corsOrigins: parseCorsOrigins(),
+  gemini: {
+    apiKey: optional('GEMINI_API_KEY'),
+    model: optional('GEMINI_MODEL', 'gemini-flash-latest'),
+  },
 
   firebase: {
     projectId,
