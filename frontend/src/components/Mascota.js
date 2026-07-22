@@ -23,7 +23,7 @@ export default function Mascota({ rol }) {
 
       case 'intermedio':
         return {
-          imgSrc: mateProfesor,
+          imgSrc: mateEscolar,
           levelName: 'Nivel Intermedio',
           description: '¡Excelente progreso! Seguí practicando.',
           accentColor: '#163b74'
@@ -32,7 +32,7 @@ export default function Mascota({ rol }) {
       case 'principiante':
       default:
         return {
-          imgSrc: mateEscolar,
+          imgSrc: mateProfesor,
           levelName: 'Nivel Inicial',
           description: '¡Comenzá a aprender y sumá puntos!',
           accentColor: '#383d41'
