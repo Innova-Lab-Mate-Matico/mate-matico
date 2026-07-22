@@ -20,33 +20,72 @@ const bigquery = new BigQuery({
  * Algoritmo determinista basado en el perfil cognitivo y de intereses del usuario.
  */
 export function calcularRecomendacionOnboarding({ confianzaMath, edad, intereses, nivelEducativo }) {
-  // Regla 1: Si la confianza matemática es baja o media-baja (<= 3), empezamos con Aritmética Básica.
-  if (confianzaMath <= 3) {
-    return 'aritmetica';
+  // Inicializamos puntajes por módulo
+  const scores = {
+    aritmetica: 0,
+    porcentajes: 0,
+    fracciones: 0,
+    economia: 0,
+  };
+
+  // 1. Influencia de los intereses seleccionados
+  if (intereses && Array.isArray(intereses)) {
+    intereses.forEach(interes => {
+      const tag = interes.toLowerCase().trim();
+      
+      // Economía Doméstica / Finanzas del hogar
+      if (['economia', 'cuotas', 'finanzas', 'ahorro', 'prestamos'].includes(tag)) {
+        scores.economia += 3;
+        scores.porcentajes += 1;
+      }
+      // Porcentajes / Descuentos
+      if (['promos', 'sueldos', 'descuentos', 'porcentajes', 'negocios', 'compras'].includes(tag)) {
+        scores.porcentajes += 3;
+        scores.economia += 1;
+      }
+      // Fracciones y decimales
+      if (['repartos', 'recetas', 'partes', 'medidas', 'fracciones'].includes(tag)) {
+        scores.fracciones += 3;
+        scores.aritmetica += 1;
+      }
+      // Aritmética básica
+      if (['basicas', 'calculos', 'operaciones', 'sumas', 'restas'].includes(tag)) {
+        scores.aritmetica += 3;
+      }
+    });
   }
 
-  // Regla 2: Si tienen confianza media-alta y muestran interés explícito en temas prácticos
-  // de la vida cotidiana o finanzas, les recomendamos Porcentajes directamente.
-  const interesesPracticos = ['descuentos', 'finanzas', 'negocios', 'ahorro', 'compras', 'porcentajes'];
-  const tieneInteresPractico = intereses && intereses.some(tag => 
-    interesesPracticos.includes(tag.toLowerCase().trim())
-  );
-
-  if (tieneInteresPractico) {
-    return 'porcentajes';
+  // 2. Ajuste según perfil cognitivo (edad, nivel educativo, confianza)
+  // Si la confianza es muy baja (<= 2), le sumamos un bonus a Aritmética para ir a lo seguro.
+  if (confianzaMath <= 2) {
+    scores.aritmetica += 4;
+  } else if (confianzaMath === 3) {
+    scores.aritmetica += 2;
   }
 
-  // Regla 3: Si son adultos (edad >= 18) o tienen nivel educativo secundario/superior,
-  // y confianza matemática aceptable (>= 3), podemos retarlos con Porcentajes.
-  const esAdulto = edad && edad >= 18;
-  const nivelEducativoAvanzado = ['secundaria', 'terciaria', 'universitaria'].includes(nivelEducativo);
-  
-  if (esAdulto || nivelEducativoAvanzado) {
-    return 'porcentajes';
+  // Si tiene buena confianza (>= 4) y es adulto/educado, le damos un bonus para temas avanzados.
+  if (confianzaMath >= 4) {
+    const esAdulto = edad && edad >= 18;
+    const nivelAvanzado = ['secundaria', 'terciaria', 'universitaria'].includes(nivelEducativo);
+    if (esAdulto || nivelAvanzado) {
+      scores.economia += 1.5;
+      scores.porcentajes += 1.5;
+      scores.fracciones += 1;
+    }
   }
 
-  // Por defecto, ante la duda o perfiles más jóvenes sin intereses marcados:
-  return 'aritmetica';
+  // Encontrar el módulo con el puntaje más alto
+  let maxScore = -1;
+  let moduloRecomendado = 'aritmetica'; // por defecto
+
+  Object.entries(scores).forEach(([modulo, score]) => {
+    if (score > maxScore) {
+      maxScore = score;
+      moduloRecomendado = modulo;
+    }
+  });
+
+  return moduloRecomendado;
 }
 
 /**
@@ -67,17 +106,22 @@ export async function guardarOnboardingUsuario(uid, respuestas) {
     moduloRecomendado: recomendacion,
   };
 
-  await ref.update(usuarioToDb({
-    onboarding: onboardingData
-  }));
-
-  // Envío en tiempo real a BigQuery (Load Job) como un proceso complementario (apto para Sandbox gratuito)
-  if (process.env.NODE_ENV === 'test' || process.env.FIRESTORE_EMULATOR_HOST) {
-    const updatedDoc = await ref.get();
-    const data = dbToUsuario(updatedDoc.data());
-    data.uid = updatedDoc.id;
-    return data;
+  try {
+    await ref.update(usuarioToDb({
+      onboarding: onboardingData
+    }));
+  } catch (err) {
+    if (err && (err.code === 8 || err.message?.includes('Quota exceeded') || err.details?.includes('Quota exceeded'))) {
+      console.warn('⚠️ Firestore cuota superada al guardar onboarding. Continuando en modo local.');
+    } else {
+      throw err;
+    }
   }
+
+  return {
+    uid,
+    onboarding: onboardingData
+  };
 
   try {
     const datasetId = 'onboarding_data';

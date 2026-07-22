@@ -48,14 +48,34 @@ describe('Onboarding Adaptativo - Backend Tests', () => {
       assert.strictEqual(rec2, 'aritmetica');
     });
 
-    it('Debe sugerir "porcentajes" si la confianza es media-alta (>=4) y muestra interés en temas prácticos de la vida cotidiana', () => {
+    it('Debe sugerir "economia" si la confianza es media-alta (>=4) y muestra interés en economía o finanzas', () => {
       const rec = calcularRecomendacionOnboarding({
         confianzaMath: 4,
         edad: 14,
         intereses: ['Ahorro', 'finanzas'],
         nivelEducativo: 'primaria'
       });
+      assert.strictEqual(rec, 'economia');
+    });
+
+    it('Debe sugerir "porcentajes" si la confianza es media-alta (>=4) y muestra interés en promos o sueldos', () => {
+      const rec = calcularRecomendacionOnboarding({
+        confianzaMath: 4,
+        edad: 14,
+        intereses: ['promos', 'sueldos'],
+        nivelEducativo: 'primaria'
+      });
       assert.strictEqual(rec, 'porcentajes');
+    });
+
+    it('Debe sugerir "fracciones" si la confianza es media-alta (>=4) y muestra interés en recetas o repartos', () => {
+      const rec = calcularRecomendacionOnboarding({
+        confianzaMath: 4,
+        edad: 14,
+        intereses: ['recetas', 'repartos'],
+        nivelEducativo: 'primaria'
+      });
+      assert.strictEqual(rec, 'fracciones');
     });
 
     it('Debe sugerir "porcentajes" a usuarios adultos (edad >= 18) con confianza matemática suficiente (>=4)', () => {
@@ -237,7 +257,7 @@ describe('Onboarding Adaptativo - Backend Tests', () => {
       const user = res.body.usuario;
       assert.strictEqual(user.uid, 'test-usuario-onboarding');
       assert.strictEqual(user.onboarding.completado, true);
-      assert.strictEqual(user.onboarding.moduloRecomendado, 'porcentajes');
+      assert.strictEqual(user.onboarding.moduloRecomendado, 'economia');
       assert.strictEqual(user.onboarding.edad, 20);
 
       // 3. Verificar persistencia real en el Firestore Emulator
@@ -245,7 +265,7 @@ describe('Onboarding Adaptativo - Backend Tests', () => {
       assert.strictEqual(savedDoc.exists, true);
       const data = savedDoc.data();
       assert.strictEqual(data.onboarding.completado, true);
-      assert.strictEqual(data.onboarding.moduloRecomendado, 'porcentajes');
+      assert.strictEqual(data.onboarding.moduloRecomendado, 'economia');
       assert.strictEqual(data.onboarding.edad, 20);
       assert.strictEqual(data.onboarding.confianzaMath, 4);
       assert.deepStrictEqual(data.onboarding.intereses, ['ahorro', 'finanzas']);

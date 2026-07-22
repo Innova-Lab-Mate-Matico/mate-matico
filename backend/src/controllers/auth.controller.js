@@ -90,8 +90,13 @@ export async function googleAuth(req, res, next) {
     } else if (err.code === 'auth/argument-error') {
       err.status = 400;
       err.message = 'Token inválido';
-    } else if (err.code?.startsWith('auth/')) {
+    } else if (typeof err.code === 'string' && err.code.startsWith('auth/')) {
       err.status = err.status || 400;
+    } else if (err.code === 8 || err.message?.includes('Quota exceeded') || err.details?.includes('Quota exceeded')) {
+      return res.status(503).json({
+        success: false,
+        error: 'Límite de cuota diaria alcanzado en Firebase/Firestore. Reintentá en unos minutos o utilizá inicio por usuario/clave local.',
+      });
     }
     next(err);
   }

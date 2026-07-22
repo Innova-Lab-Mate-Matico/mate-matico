@@ -7,27 +7,32 @@ import Auth from './components/Auth';
 import Profile from './components/Profile';
 import Modules from './components/Modules';
 import Progress from './components/Progress';
-import LessonFlow from './components/LessonFlow';
+import Logros from './components/Logros';
 
-
-// --- TUS COMPONENTES INYECTADOS (Unificados con tus flujos nuevos) ---
-import Header from './components/Header';
-import Navbar from './components/Navbar';
-import Faqs from './components/Faqs';
-import Opiniones from './components/Opiniones';
 
 // NUEVOS COMPONENTES: Control de flujo inicial de captación
 import OnboardingWizard from './components/OnboardingWizard';
 
 import olaSuperior from './assets/image 2.png';
 import olaInferior from './assets/image 10 (1).png';
+import descansoMascota from './assets/descanso.png';
+import logoPrincipal from './assets/Logo.png';
+
+// Íconos SVG oficiales de la barra inferior de Figma
+import navLeccionesSvg from './assets/two_pager.svg';
+import navPracticarSvg from './assets/cards_star.svg';
+import navInicioSvg from './assets/home.svg';
+import navProgresoSvg from './assets/diamond_shine.svg';
+import navPerfilSvg from './assets/account_circle.svg';
 
 
 
 // URL base de la API backend
 const API_BASE =
   process.env.REACT_APP_API_BASE_URL ||
-  'https://mate-matico-backend.onrender.com/api';
+  (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+    ? 'http://localhost:3000/api'
+    : 'https://mate-matico-backend.onrender.com/api');
 
 
 // Configuración Firebase Client
@@ -58,8 +63,7 @@ export default function App() {
   // Pestaña activa
   const [activeTab, setActiveTab] = useState('perfil');
 
-  // Pestaña de visitantes
-  const [visitorTab, setVisitorTab] = useState('login'); // 'login' | 'faqs' | 'opiniones'
+  const [networkError, setNetworkError] = useState(false);
 
   /*
     Intentar recuperar sesión automáticamente al iniciar la aplicación.
@@ -89,11 +93,12 @@ export default function App() {
     setIsStatusOk(ok);
   };
 /*
-  Wrapper estándar para llamadas HTTP al backend.
+  Wrapper estándar para llamadas HTTP al backend (Memorizado para evitar re-fetches en useEffect).
 */
-const apiCall = async (path, options = {}, customToken = null) => {
+const apiCall = React.useCallback(async (path, options = {}, customToken = null) => {
   const headers = {
     "Content-Type": "application/json",
+    "x-client-timezone": Intl.DateTimeFormat().resolvedOptions().timeZone,
     ...options.headers,
   };
 
@@ -110,25 +115,15 @@ const apiCall = async (path, options = {}, customToken = null) => {
 
   const data = await res.json().catch(() => ({}));
 
-  // 🔴 DEBUG IMPORTANTE: ver respuesta real del backend
-  console.log("API RESPONSE:", {
-    status: res.status,
-    ok: res.ok,
-    data,
-  });
-
   if (!res.ok) {
-    console.log("API ERROR RAW:", data);
-
-    throw {
-      status: res.status,
-      message: data.error || res.statusText || "Error inesperado en la API",
-      raw: data,
-    };
+    const err = new Error(data.error || res.statusText || "Error inesperado en la API");
+    err.status = res.status;
+    err.raw = data;
+    throw err;
   }
 
   return data;
-};
+}, [token]);
 
   /*
     Obtener perfil del usuario autenticado.
@@ -413,6 +408,15 @@ const apiCall = async (path, options = {}, customToken = null) => {
     setActiveTab('lecciones');
   };
 
+  const handleRetryConnection = () => {
+    setNetworkError(false);
+    const savedToken = token || localStorage.getItem('idToken');
+    if (savedToken) {
+      loadProfile(savedToken);
+      loadUserProgress(savedToken);
+    }
+  };
+
   if (!user) {
     /* PÁGINA DE INGRESO: Solo el Login/Registro a pantalla completa con su fondo y olas */
     return (
@@ -464,9 +468,8 @@ const apiCall = async (path, options = {}, customToken = null) => {
       <img src={olaInferior} alt="" className="global-wave ola-inferior" />
       <div className="app-container" id="arriba" style={{ minHeight: '100vh' }}>
         <header className="dashboard-header">
-          <div className="dashboard-header-left">
-            <img className="dashboard-logo" src="./img/matemático.png" alt="el mate-mático" />
-            <h2> MATE-MÁTICO</h2>
+          <div className="dashboard-header-left" style={{ display: 'flex', alignItems: 'center' }}>
+            <img src={logoPrincipal} alt="Mate-Mático" className="dashboard-logo" style={{ height: '62px', objectFit: 'contain' }} />
           </div>
           <div className="dashboard-header-right">
             <span>🔥 {user.rachaDias ?? 0} {user.rachaDias === 1 ? 'día' : 'días'}</span>
@@ -474,76 +477,152 @@ const apiCall = async (path, options = {}, customToken = null) => {
           </div>
         </header>
 
-        <main>
+        <main style={{ paddingBottom: '75px' }}>
           <div>
-            <nav className="tab-bar">
-              <button
-                type="button"
-                className={`tab-btn ${activeTab === 'perfil' ? 'active-tab' : ''}`}
-                onClick={() => setActiveTab('perfil')}
-              >
-                <span className="tab-text-full">1. Mi Perfil</span>
-                <span className="tab-text-short">Perfil</span>
-              </button>
-
-              <button
-                type="button"
-                className={`tab-btn ${activeTab === 'lecciones' ? 'active-tab' : ''}`}
-                onClick={() => setActiveTab('lecciones')}
-              >
-                <span className="tab-text-full">2. Lecciones y Ejercicios</span>
-                <span className="tab-text-short">Lecciones</span>
-              </button>
-
-              <button
-                type="button"
-                className={`tab-btn ${activeTab === 'progreso' ? 'active-tab' : ''}`}
-                onClick={() => setActiveTab('progreso')}
-              >
-                <span className="tab-text-full">3. Mi Progreso y Logros</span>
-                <span className="tab-text-short">Progreso</span>
-              </button>
-            </nav>
-
             <div className="layout-grid">
               {activeTab === 'perfil' && (
                 <Profile
                   user={user}
                   onLogout={logout}
+                  apiCall={apiCall}
                   onRefresh={() => {
                     loadProfile();
                     loadUserProgress();
                   }}
                 />
               )}
-              {activeTab === 'lecciones' && (
-           <div>
-           <Modules
-            apiCall={apiCall}
-           onAnswerSuccess={handleAnswerSuccess}
-            progress={progress}
-           onRefreshProgress={loadUserProgress}
-         />
+              {(activeTab === 'inicio' || activeTab === 'lecciones') && (
+                <Modules
+                  apiCall={apiCall}
+                  onAnswerSuccess={handleAnswerSuccess}
+                  progress={progress}
+                  onRefreshProgress={loadUserProgress}
+                  user={user}
+                />
+              )}
 
-         <LessonFlow />
-
-        </div>
-        )}
-
-           {activeTab === 'progreso' && (
+              {activeTab === 'progreso' && (
                 <Progress apiCall={apiCall} />
+              )}
+
+              {activeTab === 'logros' && (
+                <Logros apiCall={apiCall} />
               )}
             </div>
           </div>
         </main>
 
-        <footer className="footer">
-         
-          <p style={{ marginTop: '5px' }}>
-            Mate-Mático Monorepo MVP — React Frontend © 2026
-          </p>
+        {/* Barra de navegación inferior fija estilo Figma */}
+        <nav className="figma-bottom-nav">
+          <button
+            type="button"
+            className={`figma-nav-item ${activeTab === 'lecciones' ? 'active' : ''}`}
+            onClick={() => setActiveTab('lecciones')}
+          >
+            <img src={navLeccionesSvg} alt="Lecciones" />
+            <span>Lecciones</span>
+          </button>
+
+          <button
+            type="button"
+            className={`figma-nav-item ${activeTab === 'logros' ? 'active' : ''}`}
+            onClick={() => setActiveTab('logros')}
+          >
+            <img src={navPracticarSvg} alt="Practicar" />
+            <span>Practicar</span>
+          </button>
+
+          <button
+            type="button"
+            className={`figma-nav-item ${activeTab === 'inicio' ? 'active' : ''}`}
+            onClick={() => setActiveTab('inicio')}
+          >
+            <img src={navInicioSvg} alt="Inicio" />
+            <span>Inicio</span>
+          </button>
+
+          <button
+            type="button"
+            className={`figma-nav-item ${activeTab === 'progreso' ? 'active' : ''}`}
+            onClick={() => setActiveTab('progreso')}
+          >
+            <img src={navProgresoSvg} alt="Progreso" />
+            <span>Progreso</span>
+          </button>
+
+          <button
+            type="button"
+            className={`figma-nav-item ${activeTab === 'perfil' ? 'active' : ''}`}
+            onClick={() => setActiveTab('perfil')}
+          >
+            <img src={navPerfilSvg} alt="Perfil" />
+            <span>Perfil</span>
+          </button>
+        </nav>
+
+        {/* Footer Profesional Innova Lab */}
+        <footer className="figma-pro-footer">
+          <div className="footer-content">
+            <h3 className="footer-brand">Mate-Mático — Innova Lab</h3>
+            <p className="footer-tagline">
+              Plataforma Educativa Adaptativa con Gamificación e Inteligencia Artificial
+            </p>
+            <div className="footer-divider"></div>
+            <p className="footer-copyright">
+              © 2026 Innova Lab — Todos los derechos reservados.
+            </p>
+          </div>
         </footer>
       </div>
+      {networkError && (
+        <div 
+          style={{
+            position: 'fixed',
+            top: 0, left: 0, right: 0, bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.4)',
+            backdropFilter: 'blur(4px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 9999,
+            padding: '20px'
+          }}
+        >
+          <div 
+            className="app-card"
+            style={{
+              maxWidth: '440px',
+              width: '100%',
+              backgroundColor: '#ffffff',
+              borderRadius: '24px',
+              padding: '30px',
+              boxShadow: '0 20px 40px rgba(0, 0, 0, 0.15)',
+              textAlign: 'center',
+              boxSizing: 'border-box'
+            }}
+          >
+            <img 
+              src={descansoMascota} 
+              alt="Mascota descansando" 
+              style={{ width: '120px', marginBottom: '20px' }}
+            />
+            <h2 style={{ fontFamily: 'Poppins, sans-serif', color: '#163b74', fontWeight: 800, fontSize: '1.4rem', margin: '0 0 10px 0' }}>
+              ¡Ups! No pudimos conectar con Mate-Matico
+            </h2>
+            <p style={{ color: '#64748b', fontSize: '0.92rem', lineHeight: '1.5', margin: '0 0 24px 0' }}>
+              Parece que hay un problema temporal con tu conexión a internet o la pizarra de la aplicación está en mantenimiento.
+            </p>
+            <button
+              type="button"
+              className="btn-primary"
+              style={{ width: '100%', padding: '12px', fontSize: '0.95rem', fontWeight: 600, border: 'none', borderRadius: '12px', cursor: 'pointer' }}
+              onClick={handleRetryConnection}
+            >
+              Reintentar conexión ↻
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

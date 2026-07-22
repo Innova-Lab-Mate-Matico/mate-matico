@@ -12,13 +12,13 @@ const PLANTILLAS = {
       else if (porcentaje === 25) factor = 4;
       else if (porcentaje === 20) factor = 5;
       else if (porcentaje === 10) factor = 10;
-
+ 
       const minMult = Math.ceil(20 / factor);
       const maxMult = Math.floor(200 / factor);
       const mult = enteroAleatorio(rng, minMult, maxMult);
       const base = mult * factor;
       const resultado = (base * porcentaje) / 100;
-
+ 
       return ejercicio('pct-mc', 'multiple_choice', {
         porcentaje,
         base,
@@ -27,8 +27,8 @@ const PLANTILLAS = {
         enunciado: `¿Cuánto es el ${porcentaje}% de ${base}?`,
         options: options => {}, // no-op to bypass placeholder
         opciones: opcionesMultiples(resultado, rng),
-        explicacionError: `${porcentaje}% de ${base} = (${porcentaje}/100) × ${base} = ${resultado}.`,
-        comodinPista: `Pista: el ${porcentaje}% es una fracción de ${base}. ${porcentaje === 50 ? 'Es la mitad.' : ''}`,
+        explicacionError: `El ${porcentaje}% de ${base} significa tomar ${porcentaje} de cada 100 partes. Matemáticamente: (${porcentaje} ÷ 100) × ${base} = ${resultado}. Recordá atajos simples: \n• El 50% es la mitad.\n• El 25% es la cuarta parte.\n• El 10% es la décima parte.`,
+        comodinPista: `Pista: El ${porcentaje}% representa la ${porcentaje === 50 ? 'mitad (dividir por 2)' : (porcentaje === 25 ? 'cuarta parte (dividir por 4)' : (porcentaje === 20 ? 'quinta parte (dividir por 5)' : 'décima parte (dividir por 10)'))} de ${base}.`,
         puntos: 10,
       });
     },
@@ -46,25 +46,25 @@ const PLANTILLAS = {
       else if (descuento === 20) factor = 5;
       else if (descuento === 30) factor = 10;
       else if (descuento === 10) factor = 10;
-
+ 
       const factorPrecio = factor * 100;
       const mult = enteroAleatorio(rng, Math.ceil(precioBase * 0.7 / factorPrecio), Math.floor(precioBase * 1.3 / factorPrecio));
       const precio = mult * factorPrecio;
-
+ 
       const resultado = Math.round((precio * descuento) / 100);
       const fmt = (val) => val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-
+ 
       // Distractores lógicos y numéricamente plausibles
       const precioFinal = precio - resultado;
       const mitadDesc = Math.round(resultado / 2);
       const dobleDesc = resultado * 2;
-
+ 
       const opcionesSet = new Set([resultado, precioFinal, mitadDesc, dobleDesc]);
       while (opcionesSet.size < 4) {
         opcionesSet.add(resultado + enteroAleatorio(rng, 1, 5) * 100);
       }
       const opciones = [...opcionesSet].sort(() => rng() - 0.5);
-
+ 
       return ejercicio('desc-mc', 'multiple_choice', {
         precio,
         descuento,
@@ -72,8 +72,8 @@ const PLANTILLAS = {
         resultado,
         enunciado: `Estás comprando yerba para el mate. El paquete cuesta $${fmt(precio)} y tiene un ${descuento}% de descuento. ¿Cuánto dinero te ahorrás?`,
         opciones,
-        explicacionError: `El ${descuento}% de $${fmt(precio)} es: (${descuento}/100) × ${fmt(precio)} = $${fmt(resultado)}. Te ahorrás $${fmt(resultado)}.`,
-        comodinPista: `Pista: el ${descuento}% es la ${descuento === 50 ? 'mitad' : (descuento === 25 ? 'cuarta parte' : (descuento === 20 ? 'quinta parte' : 'fracción'))} del total.`,
+        explicacionError: `Para calcular el descuento de ${descuento}%, multiplicamos el precio original ($${fmt(precio)}) por el porcentaje dividido 100: ($${fmt(precio)} × ${descuento}) ÷ 100 = $${fmt(resultado)}. Te ahorrás $${fmt(resultado)} en total.`,
+        comodinPista: `Pista: El ${descuento}% es la ${descuento === 50 ? 'mitad' : (descuento === 25 ? 'cuarta parte' : (descuento === 20 ? 'quinta parte' : 'fracción'))} de $${fmt(precio)}.`,
         puntos: 10,
       });
     },
@@ -89,15 +89,15 @@ const PLANTILLAS = {
       const mult = enteroAleatorio(rng, minMult, maxMult);
       const base = mult * factor;
       const resultado = (base * porcentaje) / 100;
-
+ 
       return ejercicio('pct-num', 'numeric', {
         porcentaje,
         base,
         operacion: 'porcentaje',
         resultado,
         enunciado: `${porcentaje}% de ${base} = ___`,
-        explicacionError: `${porcentaje}% de ${base} = ${resultado}.`,
-        comodinPista: `Pista: el 10% es dividir ${base} entre 10.`,
+        explicacionError: `Calcular el ${porcentaje}% de un número es equivalente a dividirlo por 10 (desplazando la coma un lugar a la izquierda). Por eso, el 10% de ${base} es exactamente ${resultado}.`,
+        comodinPista: `Pista: Para calcular el 10% de forma rápida, simplemente dividí ${base} por 10.`,
         puntos: 15,
       });
     },
@@ -125,19 +125,19 @@ const PLANTILLAS = {
       const factorPrecio = factor * 100;
       const mult = enteroAleatorio(rng, Math.ceil(servicio.baseSujerida * 0.8 / factorPrecio), Math.floor(servicio.baseSujerida * 1.2 / factorPrecio));
       const precio = mult * factorPrecio;
-
+ 
       const montoAumento = Math.round((precio * porcentaje) / 100);
       const resultado = precio + montoAumento;
       const fmt = (val) => val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-
+ 
       return ejercicio('aum-num', 'numeric', {
         precio,
         porcentaje,
         operacion: 'aumento',
         resultado,
         enunciado: `Tu servicio de ${servicio.nombre} cuesta $${fmt(precio)} y aumenta un ${porcentaje}% este mes. ¿Cuál será el nuevo importe?`,
-        explicacionError: `El ${porcentaje}% de $${fmt(precio)} es $${fmt(montoAumento)}. El nuevo importe con el aumento es: $${fmt(precio)} + $${fmt(montoAumento)} = $${fmt(resultado)}.`,
-        comodinPista: `Pista: Calculá el ${porcentaje}% de $${fmt(precio)} y sumalo al valor original.`,
+        explicacionError: `Primero calculamos el recargo del ${porcentaje}% sobre el precio base: ($${fmt(precio)} × ${porcentaje}) ÷ 100 = $${fmt(montoAumento)}. Luego sumamos el aumento al costo original: $${fmt(precio)} + $${fmt(montoAumento)} = $${fmt(resultado)}.`,
+        comodinPista: `Pista: Calculá primero el recargo del ${porcentaje}% de $${fmt(precio)} y sumalo al importe original.`,
         puntos: 15,
       });
     },

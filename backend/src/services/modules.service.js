@@ -43,12 +43,15 @@ export function obtenerModuloConEjercicios(moduleId, semillaBase = null) {
   };
 }
 
-export function obtenerLeccion(moduleId, lessonId, semillaQuery) {
+export function obtenerLeccion(moduleId, lessonId, semillaQuery, userRole = 'principiante') {
   const found = findLesson(moduleId, lessonId);
   if (!found) return null;
 
-  const semilla = semillaQuery ? Number(semillaQuery) : semillaNueva();
-  const ejercicios = generarEjerciciosLeccion(moduleId, lessonId, semilla);
+  let semilla = semillaQuery && semillaQuery !== 'undefined' ? Number(semillaQuery) : semillaNueva();
+  if (isNaN(semilla)) {
+    semilla = semillaNueva();
+  }
+  const ejercicios = generarEjerciciosLeccion(moduleId, lessonId, semilla, userRole);
 
   return {
     id: found.lesson.id,
@@ -59,5 +62,6 @@ export function obtenerLeccion(moduleId, lessonId, semillaQuery) {
     difficulty: found.level.difficulty,
     semilla,
     ejercicios,
+    teoria: found.lesson.teoria || null,
   };
 }

@@ -18,13 +18,13 @@
 @media (min-width: 768px) {
   .app-main-layout .dashboard-header {
     padding: 12px 24px;
-    margin-bottom: 30px;
+    margin-bottom: 24px;
     border-radius: 20px;
     margin-top: 15px;
     margin-left: auto;
     margin-right: auto;
-    max-width: 650px;
-    width: calc(100% - 40px);
+    max-width: 540px;
+    width: 100%;
   }
 }
 
@@ -35,13 +35,13 @@
 }
 
 .dashboard-logo {
-  height: 48px;
+  height: 60px;
   width: auto;
 }
 
 @media (min-width: 768px) {
   .dashboard-logo {
-    height: 64px;
+    height: 72px;
   }
 }
 
@@ -162,44 +162,7 @@
   white-space: nowrap;
 }
 
-@media (max-width: 576px) {
-  .tab-bar {
-    border-radius: 16px;
-    gap: 4px;
-  }
-  .tab-btn {
-    font-size: 0.75rem;
-    padding: 8px 10px;
-    border-radius: 12px;
-  }
-}
-
-.tab-btn:hover {
-  background-color: rgba(123, 97, 255, 0.05);
-  color: #163b74;
-}
-
-.tab-btn.active-tab {
-  background-color: #163b74;
-  color: #ffffff;
-  box-shadow: 0 4px 12px rgba(22, 59, 116, 0.2);
-}
-
-/* tab-bar responsive text */
-.tab-text-short {
-  display: none;
-}
-
-@media (max-width: 576px) {
-  .tab-text-full {
-    display: none;
-  }
-  .tab-text-short {
-    display: inline;
-  }
-}
-
-/* Ajustar el contenedor de la aplicación */
+/* Ajustar el contenedor de la aplicación */�n */
 .app-main-layout .app-container {
   width: 100%;
   max-width: 100%;
@@ -212,8 +175,122 @@
 
 @media (min-width: 768px) {
   .app-main-layout .app-container {
-    max-width: 800px;
+    max-width: 540px;
     margin: 0 auto;
-    padding: 20px;
+    padding: 10px 0 0 0;
   }
+}
+
+/* Barra de navegación inferior fija estilo Figma */
+.figma-bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 68px;
+  background: #ffffff;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  z-index: 9999;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
+}
+
+@media (min-width: 768px) {
+  .figma-bottom-nav {
+    max-width: 540px;
+    margin: 0 auto;
+    left: 0;
+    right: 0;
+    bottom: 12px;
+    border-radius: 24px;
+    border: 1px solid rgba(151, 71, 255, 0.2);
+    box-shadow: 0 10px 30px rgba(151, 71, 255, 0.12);
+  }
+}
+
+.figma-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 6px 12px;
+  color: #1C1B1F;
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  gap: 4px;
+  transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  flex: 1;
+  max-width: 100px;
+}
+
+.figma-nav-item img {
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
+  filter: brightness(0);
+  opacity: 0.85;
+  transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.figma-nav-item:hover,
+.figma-nav-item.active {
+  color: #9747ff !important;
+  font-weight: 700;
+}
+
+.figma-nav-item:hover img,
+.figma-nav-item.active img {
+  opacity: 1;
+  filter: invert(38%) sepia(91%) saturate(3574%) hue-rotate(253deg) brightness(101%) contrast(102%) !important;
+  transform: translateY(-3px) scale(1.2);
+}
+
+/* Footer Profesional Figma Innova Lab */
+.figma-pro-footer {
+  margin: 40px auto 120px;
+  padding: 24px 20px;
+  max-width: 540px;
+  text-align: center;
+  font-family: 'Poppins', sans-serif;
+  color: #64748b;
+  border-top: 1px solid #e2e8f0;
+  box-sizing: border-box;
+  position: relative;
+  z-index: 1;
+}
+
+.footer-brand {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 6px 0;
+  letter-spacing: -0.3px;
+}
+
+.footer-tagline {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #64748b;
+  margin: 0 0 14px 0;
+  line-height: 1.4;
+}
+
+.footer-divider {
+  height: 1px;
+  background: radial-gradient(circle, rgba(151, 71, 255, 0.25) 0%, rgba(226, 232, 240, 0) 100%);
+  margin: 12px auto;
+  width: 80%;
+}
+
+.footer-copyright {
+  font-size: 0.78rem;
+  color: #94a3b8;
+  font-weight: 500;
+  margin: 0;
 }

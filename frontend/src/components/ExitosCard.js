@@ -1,5 +1,6 @@
-import React from 'react';// Tu componente compartido sin cambios
+import React, { useEffect } from 'react';// Tu componente compartido sin cambios
 import '../styles/completo.css'; // Tu hoja de estilos independiente
+import { EfectosService } from '../services/EfectosService';
 
 // Importaciones de los elementos gráficos que corresponden a este diseño
 import iconoCheck from '../assets/check_circle.png';
@@ -7,7 +8,12 @@ import iconoStar from '../assets/image16.png';
 import avatarAprendamos from '../assets/aprendamosJuntos.png'; // El mate feliz/animado
 
   function ExitosCard({ onComplete }) {
-   const continuar = () => {
+  useEffect(() => {
+    // Al completar la lección / tarea, celebrar con confeti y sonido triunfal
+    EfectosService.celebrarLogro();
+  }, []);
+
+  const continuar = () => {
   if (onComplete) {
     onComplete();
   }

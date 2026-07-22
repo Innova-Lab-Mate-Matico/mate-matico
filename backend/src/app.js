@@ -6,12 +6,23 @@ import progressRoutes from './routes/progress.routes.js';
 import exerciseRoutes from './routes/exercise.routes.js';
 import modulesRoutes from './routes/modules.routes.js';
 import trackingRoutes from './routes/tracking.routes.js';
+import logrosRoutes from './routes/logros.routes.js';
+import aiRoutes from './routes/ai.routes.js';
 import { applySecurity } from './middleware/security.js';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler.js';
 
 const app = express();
 
 applySecurity(app);
+
+// Desactivar caché del navegador para endpoints dinámicos de la API
+app.use((req, res, next) => {
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+  res.setHeader('Surrogate-Control', 'no-store');
+  next();
+});
 
 app.use(express.json({ limit: '32kb' }));
 
@@ -31,6 +42,8 @@ app.use('/api/modules', modulesRoutes);
 app.use('/api/progress', progressRoutes);
 app.use('/api/exercises', exerciseRoutes);
 app.use('/api/tracking', trackingRoutes);
+app.use('/api/logros', logrosRoutes);
+app.use('/api/ai', aiRoutes);
 
 app.use(notFoundHandler);
 app.use(errorHandler);

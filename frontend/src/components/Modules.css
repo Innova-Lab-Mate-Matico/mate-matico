@@ -11,6 +11,84 @@
   margin: 0 auto 20px;
 }
 
+/* Theory Modal Overlay Styles */
+.theory-overlay-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(8px);
+  z-index: 9999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  animation: theoryFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.theory-modal-wrapper {
+  background: #ffffff;
+  border-radius: 24px;
+  width: 100%;
+  max-width: 520px;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  animation: theoryScaleUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.theory-modal-close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #f1f5f9;
+  border: none;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #64748b;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: all 0.2s ease;
+  z-index: 10001;
+}
+
+.theory-modal-close:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+  transform: scale(1.05);
+}
+
+.theory-modal-content {
+  padding: 10px;
+}
+
+.theory-modal-content .microleccion1-wrapper {
+  padding-top: 20px !important;
+  padding-bottom: 20px !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
+@keyframes theoryFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes theoryScaleUp {
+  from { transform: scale(0.95) translateY(10px); opacity: 0; }
+  to { transform: scale(1) translateY(0); opacity: 1; }
+}
+
 @media (min-width: 768px) {
   .card.modules-card {
     padding: 30px;
@@ -560,4 +638,717 @@
 .modules-card .btn-primary:hover:not(:disabled) {
   background-color: #112d59;
   box-shadow: 0 4px 12px rgba(22, 59, 116, 0.15);
+}
+
+/* ROADMAP VISUAL PATHWAY */
+.roadmap-container {
+  position: relative;
+  width: 100%;
+  margin: 30px auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 10px;
+  box-sizing: border-box;
+}
+
+/* Central connecting line */
+.roadmap-line {
+  position: absolute;
+  top: 40px;
+  bottom: 40px;
+  width: 4px;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent,
+    transparent 6px,
+    #cbd5e1 6px,
+    #cbd5e1 12px
+  );
+  z-index: 1;
+}
+
+/* Roadmap step node wrapper */
+.roadmap-step {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  margin: 35px 0;
+  z-index: 2;
+  transition: transform 0.2s ease;
+}
+
+/* Alternating zig-zag offset */
+.roadmap-step.offset-left {
+  transform: translateX(-40px);
+}
+.roadmap-step.offset-right {
+  transform: translateX(40px);
+}
+.roadmap-step.offset-center {
+  transform: translateX(0);
+}
+
+/* Circle button node */
+.roadmap-node {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  border: 4px solid #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+/* Locked state */
+.roadmap-node.locked {
+  background: #e2e8f0;
+  color: #94a3b8;
+  border-color: #cbd5e1;
+  cursor: not-allowed;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+/* Unlocked (active) state */
+.roadmap-node.active {
+  background: linear-gradient(135deg, #7b61ff, #a78bfa);
+  color: #ffffff;
+  border-color: #ffffff;
+  animation: pulse-active 2s infinite;
+}
+
+/* Completed state */
+.roadmap-node.completed {
+  background: linear-gradient(135deg, #10b981, #34d399);
+  color: #ffffff;
+  border-color: #ffffff;
+}
+
+/* Hover effects */
+.roadmap-node:hover:not(.locked) {
+  transform: scale(1.12);
+  box-shadow: 0 12px 28px rgba(123, 97, 255, 0.2);
+}
+
+.roadmap-node.completed:hover {
+  box-shadow: 0 12px 28px rgba(16, 185, 129, 0.2);
+}
+
+/* Pulsing outer animation for the active step */
+@keyframes pulse-active {
+  0% {
+    box-shadow: 0 0 0 0 rgba(123, 97, 255, 0.5), 0 8px 20px rgba(0, 0, 0, 0.1);
+  }
+  70% {
+    box-shadow: 0 0 0 16px rgba(123, 97, 255, 0), 0 8px 20px rgba(0, 0, 0, 0.1);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(123, 97, 255, 0), 0 8px 20px rgba(0, 0, 0, 0.1);
+  }
+}
+
+/* Label details */
+.roadmap-label-box {
+  background: #ffffff;
+  border: 1px solid rgba(123, 97, 255, 0.1);
+  padding: 8px 16px;
+  border-radius: 12px;
+  margin-top: 10px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(123, 97, 255, 0.04);
+  max-width: 180px;
+}
+
+.roadmap-label-title {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  font-size: 0.88rem;
+  color: #163b74;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.roadmap-label-status {
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 600;
+  margin-top: 2px;
+  display: block;
+}
+
+.roadmap-node.locked + .roadmap-label-box {
+  border-color: #e2e8f0;
+  opacity: 0.75;
+}
+
+.roadmap-label-status.locked {
+  color: #94a3b8;
+}
+
+.roadmap-label-status.active {
+  color: #7b61ff;
+  font-weight: 700;
+  animation: text-pulse 1.5s infinite alternate;
+}
+
+.roadmap-label-status.completed {
+  color: #059669;
+}
+
+@keyframes text-pulse {
+  from { opacity: 0.8; }
+  to { opacity: 1; }
+}
+
+/* Section divider header for levels inside the roadmap */
+.roadmap-section-header {
+  width: 100%;
+  text-align: center;
+  margin: 25px 0 15px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+
+.roadmap-section-title {
+  background: #f8fafc;
+  border: 1px solid rgba(123, 97, 255, 0.15);
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  font-size: 0.8rem;
+  color: #7b61ff;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 8px rgba(123, 97, 255, 0.05);
+}
+
+/* Adaptive desktop adjustments */
+@media (min-width: 480px) {
+  .roadmap-step.offset-left {
+    transform: translateX(-65px);
+  }
+  .roadmap-step.offset-right {
+    transform: translateX(65px);
+  }
+}
+
+/* Tutor IA / Mateico Chat Panel */
+.tutor-ia-section {
+  margin: 15px 0 5px;
+  border-radius: 16px;
+  border: 1px dashed #7b61ff;
+  background: rgba(123, 97, 255, 0.02);
+  padding: 15px;
+  font-family: 'Poppins', sans-serif;
+  transition: all 0.3s ease;
+  text-align: left;
+}
+
+.tutor-ia-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  user-select: none;
+}
+
+.tutor-ia-header h3 {
+  margin: 0 !important;
+  font-size: 0.95rem !important;
+  color: #7b61ff !important;
+  font-weight: 700 !important;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tutor-ia-chat-box {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.tutor-messages {
+  max-height: 180px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-right: 5px;
+  border-bottom: 1px solid rgba(123, 97, 255, 0.1);
+  padding-bottom: 10px;
+}
+
+.tutor-message {
+  padding: 8px 12px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  max-width: 85%;
+}
+
+.tutor-message.tutor {
+  background: #f1f5f9;
+  color: #334155;
+  align-self: flex-start;
+  border-bottom-left-radius: 4px;
+}
+
+.tutor-message.user {
+  background: #7b61ff;
+  color: #ffffff;
+  align-self: flex-end;
+  border-bottom-right-radius: 4px;
+}
+
+.tutor-suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 5px;
+}
+
+.tutor-suggestion-btn {
+  background: #ffffff;
+  border: 1px solid rgba(123, 97, 255, 0.25);
+  color: #7b61ff;
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: 'Poppins', sans-serif;
+}
+
+.tutor-suggestion-btn:hover {
+  background: #f1f0ff;
+  border-color: #7b61ff;
+}
+
+.tutor-input-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 5px;
+}
+
+.tutor-input {
+  flex: 1;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-size: 0.8rem;
+  font-family: inherit;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.tutor-input:focus {
+  border-color: #7b61ff;
+}
+
+.tutor-send-btn {
+  background: #7b61ff;
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  padding: 0 16px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.tutor-send-btn:hover {
+  background: #6366f1;
+}
+
+.tutor-loading {
+  font-size: 0.72rem;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-style: italic;
+  margin-top: 4px;
+}
+
+/* ==========================================================================
+   FIGMA DESIGN SYSTEM & CAROUSEL (MOBILE-FIRST)
+   ========================================================================== */
+
+.card.modules-card.figma-modules-card {
+  background: #f8fafc;
+  border: none;
+  box-shadow: none;
+  padding: 12px 10px 30px;
+  max-width: 540px;
+  margin: 0 auto;
+}
+
+@media (min-width: 768px) {
+  .card.modules-card.figma-modules-card {
+    background: #ffffff;
+    border: 1px solid rgba(123, 97, 255, 0.1);
+    box-shadow: 0 10px 30px rgba(123, 97, 255, 0.05);
+    padding: 28px;
+    border-radius: 24px;
+  }
+}
+
+.figma-header {
+  margin-bottom: 22px;
+  text-align: center;
+}
+
+.figma-main-title {
+  font-size: 2.1rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+  letter-spacing: -0.6px;
+  font-family: 'Poppins', system-ui, sans-serif;
+}
+
+.figma-section-header {
+  margin-bottom: 14px;
+}
+
+.card.modules-card .figma-section-title,
+.figma-section-title {
+  font-family: 'Poppins', sans-serif !important;
+  font-size: clamp(1.05rem, 3.8vw, 1.25rem) !important;
+  font-weight: 700 !important;
+  font-style: normal !important;
+  line-height: 1.3 !important;
+  color: #1A1A1A !important;
+  margin: 0 0 4px 0 !important;
+}
+
+.card.modules-card .figma-section-subtitle,
+.figma-section-subtitle {
+  font-family: 'Poppins', sans-serif !important;
+  font-size: clamp(0.82rem, 2.8vw, 0.95rem) !important;
+  color: #737373 !important;
+  margin: 0 !important;
+  font-weight: 500 !important;
+}
+
+.carousel-container-outer {
+  width: 100%;
+  position: relative;
+}
+
+.carousel-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-top: 10px;
+  width: 100%;
+}
+
+.carousel-arrow {
+  display: none;
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  color: #334155;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  font-size: 1.6rem;
+  line-height: 1;
+  font-weight: 700;
+  cursor: pointer;
+  z-index: 10;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+  transition: all 0.2s ease;
+  position: absolute;
+}
+
+@media (min-width: 640px) {
+  .carousel-arrow {
+    display: flex;
+  }
+}
+
+.carousel-arrow:hover {
+  background: #f8fafc;
+  color: #0f172a;
+  transform: scale(1.1);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+}
+
+.carousel-arrow-prev {
+  left: -20px;
+}
+
+.carousel-arrow-next {
+  right: -20px;
+}
+
+.carousel-track-container {
+  width: 100%;
+  overflow: hidden;
+  border-radius: 22px;
+  touch-action: pan-y;
+}
+
+.carousel-track {
+  display: flex;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  width: 100%;
+}
+
+.carousel-slide {
+  min-width: 100%;
+  box-sizing: border-box;
+  cursor: pointer;
+}
+
+.featured-card {
+  background: linear-gradient(135deg, #fff9e6 0%, #fff3d1 100%);
+  border: 1.5px solid #fde68a;
+  border-radius: 22px;
+  padding: 20px 22px;
+  box-shadow: 0 10px 25px rgba(251, 191, 36, 0.12);
+  transition: all 0.25s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.featured-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 30px rgba(251, 191, 36, 0.18);
+}
+
+.featured-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 14px;
+}
+
+.featured-icon-badge {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.featured-icon-box {
+  width: 44px;
+  height: 44px;
+  background: #f59e0b;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+}
+
+.featured-badge {
+  background: #fef08a;
+  color: #854d0e;
+  font-size: 0.78rem;
+  font-weight: 800;
+  padding: 4px 12px;
+  border-radius: 100px;
+  border: 1px solid #fde047;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.featured-illustration-circle {
+  width: 80px;
+  height: 80px;
+  background: rgba(254, 240, 138, 0.55);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.2rem;
+  margin-right: -10px;
+  margin-top: -10px;
+  box-shadow: 0 6px 16px rgba(245, 158, 11, 0.15);
+}
+
+.featured-card-body {
+  margin-top: 5px;
+}
+
+.card.modules-card .featured-card-title,
+.featured-card-title {
+  font-family: 'Poppins', sans-serif !important;
+  font-size: clamp(1.05rem, 4vw, 1.25rem) !important;
+  font-weight: 700 !important;
+  font-style: normal !important;
+  line-height: 1.3 !important;
+  color: #1A1A1A !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 0 6px 0 !important;
+  word-break: break-word !important;
+}
+
+.featured-card-meta {
+  font-size: clamp(0.8rem, 2.8vw, 0.92rem);
+  font-weight: 600;
+  color: #475569;
+  margin: 0 0 12px 0;
+}
+
+.featured-progress-bar {
+  width: 100%;
+  height: 10px;
+  background: #e2e8f0;
+  border-radius: 100px;
+  overflow: hidden;
+}
+
+.featured-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #1e3a8a 0%, #3b82f6 100%);
+  border-radius: 100px;
+  transition: width 0.4s ease;
+}
+
+.carousel-dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.carousel-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #cbd5e1;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.25s ease;
+}
+
+.carousel-dot.active {
+  width: 26px;
+  border-radius: 100px;
+  background: #7b61ff;
+}
+
+.figma-lessons-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.figma-lesson-card {
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 20px;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.03);
+}
+
+.figma-lesson-card:hover {
+  border-color: #cbd5e1;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+}
+
+.figma-lesson-icon-box {
+  width: 54px;
+  height: 54px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+  color: #ffffff;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.figma-lesson-info {
+  flex: 1;
+}
+
+.card.modules-card .figma-lesson-title,
+.figma-lesson-title {
+  font-family: 'Poppins', sans-serif !important;
+  font-size: clamp(1.05rem, 3.8vw, 1.2rem) !important;
+  font-weight: 700 !important;
+  font-style: normal !important;
+  line-height: 1.3 !important;
+  color: #1A1A1A !important;
+  margin: 0 0 4px 0 !important;
+}
+
+.card.modules-card .figma-lesson-subtitle,
+.figma-lesson-subtitle {
+  font-family: 'Poppins', sans-serif !important;
+  font-size: clamp(0.82rem, 2.8vw, 0.92rem) !important;
+  font-weight: 500 !important;
+  color: #737373 !important;
+  margin: 0 !important;
+}
+
+.figma-back-btn {
+  background: transparent;
+  border: none;
+  color: #64748b;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 14px;
+  padding: 4px 0;
+  transition: color 0.2s ease;
+}
+
+.figma-back-btn:hover {
+  color: #0f172a;
+}
+
+.figma-svg-icon {
+  width: 28px;
+  height: 28px;
+  filter: brightness(0) invert(1);
+}
+
+.figma-svg-icon-full {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
+
+.figma-section-all-lessons {
+  margin-top: 28px;
+}
+
+.figma-section-title-spaced {
+  margin-bottom: 14px;
 }
