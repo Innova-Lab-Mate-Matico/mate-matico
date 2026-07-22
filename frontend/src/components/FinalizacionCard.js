@@ -4,7 +4,7 @@ import '../styles/completo.css';
 import iconoNivel from '../assets/nivel.png';
 import mateEscolar from '../assets/mate_escolar.png';
 import mateProfesor from '../assets/mate_profesor.png';
-import mateAcademico from '../assets/mate_academico.png';
+import mateAcademico from '../assets/mate_academico.webp';
 
 function FinalizacionCard({
   onComplete,

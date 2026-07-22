@@ -3,7 +3,7 @@ import Mascota from './Mascota';
 import './Profile.css';
 import mateEscolar from '../assets/mate_escolar.png';
 import mateProfesor from '../assets/mate_profesor.png';
-import mateAcademico from '../assets/mate_academico.png';
+import mateAcademico from '../assets/mate_academico.webp';
 
 /*
   MATE-MÁTICO — COMPONENTE PERFIL

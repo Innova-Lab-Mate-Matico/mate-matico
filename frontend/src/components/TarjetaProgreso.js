@@ -4,7 +4,7 @@ import imgLeccion from '../assets/lección ok.png';
 import imgMedalla from '../assets/image 19.png';
 import mateEscolar from '../assets/mate_escolar.png';
 import mateProfesor from '../assets/mate_profesor.png';
-import mateAcademico from '../assets/mate_academico.png';
+import mateAcademico from '../assets/mate_academico.webp';
 
 function TarjetaProgreso({
   destinoAncla = "continuar",
