@@ -16,6 +16,7 @@ import OnboardingWizard from './components/OnboardingWizard';
 import olaSuperior from './assets/image 2.png';
 import olaInferior from './assets/image 10 (1).png';
 import descansoMascota from './assets/descanso.png';
+import logoPrincipal from './assets/Logo.png';
 
 
 
@@ -458,9 +459,8 @@ const apiCall = async (path, options = {}, customToken = null) => {
       <img src={olaInferior} alt="" className="global-wave ola-inferior" />
       <div className="app-container" id="arriba" style={{ minHeight: '100vh' }}>
         <header className="dashboard-header">
-          <div className="dashboard-header-left">
-            <img className="dashboard-logo" src="./img/matemático.png" alt="el mate-mático" />
-            <h2> MATE-MÁTICO</h2>
+          <div className="dashboard-header-left" style={{ display: 'flex', alignItems: 'center' }}>
+            <img src={logoPrincipal} alt="Mate-Mático" style={{ height: '42px', objectFit: 'contain' }} />
           </div>
           <div className="dashboard-header-right">
             <span>🔥 {user.rachaDias ?? 0} {user.rachaDias === 1 ? 'día' : 'días'}</span>
