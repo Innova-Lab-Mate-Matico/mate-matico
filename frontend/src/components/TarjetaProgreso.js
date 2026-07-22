@@ -28,14 +28,14 @@ function TarjetaProgreso({
         };
       case 'intermedio':
         return {
-          imgSrc: mateProfesor,
+          imgSrc: mateEscolar,
           levelTitle: 'Nivel Intermedio',
           levelDesc: '¡Excelente progreso! Seguí practicando para perfeccionar tus habilidades.'
         };
       case 'principiante':
       default:
         return {
-          imgSrc: mateEscolar,
+          imgSrc: mateProfesor,
           levelTitle: 'Primeros Mates',
           levelDesc: 'Estás construyendo una base sólida para tomar decisiones con más confianza.'
         };

@@ -28,14 +28,14 @@ function FinalizacionCard({
         };
       case 'intermedio':
         return {
-          imgSrc: mateProfesor,
+          imgSrc: mateEscolar,
           bubbleTop: '¡Nivel Intermedio!',
           bubbleBottom: '¡Excelente progreso! Tu dedicación da frutos.'
         };
       case 'principiante':
       default:
         return {
-          imgSrc: mateEscolar,
+          imgSrc: mateProfesor,
           bubbleTop: '¡Tú Puedes!',
           bubbleBottom: 'Seguí esforzándote día a día.'
         };
