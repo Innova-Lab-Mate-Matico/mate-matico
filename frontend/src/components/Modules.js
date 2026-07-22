@@ -5,26 +5,52 @@ import Microleccion1 from './microleccion1';
 import Microleccion2 from './microleccion2';
 import DynamicTheoryCard from './DynamicTheoryCard';
 
-/*
-  MATE-MÁTICO — COMPONENTE LECCIONES Y MÓDULOS
-  (REACT CLÁSICO)
+/**
+ * ============================================================================
+ * MATE-MÁTICO — COMPONENTE NÚCLEO DE LECCIONES Y MÓDULOS (Modules.js)
+ * ============================================================================
+ * 
+ * Este componente administra la experiencia de aprendizaje del alumno dividida
+ * en 3 vistas principales:
+ * 
+ * 1. VISTA 1 (CATÁLOGO FIGMA): Muestra el carrusel mobile-first "Seguí aprendiendo"
+ *    con badges de recomendación de IA y la lista de todos los módulos disponibles.
+ * 2. VISTA 2 (MAPA DE RUTA / ROADMAP): Muestra la ruta gamificada estilo Duolingo
+ *    del módulo seleccionado con estados (Completado, Activo, Bloqueado) y opción de leer teoría.
+ * 3. VISTA 3 (LECCIÓN ACTIVA): Transfiere la ejecución iterativa de ejercicios a <LessonFlow />.
+ */
 
-  Este componente representa el núcleo principal
-  del sistema educativo gamificado.
+import paymentSvg from '../assets/payment_arrow_down.svg';
+import percentSvg from '../assets/percent.svg';
+import group18Svg from '../assets/Group 18.svg';
+import aritmeticaPng from '../assets/aritmetica.png';
 
-  FUNCIONES:
-  - Carga módulos y niveles desde el backend
-  - Muestra catálogo de aprendizaje
-  - Gestiona ejercicios interactivos
-  - Valida respuestas en tiempo real
-  - Sincroniza progreso del alumno
-  - Maneja pistas y comodines
-  - Controla pantalla de éxito
-
-  Compatible con:
-  - Create React App
-  - React clásico
-*/
+const MODULE_THEMES = {
+  fracciones: {
+    icon: '💲',
+    iconBg: '#76c845',
+    title: 'Finanzas Personales',
+    badge: 'En curso'
+  },
+  aritmetica: {
+    icon: <img src={aritmeticaPng} alt="Base aritmética" className="figma-svg-icon" />,
+    iconBg: '#c85a28',
+    title: 'Base aritmética',
+    badge: 'Recomendado'
+  },
+  economia: {
+    icon: <img src={group18Svg} alt="Economía" className="figma-svg-icon-full" />,
+    iconBg: '#3b82f6',
+    title: 'Economía de hogar',
+    badge: 'En curso'
+  },
+  porcentajes: {
+    icon: <img src={percentSvg} alt="Descuentos" className="figma-svg-icon" />,
+    iconBg: '#a855f7',
+    title: 'Promociones y descuentos',
+    badge: 'Nuevo'
+  }
+};
 
 export default function Modules({
   apiCall,
@@ -54,23 +80,64 @@ export default function Modules({
   };
 
   const [modules, setModules] = useState([]);
-  const [selectedModuleId, setSelectedModuleId] =
-    useState(null);
-
-  const [moduleDetail, setModuleDetail] =
-    useState(null);
-
-  const [activeLesson, setActiveLesson] =
-    useState(null);
-
-  const [exerciseStates, setExerciseStates] =
-    useState({});
-
-  const [loading, setLoading] =
-    useState(false);
-
+  const [selectedModuleId, setSelectedModuleId] = useState(null);
+  const [moduleDetail, setModuleDetail] = useState(null);
+  const [activeLesson, setActiveLesson] = useState(null);
+  const [exerciseStates, setExerciseStates] = useState({});
+  const [loading, setLoading] = useState(false);
   const [theoryOnlyLesson, setTheoryOnlyLesson] = useState(null);
   const [currentTheoryIndex, setCurrentTheoryIndex] = useState(0);
+
+  /* Estado para el Carrusel de Módulos Destacados */
+  const [carouselIndex, setCarouselIndex] = useState(0);
+  const [touchStartX, setTouchStartX] = useState(null);
+
+  const getModuleProgress = (modId, defaultTotal = 6) => {
+    const targetMod = modules.find((m) => m.id === modId);
+    const totalLessons = targetMod?.lessonCount || (targetMod?.levelCount ? targetMod.levelCount * 2 : defaultTotal);
+
+    if (!progress) {
+      return { completed: 0, total: totalLessons, pct: 0 };
+    }
+
+    const modMap = progress.progreso?.modulos || progress.modulos || progress;
+    const modInfo = modMap?.[modId];
+    if (!modInfo) {
+      return { completed: 0, total: totalLessons, pct: 0 };
+    }
+
+    const lecciones = modInfo.lecciones ?? modInfo.lessons ?? {};
+    const completedLessons = Object.entries(lecciones).filter(
+      ([_, l]) => l === true || l.completada === true || l.completed === true
+    );
+    const completedCount = completedLessons.length;
+    const pct = Math.min(100, Math.round((completedCount / Math.max(1, totalLessons)) * 100));
+    return { completed: completedCount, total: totalLessons, pct };
+  };
+
+  const handlePrevCarousel = () => {
+    setCarouselIndex((prev) => (prev > 0 ? prev - 1 : (modules.length ? modules.length - 1 : 0)));
+  };
+
+  const handleNextCarousel = () => {
+    setCarouselIndex((prev) => (prev < (modules.length - 1) ? prev + 1 : 0));
+  };
+
+  const handleTouchStart = (e) => {
+    setTouchStartX(e.touches[0].clientX);
+  };
+
+  const handleTouchEnd = (e) => {
+    if (touchStartX === null) return;
+    const touchEndX = e.changedTouches[0].clientX;
+    const diff = touchStartX - touchEndX;
+    if (diff > 40) {
+      handleNextCarousel();
+    } else if (diff < -40) {
+      handlePrevCarousel();
+    }
+    setTouchStartX(null);
+  };
 
   const handleOpenTheoryOnly = async (lesson) => {
     setLoading(true);
@@ -99,55 +166,28 @@ export default function Modules({
   */
   const loadCatalog = async () => {
     setLoading(true);
-
     try {
       const data = await apiCall('/modules');
-
-      setModules(
-        data.modulos ??
-          data.modules ??
-          []
-      );
+      setModules(data.modulos ?? data.modules ?? []);
     } catch (err) {
-      console.error(
-        'Error al cargar catálogo:',
-        err
-      );
+      console.error('Error al cargar catálogo:', err);
     } finally {
       setLoading(false);
     }
   };
 
   /*
-    Seleccionar módulo.
+    Seleccionar módulo y cargar sus niveles/lecciones.
   */
-  const handleSelectModule = async (
-    moduleId
-  ) => {
+  const handleSelectModule = async (moduleId) => {
+    setSelectedModuleId(moduleId);
     setLoading(true);
 
     try {
-      const data = await apiCall(
-        `/modules/${moduleId}`
-      );
-
-      setSelectedModuleId(moduleId);
-
-      setModuleDetail(
-        data.modulo ??
-          data.module
-      );
-
-      setActiveLesson(null);
-
-      setExerciseStates({});
-
-
+      const data = await apiCall(`/modules/${moduleId}`);
+      setModuleDetail(data.modulo ?? data.module ?? null);
     } catch (err) {
-      console.error(
-        'Error al cargar detalle del módulo:',
-        err
-      );
+      console.error('Error al cargar módulo:', err);
     } finally {
       setLoading(false);
     }
@@ -185,90 +225,57 @@ export default function Modules({
 
 
   /*
-    Verificar si una lección
-    ya fue completada (históricamente).
+    Helper: Verificar si una lección está completada en el estado de progreso
   */
-  const isLessonCompleted = (
-    lessonId
-  ) => {
-    if (
-      !progress ||
-      !selectedModuleId
-    ) {
+  const isLessonCompleted = (lessonId) => {
+    if (!progress || !progress.progreso || !progress.progreso.modulos) {
       return false;
     }
+    const mod = progress.progreso.modulos[selectedModuleId];
+    if (!mod) return false;
+    const lecciones = mod.lecciones ?? mod.lessons;
+    if (!lecciones) return false;
 
-    const moduleProgress =
-      progress?.modulos?.[selectedModuleId] ||
-      progress[selectedModuleId] ||
-      {};
+    const lessonData = lecciones[lessonId];
+    if (!lessonData) return false;
 
-    const lecciones =
-      moduleProgress.lecciones ||
-      moduleProgress.lessons ||
-      {};
-
-    return (
-      lecciones[lessonId]
-        ?.completada ||
-      lecciones[lessonId]
-        ?.completed ||
-      false
-    );
+    return lessonData.completada === true || lessonData.completed === true;
   };
 
   /*
-    Verificar si una lección fue completada HOY (para renovar el tilde ✓ cada medianoche).
+    Helper: Verificar si una lección fue completada HOY (para badge de racha)
   */
-  const isLessonCompletedToday = (
-    lessonId
-  ) => {
-    if (
-      !progress ||
-      !selectedModuleId
-    ) {
+  const isLessonCompletedToday = (lessonId) => {
+    if (!progress || !progress.progreso || !progress.progreso.modulos) {
       return false;
     }
-
-    const moduleProgress =
-      progress?.modulos?.[selectedModuleId] ||
-      progress[selectedModuleId] ||
-      {};
-
-    const lecciones =
-      moduleProgress.lecciones ||
-      moduleProgress.lessons ||
-      {};
+    const mod = progress.progreso.modulos[selectedModuleId];
+    if (!mod) return false;
+    const lecciones = mod.lecciones ?? mod.lessons;
+    if (!lecciones) return false;
 
     const lessonData = lecciones[lessonId];
-    if (!lessonData || !(lessonData.completada || lessonData.completed)) {
-      return false;
-    }
+    if (!lessonData) return false;
+
+    const isDone = lessonData.completada === true || lessonData.completed === true;
+    if (!isDone) return false;
 
     const dateStr = lessonData.actualizadoEn ?? lessonData.completadoEn ?? lessonData.completedAt;
     if (!dateStr) return false;
-    const completedDate = new Date(dateStr);
-    if (isNaN(completedDate.getTime())) return false;
 
-    const today = new Date();
-    return (
-      completedDate.getDate() === today.getDate() &&
-      completedDate.getMonth() === today.getMonth() &&
-      completedDate.getFullYear() === today.getFullYear()
-    );
+    const todayStr = new Date().toISOString().split('T')[0];
+    return dateStr.startsWith(todayStr);
   };
 
   /*
     Volver al catálogo.
   */
-  const handleBackToCatalog =
-    () => {
-      setSelectedModuleId(null);
-
-      setModuleDetail(null);
-
-      setActiveLesson(null);
-    };
+  const handleBackToCatalog = () => {
+    setSelectedModuleId(null);
+    setModuleDetail(null);
+    setActiveLesson(null);
+    setExerciseStates({});
+  };
 
 
 
@@ -288,78 +295,146 @@ export default function Modules({
 
   /*
     VISTA 1:
-    Catálogo de módulos.
+    Catálogo de módulos (Diseño Figma con Carrusel y Lista).
   */
   if (!selectedModuleId) {
     return (
-      <div className="card modules-card">
-        <h3>
-          Módulos de Aprendizaje
-        </h3>
+      <div className="card modules-card figma-modules-card">
+        {/* Header estilo Figma */}
+        <header className="figma-header">
+          <h1 className="figma-main-title">Lecciones</h1>
+        </header>
 
-        <p
-          style={{
-            color: '#666',
-            fontSize: '14px',
-            marginBottom: '15px',
-          }}
-        >
-          Selecciona una temática
-          para comenzar desafíos.
-        </p>
+        {/* Sección: Seguí aprendiendo */}
+        <section className="figma-section">
+          <div className="figma-section-header">
+            <h2 className="figma-section-title">Seguí aprendiendo</h2>
+            <p className="figma-section-subtitle">Elegí la lección que querés continuar</p>
+          </div>
 
-        <div className="module-grid">
-          {modules.map((mod) => (
-            <div
-              key={mod.id}
-              className="module-card"
-              onClick={() =>
-                handleSelectModule(
-                  mod.id
-                )
-              }
-            >
-              <div>
-                <strong>
-                  {mod.title}
-                </strong>
-
-                <p>
-                  {
-                    mod.description
-                  }
-                </p>
-
-                <div
-                  style={{
-                    marginTop:
-                      '15px',
-                    display: 'flex',
-                    flexWrap: 'wrap',
-                    gap: '6px'
-                  }}
+          {/* Carrusel de Módulos Destacados */}
+          {modules.length > 0 && (
+            <div className="carousel-container-outer">
+              <div className="carousel-wrapper">
+                <button
+                  type="button"
+                  className="carousel-arrow carousel-arrow-prev"
+                  onClick={handlePrevCarousel}
+                  aria-label="Lección anterior"
                 >
-                  <span className="badge">
-                    {
-                      mod.levelCount
-                    }{' '}
-                    niveles
-                  </span>
+                  ‹
+                </button>
 
-                  <span className="badge badge-success">
-                    {getDisplayDifficulty(mod.rolSugerido, user?.rolActual)}
-                  </span>
+                <div 
+                  className="carousel-track-container"
+                  onTouchStart={handleTouchStart}
+                  onTouchEnd={handleTouchEnd}
+                >
+                  <div
+                    className="carousel-track"
+                    style={{ transform: `translateX(-${carouselIndex * 100}%)` }}
+                  >
+                    {modules.map((mod) => {
+                      const prog = getModuleProgress(mod.id);
+                      const theme = MODULE_THEMES[mod.id] || { icon: '📘', iconBg: '#7b61ff', badge: 'En curso' };
+                      const isRecommended = user?.onboarding?.moduloRecomendado === mod.id;
+                      const badgeText = isRecommended ? '★ Recomendado' : (theme.badge || 'En curso');
 
-                  {user?.onboarding?.moduloRecomendado === mod.id && (
-                    <span className="badge badge-recommended">
-                      ★ Recomendado
-                    </span>
-                  )}
+                      return (
+                        <div
+                          key={mod.id}
+                          className="carousel-slide"
+                          onClick={() => handleSelectModule(mod.id)}
+                        >
+                          <div className="featured-card">
+                            <div className="featured-card-header">
+                              <div className="featured-icon-badge">
+                                <div className="featured-icon-box">
+                                  <span>💳</span>
+                                </div>
+                                <span className="featured-badge">{badgeText}</span>
+                              </div>
+
+                              <div className="featured-illustration-circle">
+                                <span>💳🧮</span>
+                              </div>
+                            </div>
+
+                            <div className="featured-card-body">
+                              <h3 className="featured-card-title">{mod.title}</h3>
+                              <p className="featured-card-meta">{prog.completed} de {prog.total} completadas</p>
+
+                              <div className="featured-progress-bar">
+                                <div
+                                  className="featured-progress-fill"
+                                  style={{ width: `${Math.max(6, prog.pct)}%` }}
+                                ></div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
+
+                <button
+                  type="button"
+                  className="carousel-arrow carousel-arrow-next"
+                  onClick={handleNextCarousel}
+                  aria-label="Siguiente lección"
+                >
+                  ›
+                </button>
+              </div>
+
+              {/* Indicadores / Puntos */}
+              <div className="carousel-dots">
+                {modules.map((mod, idx) => (
+                  <button
+                    key={mod.id}
+                    type="button"
+                    className={`carousel-dot ${idx === carouselIndex ? 'active' : ''}`}
+                    onClick={() => setCarouselIndex(idx)}
+                    aria-label={`Ir a ${mod.title}`}
+                  />
+                ))}
               </div>
             </div>
-          ))}
-        </div>
+          )}
+        </section>
+
+        {/* Sección: Todas las lecciones */}
+        <section className="figma-section figma-section-all-lessons">
+          <h2 className="figma-section-title figma-section-title-spaced">Todas las lecciones</h2>
+
+          <div className="figma-lessons-list">
+            {modules.map((mod) => {
+              const prog = getModuleProgress(mod.id);
+              const theme = MODULE_THEMES[mod.id] || { icon: '📘', iconBg: '#7b61ff' };
+
+              return (
+                <div
+                  key={mod.id}
+                  className="figma-lesson-card"
+                  onClick={() => handleSelectModule(mod.id)}
+                >
+                  <div
+                    className="figma-lesson-icon-box"
+                    style={{ backgroundColor: theme.iconBg }}
+                  >
+                    <span>{theme.icon}</span>
+                  </div>
+
+                  <div className="figma-lesson-info">
+                    <h3 className="figma-lesson-title">{mod.title}</h3>
+                    <p className="figma-lesson-subtitle">{prog.completed} de {prog.total} completadas</p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
       </div>
     );
   }
@@ -394,12 +469,12 @@ export default function Modules({
 
     return (
       <div className="card modules-card">
-        {/* Navegación de retorno */}
+        {/* Navegación de retorno estilo Figma */}
         <button
-          className="module-back-btn"
+          className="figma-back-btn"
           onClick={handleBackToCatalog}
         >
-          ← Volver al Catálogo
+          ← volver
         </button>
 
         {/* Título del módulo */}
