@@ -1,8 +1,8 @@
 import React from 'react';
 import Mascota from './Mascota';
 import './Profile.css';
-import mateEscolar from '../assets/mate_escolar.png';
-import mateProfesor from '../assets/mate_profesor.png';
+import mateEscolar from '../assets/mate_escolar.webp';
+import mateProfesor from '../assets/mate_profesor.webp';
 import mateAcademico from '../assets/mate_academico.webp';
 
 /*
