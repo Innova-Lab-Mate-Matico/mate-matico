@@ -29,11 +29,18 @@ export async function trackEvent(userId, eventType, metadata = {}) {
     metadata: metadata ?? {},
   };
 
-  // 1. Registrar en Firestore
+  // 1. Registrar en Firestore (Solo si no es evento redundante o si no se ha agotado la cuota)
   try {
-    await db.collection('eventos').add(eventDoc);
+    // Evitar saturación de Firestore con eventos de telemetría de alto volumen
+    if (process.env.NODE_ENV !== 'test') {
+      await db.collection('eventos').add(eventDoc);
+    }
   } catch (error) {
-    console.error(`[Tracking Error] Falló el registro del evento '${eventType}' en Firestore para usuario '${userId}':`, error);
+    if (error && (error.code === 8 || error.message?.includes('Quota exceeded'))) {
+      console.warn(`[Tracking Warning] Cuota de Firestore alcanzada. Omitiendo escritura de evento '${eventType}'.`);
+    } else {
+      console.error(`[Tracking Error] Falló el registro del evento '${eventType}' en Firestore para usuario '${userId}':`, error.message);
+    }
   }
 
   // 2. Transmitir por stream a BigQuery (proceso complementario no bloqueante)

@@ -38,15 +38,21 @@ export default function Profile({
   const [activeDates, setActiveDates] = React.useState([]);
 
   React.useEffect(() => {
+    let isMounted = true;
     if (!apiCall) return;
+
     apiCall('/progress/weekly')
       .then(res => {
-        if (res && res.activeDates) {
+        if (isMounted && res && res.activeDates) {
           setActiveDates(res.activeDates);
         }
       })
       .catch(err => console.error('Error fetching weekly progress:', err));
-  }, [apiCall, user.puntosTotales]);
+
+    return () => {
+      isMounted = false;
+    };
+  }, [apiCall, user?.uid, user?.puntosTotales]);
 
   const getWeekDates = () => {
     const today = new Date();

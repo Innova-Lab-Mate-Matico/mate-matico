@@ -18,12 +18,21 @@ import olaInferior from './assets/image 10 (1).png';
 import descansoMascota from './assets/descanso.png';
 import logoPrincipal from './assets/Logo.png';
 
+// Íconos SVG oficiales de la barra inferior de Figma
+import navLeccionesSvg from './assets/two_pager.svg';
+import navPracticarSvg from './assets/cards_star.svg';
+import navInicioSvg from './assets/home.svg';
+import navProgresoSvg from './assets/diamond_shine.svg';
+import navPerfilSvg from './assets/account_circle.svg';
+
 
 
 // URL base de la API backend
 const API_BASE =
   process.env.REACT_APP_API_BASE_URL ||
-  'https://mate-matico-backend.onrender.com/api';
+  (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+    ? 'http://localhost:3000/api'
+    : 'https://mate-matico-backend.onrender.com/api');
 
 
 // Configuración Firebase Client
@@ -84,9 +93,9 @@ export default function App() {
     setIsStatusOk(ok);
   };
 /*
-  Wrapper estándar para llamadas HTTP al backend.
+  Wrapper estándar para llamadas HTTP al backend (Memorizado para evitar re-fetches en useEffect).
 */
-const apiCall = async (path, options = {}, customToken = null) => {
+const apiCall = React.useCallback(async (path, options = {}, customToken = null) => {
   const headers = {
     "Content-Type": "application/json",
     "x-client-timezone": Intl.DateTimeFormat().resolvedOptions().timeZone,
@@ -114,7 +123,7 @@ const apiCall = async (path, options = {}, customToken = null) => {
   }
 
   return data;
-};
+}, [token]);
 
   /*
     Obtener perfil del usuario autenticado.
@@ -460,7 +469,7 @@ const apiCall = async (path, options = {}, customToken = null) => {
       <div className="app-container" id="arriba" style={{ minHeight: '100vh' }}>
         <header className="dashboard-header">
           <div className="dashboard-header-left" style={{ display: 'flex', alignItems: 'center' }}>
-            <img src={logoPrincipal} alt="Mate-Mático" style={{ height: '42px', objectFit: 'contain' }} />
+            <img src={logoPrincipal} alt="Mate-Mático" className="dashboard-logo" style={{ height: '62px', objectFit: 'contain' }} />
           </div>
           <div className="dashboard-header-right">
             <span>🔥 {user.rachaDias ?? 0} {user.rachaDias === 1 ? 'día' : 'días'}</span>
@@ -468,46 +477,8 @@ const apiCall = async (path, options = {}, customToken = null) => {
           </div>
         </header>
 
-        <main>
+        <main style={{ paddingBottom: '75px' }}>
           <div>
-            <nav className="tab-bar">
-              <button
-                type="button"
-                className={`tab-btn ${activeTab === 'perfil' ? 'active-tab' : ''}`}
-                onClick={() => setActiveTab('perfil')}
-              >
-                <span className="tab-text-full">1. Mi Perfil</span>
-                <span className="tab-text-short">Perfil</span>
-              </button>
-
-              <button
-                type="button"
-                className={`tab-btn ${activeTab === 'lecciones' ? 'active-tab' : ''}`}
-                onClick={() => setActiveTab('lecciones')}
-              >
-                <span className="tab-text-full">2. Lecciones y Ejercicios</span>
-                <span className="tab-text-short">Lecciones</span>
-              </button>
-
-              <button
-                type="button"
-                className={`tab-btn ${activeTab === 'progreso' ? 'active-tab' : ''}`}
-                onClick={() => setActiveTab('progreso')}
-              >
-                <span className="tab-text-full">3. Mi Progreso</span>
-                <span className="tab-text-short">Progreso</span>
-              </button>
-
-              <button
-                type="button"
-                className={`tab-btn ${activeTab === 'logros' ? 'active-tab' : ''}`}
-                onClick={() => setActiveTab('logros')}
-              >
-                <span className="tab-text-full">4. Mis Logros 🏆</span>
-                <span className="tab-text-short">Logros</span>
-              </button>
-            </nav>
-
             <div className="layout-grid">
               {activeTab === 'perfil' && (
                 <Profile
@@ -520,7 +491,7 @@ const apiCall = async (path, options = {}, customToken = null) => {
                   }}
                 />
               )}
-              {activeTab === 'lecciones' && (
+              {(activeTab === 'inicio' || activeTab === 'lecciones') && (
                 <Modules
                   apiCall={apiCall}
                   onAnswerSuccess={handleAnswerSuccess}
@@ -530,7 +501,7 @@ const apiCall = async (path, options = {}, customToken = null) => {
                 />
               )}
 
-           {activeTab === 'progreso' && (
+              {activeTab === 'progreso' && (
                 <Progress apiCall={apiCall} />
               )}
 
@@ -541,11 +512,66 @@ const apiCall = async (path, options = {}, customToken = null) => {
           </div>
         </main>
 
-        <footer className="footer">
-         
-          <p style={{ marginTop: '5px' }}>
-            Mate-Mático Monorepo MVP — React Frontend © 2026
-          </p>
+        {/* Barra de navegación inferior fija estilo Figma */}
+        <nav className="figma-bottom-nav">
+          <button
+            type="button"
+            className={`figma-nav-item ${activeTab === 'lecciones' ? 'active' : ''}`}
+            onClick={() => setActiveTab('lecciones')}
+          >
+            <img src={navLeccionesSvg} alt="Lecciones" />
+            <span>Lecciones</span>
+          </button>
+
+          <button
+            type="button"
+            className={`figma-nav-item ${activeTab === 'logros' ? 'active' : ''}`}
+            onClick={() => setActiveTab('logros')}
+          >
+            <img src={navPracticarSvg} alt="Practicar" />
+            <span>Practicar</span>
+          </button>
+
+          <button
+            type="button"
+            className={`figma-nav-item ${activeTab === 'inicio' ? 'active' : ''}`}
+            onClick={() => setActiveTab('inicio')}
+          >
+            <img src={navInicioSvg} alt="Inicio" />
+            <span>Inicio</span>
+          </button>
+
+          <button
+            type="button"
+            className={`figma-nav-item ${activeTab === 'progreso' ? 'active' : ''}`}
+            onClick={() => setActiveTab('progreso')}
+          >
+            <img src={navProgresoSvg} alt="Progreso" />
+            <span>Progreso</span>
+          </button>
+
+          <button
+            type="button"
+            className={`figma-nav-item ${activeTab === 'perfil' ? 'active' : ''}`}
+            onClick={() => setActiveTab('perfil')}
+          >
+            <img src={navPerfilSvg} alt="Perfil" />
+            <span>Perfil</span>
+          </button>
+        </nav>
+
+        {/* Footer Profesional Innova Lab */}
+        <footer className="figma-pro-footer">
+          <div className="footer-content">
+            <h3 className="footer-brand">Mate-Mático — Innova Lab</h3>
+            <p className="footer-tagline">
+              Plataforma Educativa Adaptativa con Gamificación e Inteligencia Artificial
+            </p>
+            <div className="footer-divider"></div>
+            <p className="footer-copyright">
+              © 2026 Innova Lab — Todos los derechos reservados.
+            </p>
+          </div>
         </footer>
       </div>
       {networkError && (

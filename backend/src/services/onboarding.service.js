@@ -106,17 +106,22 @@ export async function guardarOnboardingUsuario(uid, respuestas) {
     moduloRecomendado: recomendacion,
   };
 
-  await ref.update(usuarioToDb({
-    onboarding: onboardingData
-  }));
-
-  // Envío en tiempo real a BigQuery (Load Job) como un proceso complementario (apto para Sandbox gratuito)
-  if (process.env.NODE_ENV === 'test' || process.env.FIRESTORE_EMULATOR_HOST) {
-    const updatedDoc = await ref.get();
-    const data = dbToUsuario(updatedDoc.data());
-    data.uid = updatedDoc.id;
-    return data;
+  try {
+    await ref.update(usuarioToDb({
+      onboarding: onboardingData
+    }));
+  } catch (err) {
+    if (err && (err.code === 8 || err.message?.includes('Quota exceeded') || err.details?.includes('Quota exceeded'))) {
+      console.warn('⚠️ Firestore cuota superada al guardar onboarding. Continuando en modo local.');
+    } else {
+      throw err;
+    }
   }
+
+  return {
+    uid,
+    onboarding: onboardingData
+  };
 
   try {
     const datasetId = 'onboarding_data';

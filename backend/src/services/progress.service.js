@@ -3,23 +3,42 @@ import { COLECCION_USUARIOS } from '../models/usuario.model.js';
 import { trackEvent } from './tracking.service.js';
 import { findModule, findLesson } from '../data/moduleCatalog.js';
 
+const memoryProgress = new Map();
+
+function isQuotaError(err) {
+  return err && (err.code === 8 || err.message?.includes('Quota exceeded') || err.details?.includes('Quota exceeded'));
+}
+
 function progresoRef(uid) {
   return db.collection(COLECCION_USUARIOS).doc(uid).collection('progreso');
 }
 
 export async function getProgress(uid) {
-  const snap = await progresoRef(uid).get();
-  const modulos = {};
-  snap.forEach((doc) => {
-    modulos[doc.id] = doc.data();
-  });
-  return { modulos };
+  try {
+    const snap = await progresoRef(uid).get();
+    const modulos = {};
+    snap.forEach((doc) => {
+      modulos[doc.id] = doc.data();
+    });
+    return { modulos };
+  } catch (err) {
+    if (isQuotaError(err)) {
+      console.warn('⚠️ Firestore cuota superada en getProgress. Usando fallback en memoria local.');
+      return { modulos: memoryProgress.get(uid) || {} };
+    }
+    throw err;
+  }
 }
 
 export async function updateLessonProgress(uid, { moduleId, lessonId, completada, puntaje, tiempo_segundos }) {
-  const ref = progresoRef(uid).doc(moduleId);
-  const doc = await ref.get();
-  const existing = doc.exists ? doc.data() : { moduleId };
+  let existing = { moduleId };
+  try {
+    const ref = progresoRef(uid).doc(moduleId);
+    const doc = await ref.get();
+    if (doc.exists) existing = doc.data();
+  } catch (err) {
+    if (!isQuotaError(err)) throw err;
+  }
 
   const lecciones = { ...(existing.lecciones ?? existing.lessons ?? {}) };
   
@@ -79,35 +98,55 @@ export async function updateLessonProgress(uid, { moduleId, lessonId, completada
   return payload;
 }
 
+const weeklyCache = new Map(); // uid -> { data, timestamp }
+
 export async function getWeeklyActivity(uid, timezone = 'America/Argentina/Buenos_Aires') {
+  const cached = weeklyCache.get(uid);
+  if (cached && (Date.now() - cached.timestamp < 5 * 60 * 1000)) {
+    return cached.data;
+  }
+
   const hace8Dias = new Date();
   hace8Dias.setDate(hace8Dias.getDate() - 8);
 
-  const snap = await db.collection('eventos')
-    .where('usuario_id', '==', uid)
-    .where('fecha_hora', '>=', hace8Dias.toISOString())
-    .get();
-
   const diasActivos = new Set();
-  
-  snap.forEach(doc => {
-    const data = doc.data();
-    if (!data.fecha_hora) return;
-    const fecha = new Date(data.fecha_hora);
-    
-    try {
-      const formatted = new Intl.DateTimeFormat('en-CA', {
-        timeZone: timezone,
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit'
-      }).format(fecha);
-      diasActivos.add(formatted);
-    } catch (err) {
-      const formatted = fecha.toISOString().split('T')[0];
-      diasActivos.add(formatted);
-    }
-  });
 
-  return Array.from(diasActivos);
+  try {
+    const snap = await db.collection('eventos')
+      .where('usuario_id', '==', uid)
+      .where('fecha_hora', '>=', hace8Dias.toISOString())
+      .limit(50)
+      .get();
+
+    snap.forEach(doc => {
+      const data = doc.data();
+      if (!data.fecha_hora) return;
+      const fecha = new Date(data.fecha_hora);
+      
+      try {
+        const formatted = new Intl.DateTimeFormat('en-CA', {
+          timeZone: timezone,
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit'
+        }).format(fecha);
+        diasActivos.add(formatted);
+      } catch (err) {
+        const formatted = fecha.toISOString().split('T')[0];
+        diasActivos.add(formatted);
+      }
+    });
+  } catch (err) {
+    if (isQuotaError(err)) {
+      console.warn('⚠️ Firestore cuota superada en getWeeklyActivity. Usando caché local.');
+      const fallbackResult = [new Date().toISOString().split('T')[0]];
+      weeklyCache.set(uid, { data: fallbackResult, timestamp: Date.now() });
+      return fallbackResult;
+    }
+    throw err;
+  }
+
+  const result = Array.from(diasActivos);
+  weeklyCache.set(uid, { data: result, timestamp: Date.now() });
+  return result;
 }
