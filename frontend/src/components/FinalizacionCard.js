@@ -2,8 +2,8 @@ import React from 'react';
 import '../styles/completo.css';
 
 import iconoNivel from '../assets/nivel.png';
-import mateEscolar from '../assets/mate_escolar.png';
-import mateProfesor from '../assets/mate_profesor.png';
+import mateEscolar from '../assets/mate_escolar.webp';
+import mateProfesor from '../assets/mate_profesor.webp';
 import mateAcademico from '../assets/mate_academico.webp';
 
 function FinalizacionCard({
