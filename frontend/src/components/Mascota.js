@@ -12,8 +12,10 @@ import mateAcademico from '../assets/mate_academico.png';
 
 export default function Mascota({ rol }) {
   const getMascotaVisual = () => {
-    switch (rol) {
+    const r = (rol || '').toLowerCase();
+    switch (r) {
       case 'avanzado':
+      case 'experto':
         return {
           imgSrc: mateAcademico,
           levelName: 'Nivel Experto',
@@ -22,6 +24,8 @@ export default function Mascota({ rol }) {
         };
 
       case 'intermedio':
+      case 'secundario':
+      case 'medio':
         return {
           imgSrc: mateEscolar,
           levelName: 'Nivel Intermedio',
@@ -30,6 +34,8 @@ export default function Mascota({ rol }) {
         };
 
       case 'principiante':
+      case 'inicial':
+      case 'basico':
       default:
         return {
           imgSrc: mateProfesor,

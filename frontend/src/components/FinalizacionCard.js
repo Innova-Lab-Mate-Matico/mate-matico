@@ -19,20 +19,26 @@ function FinalizacionCard({
   };
 
   const getMascotaData = () => {
-    switch (userRole) {
+    const r = (userRole || '').toLowerCase();
+    switch (r) {
       case 'avanzado':
+      case 'experto':
         return {
           imgSrc: mateAcademico,
           bubbleTop: '¡Nivel Experto!',
           bubbleBottom: '¡Sos imparable! Seguí dominando las matemáticas.'
         };
       case 'intermedio':
+      case 'secundario':
+      case 'medio':
         return {
           imgSrc: mateEscolar,
           bubbleTop: '¡Nivel Intermedio!',
           bubbleBottom: '¡Excelente progreso! Tu dedicación da frutos.'
         };
       case 'principiante':
+      case 'inicial':
+      case 'basico':
       default:
         return {
           imgSrc: mateProfesor,

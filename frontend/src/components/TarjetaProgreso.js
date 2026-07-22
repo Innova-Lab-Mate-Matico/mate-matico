@@ -19,20 +19,26 @@ function TarjetaProgreso({
   };
 
   const getMascotaData = () => {
-    switch (userRole) {
+    const r = (userRole || '').toLowerCase();
+    switch (r) {
       case 'avanzado':
+      case 'experto':
         return {
           imgSrc: mateAcademico,
           levelTitle: 'Nivel Experto',
           levelDesc: '¡Felicitaciones! Has alcanzado el nivel máximo y dominás los desafíos.'
         };
       case 'intermedio':
+      case 'secundario':
+      case 'medio':
         return {
           imgSrc: mateEscolar,
           levelTitle: 'Nivel Intermedio',
           levelDesc: '¡Excelente progreso! Seguí practicando para perfeccionar tus habilidades.'
         };
       case 'principiante':
+      case 'inicial':
+      case 'basico':
       default:
         return {
           imgSrc: mateProfesor,
