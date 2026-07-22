@@ -32,7 +32,7 @@ function FinalizacionCard({
       case 'secundario':
       case 'medio':
         return {
-          imgSrc: mateEscolar,
+          imgSrc: mateProfesor,
           bubbleTop: '¡Nivel Intermedio!',
           bubbleBottom: '¡Excelente progreso! Tu dedicación da frutos.'
         };
@@ -41,7 +41,7 @@ function FinalizacionCard({
       case 'basico':
       default:
         return {
-          imgSrc: mateProfesor,
+          imgSrc: mateEscolar,
           bubbleTop: '¡Tú Puedes!',
           bubbleBottom: 'Seguí esforzándote día a día.'
         };

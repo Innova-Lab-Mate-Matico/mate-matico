@@ -19,12 +19,12 @@ const getMascotaImg = (rol) => {
     case 'intermedio':
     case 'secundario':
     case 'medio':
-      return mateEscolar;
+      return mateProfesor;
     case 'principiante':
     case 'inicial':
     case 'basico':
     default:
-      return mateProfesor;
+      return mateEscolar;
   }
 };
 
