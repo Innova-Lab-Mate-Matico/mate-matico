@@ -11,7 +11,9 @@ export function crearGeneradorSemilla(semilla) {
 }
 
 export function enteroAleatorio(rng, min, max) {
-  return Math.floor(rng() * (max - min + 1)) + min;
+  const intMin = Math.ceil(min);
+  const intMax = Math.floor(max);
+  return Math.floor(rng() * (intMax - intMin + 1)) + intMin;
 }
 
 export function semillaNueva() {

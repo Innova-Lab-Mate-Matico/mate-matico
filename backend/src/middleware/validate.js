@@ -152,13 +152,13 @@ export function validateOnboardingBody(req, res, next) {
     });
   }
 
-  // 3. edad: opcional, entero, rango 5-120
+  // 3. edad: opcional, entero, rango 18-120 (Público +18)
   if (edad !== undefined && edad !== null && edad !== '') {
     const edadNum = Number(edad);
-    if (!Number.isInteger(edadNum) || edadNum < 5 || edadNum > 120) {
+    if (!Number.isInteger(edadNum) || edadNum < 18 || edadNum > 120) {
       return res.status(400).json({
         success: false,
-        error: 'La edad debe ser un número entero válido entre 5 y 120 años',
+        error: 'La edad debe ser un número entero válido de al menos 18 años',
       });
     }
   }

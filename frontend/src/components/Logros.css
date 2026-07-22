@@ -1,0 +1,222 @@
+/* ============================================================
+   LOGROS.CSS — Pantalla de Badges / Medallas
+   Sigue las mismas variables y convenciones del equipo de front:
+   - Color primario: #7b61ff
+   - Azul oscuro títulos: #163b74
+   - Texto secundario: #64748b
+   - Cards: border-radius 16px, sombra suave violeta
+   ============================================================ */
+
+.logros-card {
+  max-width: 650px;
+  margin: 0 auto;
+}
+
+/* ── Cabecera ────────────────────────────────────────────── */
+.logros-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.logros-header h2 {
+  margin: 0;
+  color: #163b74;
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+/* ── Barra de progreso global ────────────────────────────── */
+.logros-progress-bar-wrapper {
+  background: #f1f0ff;
+  border: 1px solid rgba(123, 97, 255, 0.15);
+  border-radius: 16px;
+  padding: 16px 20px;
+  margin-bottom: 24px;
+}
+
+.logros-progress-bar-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.logros-progress-bar-label span {
+  font-size: 0.9rem;
+  color: #4b5563;
+  font-weight: 600;
+}
+
+.logros-progress-bar-label strong {
+  color: #7b61ff;
+  font-size: 1.1rem;
+}
+
+.logros-progress-track {
+  width: 100%;
+  height: 10px;
+  background: #e2e8f0;
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.logros-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #7b61ff, #a78bfa);
+  border-radius: 99px;
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ── Sección por categoría ───────────────────────────────── */
+.logros-section {
+  margin-bottom: 28px;
+}
+
+.logros-section-title {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 14px;
+  padding-left: 4px;
+}
+
+/* ── Grid de badges ──────────────────────────────────────── */
+.logros-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 12px;
+}
+
+/* ── Card individual de badge ────────────────────────────── */
+.logro-card {
+  background: #ffffff;
+  border: 1px solid rgba(123, 97, 255, 0.12);
+  border-radius: 16px;
+  padding: 16px 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 8px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.logro-card.desbloqueado {
+  box-shadow: 0 4px 16px rgba(123, 97, 255, 0.12);
+  cursor: default;
+}
+
+.logro-card.desbloqueado:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(123, 97, 255, 0.2);
+}
+
+.logro-card.bloqueado {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+  opacity: 0.7;
+}
+
+/* Shimmer en la esquina del badge desbloqueado */
+.logro-card.desbloqueado::before {
+  content: '';
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  width: 40px;
+  height: 40px;
+  background: radial-gradient(circle, rgba(123, 97, 255, 0.15), transparent 70%);
+  border-radius: 50%;
+}
+
+.logro-emoji {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.logro-card.bloqueado .logro-emoji {
+  filter: grayscale(1);
+  opacity: 0.5;
+}
+
+.logro-nombre {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #163b74;
+  line-height: 1.3;
+}
+
+.logro-card.bloqueado .logro-nombre {
+  color: #94a3b8;
+}
+
+.logro-descripcion {
+  font-size: 0.68rem;
+  color: #64748b;
+  line-height: 1.4;
+}
+
+.logro-card.bloqueado .logro-descripcion {
+  color: #cbd5e1;
+}
+
+/* Ícono de candado en bloqueados */
+.logro-lock-icon {
+  font-size: 0.8rem;
+  color: #cbd5e1;
+  margin-top: 2px;
+}
+
+/* Badge "Nuevo" tick en desbloqueados */
+.logro-check-icon {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 18px;
+  height: 18px;
+  background: #7b61ff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.6rem;
+  color: white;
+  font-weight: 700;
+}
+
+/* ── Loading y estado vacío ──────────────────────────────── */
+.logros-loading {
+  text-align: center;
+  padding: 40px 20px;
+  color: #64748b;
+  font-size: 0.95rem;
+}
+
+.logros-empty {
+  text-align: center;
+  padding: 30px 20px;
+  color: #94a3b8;
+  font-style: italic;
+  font-size: 0.88rem;
+}
+
+/* ── Responsive ──────────────────────────────────────────── */
+@media (max-width: 480px) {
+  .logros-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 600px) {
+  .logros-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}

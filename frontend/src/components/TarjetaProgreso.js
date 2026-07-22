@@ -2,9 +2,48 @@ import React from 'react';
 import BotonAncla from './BotonAncla';
 import imgLeccion from '../assets/lección ok.png';
 import imgMedalla from '../assets/image 19.png';
-import imgContento from '../assets/contento.png';
+import mateEscolar from '../assets/mate_escolar.png';
+import mateProfesor from '../assets/mate_profesor.png';
+import mateAcademico from '../assets/mate_academico.png';
 
-function TarjetaProgreso({ destinoAncla = "continuar" }) {
+function TarjetaProgreso({
+  destinoAncla = "continuar",
+  onContinuar,
+  completedCount = 2,
+  totalLessons = 6,
+  userRole = "principiante"
+}) {
+  const getDisplayProgress = () => {
+    const pct = Math.round((completedCount / totalLessons) * 100);
+    return `${Math.min(100, Math.max(0, pct))}%`;
+  };
+
+  const getMascotaData = () => {
+    switch (userRole) {
+      case 'avanzado':
+        return {
+          imgSrc: mateAcademico,
+          levelTitle: 'Nivel Experto',
+          levelDesc: '¡Felicitaciones! Has alcanzado el nivel máximo y dominás los desafíos.'
+        };
+      case 'intermedio':
+        return {
+          imgSrc: mateProfesor,
+          levelTitle: 'Nivel Intermedio',
+          levelDesc: '¡Excelente progreso! Seguí practicando para perfeccionar tus habilidades.'
+        };
+      case 'principiante':
+      default:
+        return {
+          imgSrc: mateEscolar,
+          levelTitle: 'Primeros Mates',
+          levelDesc: 'Estás construyendo una base sólida para tomar decisiones con más confianza.'
+        };
+    }
+  };
+
+  const mascota = getMascotaData();
+
   return (
     <div className="progreso-card-wrapper">
       <div className="progreso-card">
@@ -31,7 +70,7 @@ function TarjetaProgreso({ destinoAncla = "continuar" }) {
               <div className="progreso-card__counter-row">
                 <div className="progreso-card__number-group">
                   <p className="progreso-card__metric-points-highlight">
-                    <span className="progreso-card__number-massive">2</span> de 6
+                    <span className="progreso-card__number-massive">{completedCount}</span> de {totalLessons}
                   </p>
                   <p className="progreso-card__metric-label-progress">Tu avance</p>
                   <p className="progreso-card__metric-sublabel-progress">Progreso del módulo</p>
@@ -44,7 +83,7 @@ function TarjetaProgreso({ destinoAncla = "continuar" }) {
 
               {/* Barra de progreso */}
               <div className="progreso-card__progress-bar-track">
-                <div className="progreso-card__progress-bar-fill" style={{ width: '33.33%' }}></div>
+                <div className="progreso-card__progress-bar-fill" style={{ width: getDisplayProgress() }}></div>
               </div>
 
               </div>
@@ -58,9 +97,9 @@ function TarjetaProgreso({ destinoAncla = "continuar" }) {
                   <span className="progreso-card__icon-bullet-signal"></span>
                   <span className="progreso-card__metric-label-small">Nivel actual</span>
                 </div>
-                <h3 className="progreso-card__level-title">Primeros Mates</h3>
+                <h3 className="progreso-card__level-title">{mascota.levelTitle}</h3>
                 <p className="progreso-card__level-description">
-                  Estás construyendo una base sólida para tomar decisiones con más confianza.
+                  {mascota.levelDesc}
                 </p>
               </div>
              
@@ -73,11 +112,10 @@ function TarjetaProgreso({ destinoAncla = "continuar" }) {
           {/* --- 6. BLOQUES MOTIVACIONALES INFERIORES --- */}
           <section className="progreso-card__motivation-box">
             <div className="progreso-card__motivation-avatar-container">
-              <img src={imgContento} alt="Mate Contento" className="progreso-card__motivation-avatar-massive" />
+              <img src={mascota.imgSrc} alt="Mate" className="progreso-card__motivation-avatar-massive" />
             </div>
             <div className="progreso-card__motivation-text-stack">
               <p className="progreso-card__motivation-line-bottom">Un mate más y seguimos aprendiendo</p>
-             
             </div>
           </section>
 
@@ -86,7 +124,7 @@ function TarjetaProgreso({ destinoAncla = "continuar" }) {
         {/* --- 7. COMPONENTE COMPARTIDO: BOTÓN ANCLA GRUPAL --- */}
         <footer className="progreso-card__actions">
           <div className="progreso-card__btn-wrapper">
-            <BotonAncla destino={destinoAncla}>Continuar</BotonAncla>
+            <BotonAncla destino={destinoAncla} onContinuar={onContinuar}>Continuar</BotonAncla>
           </div>
         </footer>
 

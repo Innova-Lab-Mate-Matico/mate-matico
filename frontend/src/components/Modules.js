@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import luzIcon from '../assets/luz.png';
-import dudaIcon from '../assets/duda.png';
-import loLograsteIcon from '../assets/lo lograste.png';
 import './Modules.css';
+import LessonFlow from './LessonFlow';
+import Microleccion1 from './microleccion1';
+import Microleccion2 from './microleccion2';
+import DynamicTheoryCard from './DynamicTheoryCard';
 
 /*
   MATE-MÁTICO — COMPONENTE LECCIONES Y MÓDULOS
@@ -32,6 +33,26 @@ export default function Modules({
   onRefreshProgress,
   user
 }) {
+  const getDisplayDifficulty = (baseRol, userRol) => {
+    const rolesOrder = ['principiante', 'intermedio', 'avanzado'];
+    const baseIdx = rolesOrder.indexOf(baseRol);
+    const userIdx = rolesOrder.indexOf(userRol);
+
+    const labels = {
+      principiante: 'Inicial',
+      intermedio: 'Intermedia',
+      avanzado: 'Avanzada',
+    };
+
+    const baseLabel = labels[baseRol] || baseRol;
+    if (userIdx > baseIdx && userRol) {
+      const userLabel = labels[userRol] || userRol;
+      return `Dificultad: ${userLabel} (Adaptada)`;
+    }
+
+    return `Dificultad: ${baseLabel}`;
+  };
+
   const [modules, setModules] = useState([]);
   const [selectedModuleId, setSelectedModuleId] =
     useState(null);
@@ -45,16 +66,29 @@ export default function Modules({
   const [exerciseStates, setExerciseStates] =
     useState({});
 
-  // Conteo de errores consecutivos
-  const [errorCount, setErrorCount] =
-    useState({});
-
-  // Índice del ejercicio actual (flujo paso a paso)
-  const [currentExerciseIndex, setCurrentExerciseIndex] =
-    useState(0);
-
   const [loading, setLoading] =
     useState(false);
+
+  const [theoryOnlyLesson, setTheoryOnlyLesson] = useState(null);
+  const [currentTheoryIndex, setCurrentTheoryIndex] = useState(0);
+
+  const handleOpenTheoryOnly = async (lesson) => {
+    setLoading(true);
+    try {
+      const data = await apiCall(
+        `/modules/${selectedModuleId}/lessons/${lesson.id}?semilla=${moduleDetail.semillaSesion}`
+      );
+      const loadedLesson = data.leccion ?? data.lesson ?? lesson;
+      setTheoryOnlyLesson(loadedLesson);
+      setCurrentTheoryIndex(0);
+    } catch (err) {
+      console.error('Error al cargar teoría de la lección:', err);
+      setTheoryOnlyLesson(lesson);
+      setCurrentTheoryIndex(0);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     loadCatalog();
@@ -108,7 +142,7 @@ export default function Modules({
 
       setExerciseStates({});
 
-      setErrorCount({});
+
     } catch (err) {
       console.error(
         'Error al cargar detalle del módulo:',
@@ -146,143 +180,13 @@ export default function Modules({
     } finally {
       setLoading(false);
       setExerciseStates({});
-      setErrorCount({});
-      setCurrentExerciseIndex(0);
     }
   };
 
-  /*
-    Validar respuesta.
-  */
-  const handleSubmitAnswer = async (
-    ex,
-    answer
-  ) => {
-    const exId = ex.id;
-
-    if (
-      exerciseStates[exId]?.correcto
-    ) {
-      return;
-    }
-
-    try {
-      const result = await apiCall(
-        '/exercises/validate',
-        {
-          method: 'POST',
-          body: JSON.stringify({
-            moduleId:
-              selectedModuleId,
-
-            lessonId:
-              activeLesson.id,
-
-            exerciseId: exId,
-
-            answer:
-              ex.tipo ===
-              'multiple_choice'
-                ? String(answer)
-                : Number(answer),
-
-            semilla:
-              ex.semilla ??
-              moduleDetail.semillaSesion,
-
-            operandos:
-              ex.operandos,
-          }),
-        }
-      );
-
-      /*
-        Guardar resultado local.
-      */
-      setExerciseStates(
-        (prev) => ({
-          ...prev,
-
-          [exId]: {
-            ...prev[exId],
-
-            checked: true,
-
-            correcto:
-              result.correcto,
-
-            puntosGanados:
-              result.puntosGanados,
-
-            rolActual:
-              result.rolActual,
-
-            rolSubio:
-              result.rolSubio,
-
-            explicacionError:
-              result.explicacionError,
-
-            habilitarComodin:
-              result.habilitarComodin,
-
-            comodinPista:
-              result.comodinPista,
-          },
-        })
-      );
-
-      if (result.correcto) {
-        onAnswerSuccess(result);
-        // Auto-avanzar al siguiente ejercicio después de 1.5s de celebración
-        setTimeout(() => {
-          setCurrentExerciseIndex(prev => prev + 1);
-        }, 1500);
-      } else {
-        setErrorCount((prev) => ({
-          ...prev,
-
-          [exId]:
-            (prev[exId] || 0) + 1,
-        }));
-      }
-    } catch (err) {
-      alert(
-        `Error al validar: ${err.message}`
-      );
-    }
-  };
-
-  /*
-    Manejadores de entrada del usuario para los ejercicios.
-  */
-  const handleSelectOption = (exId, option) => {
-    if (exerciseStates[exId]?.correcto) return;
-
-    setExerciseStates((prev) => ({
-      ...prev,
-      [exId]: {
-        ...prev[exId],
-        selectedOption: option,
-      },
-    }));
-  };
-
-  const handleNumericChange = (exId, value) => {
-    if (exerciseStates[exId]?.correcto) return;
-
-    setExerciseStates((prev) => ({
-      ...prev,
-      [exId]: {
-        ...prev[exId],
-        userInput: value,
-      },
-    }));
-  };
 
   /*
     Verificar si una lección
-    ya fue completada.
+    ya fue completada (históricamente).
   */
   const isLessonCompleted = (
     lessonId
@@ -295,6 +199,7 @@ export default function Modules({
     }
 
     const moduleProgress =
+      progress?.modulos?.[selectedModuleId] ||
       progress[selectedModuleId] ||
       {};
 
@@ -313,6 +218,47 @@ export default function Modules({
   };
 
   /*
+    Verificar si una lección fue completada HOY (para renovar el tilde ✓ cada medianoche).
+  */
+  const isLessonCompletedToday = (
+    lessonId
+  ) => {
+    if (
+      !progress ||
+      !selectedModuleId
+    ) {
+      return false;
+    }
+
+    const moduleProgress =
+      progress?.modulos?.[selectedModuleId] ||
+      progress[selectedModuleId] ||
+      {};
+
+    const lecciones =
+      moduleProgress.lecciones ||
+      moduleProgress.lessons ||
+      {};
+
+    const lessonData = lecciones[lessonId];
+    if (!lessonData || !(lessonData.completada || lessonData.completed)) {
+      return false;
+    }
+
+    const dateStr = lessonData.actualizadoEn ?? lessonData.completadoEn ?? lessonData.completedAt;
+    if (!dateStr) return false;
+    const completedDate = new Date(dateStr);
+    if (isNaN(completedDate.getTime())) return false;
+
+    const today = new Date();
+    return (
+      completedDate.getDate() === today.getDate() &&
+      completedDate.getMonth() === today.getMonth() &&
+      completedDate.getFullYear() === today.getFullYear()
+    );
+  };
+
+  /*
     Volver al catálogo.
   */
   const handleBackToCatalog =
@@ -324,13 +270,7 @@ export default function Modules({
       setActiveLesson(null);
     };
 
-  /*
-    Volver al módulo.
-  */
-  const handleBackToModule =
-    () => {
-      setActiveLesson(null);
-    };
+
 
   /*
     Estado de carga inicial.
@@ -407,10 +347,7 @@ export default function Modules({
                   </span>
 
                   <span className="badge badge-success">
-                    Sugerido:{' '}
-                    {
-                      mod.rolSugerido
-                    }
+                    {getDisplayDifficulty(mod.rolSugerido, user?.rolActual)}
                   </span>
 
                   {user?.onboarding?.moduloRecomendado === mod.id && (
@@ -435,6 +372,26 @@ export default function Modules({
     moduleDetail &&
     !activeLesson
   ) {
+    // Pre-calculate unlock mapping for visual progression
+    const lessonUnlockMap = {};
+    let foundFirstIncomplete = false;
+    moduleDetail.levels.forEach(lvl => {
+      lvl.lessons.forEach(lesson => {
+        const completed = isLessonCompleted(lesson.id);
+        if (completed) {
+          lessonUnlockMap[lesson.id] = true;
+        } else if (!foundFirstIncomplete) {
+          lessonUnlockMap[lesson.id] = true; // First incomplete is unlocked (active)
+          foundFirstIncomplete = true;
+        } else {
+          lessonUnlockMap[lesson.id] = false; // Locked
+        }
+      });
+    });
+
+    let globalLessonIndex = 0;
+    const offsetSequence = ['offset-left', 'offset-center', 'offset-right', 'offset-center'];
+
     return (
       <div className="card modules-card">
         {/* Navegación de retorno */}
@@ -457,84 +414,154 @@ export default function Modules({
           )}
         </div>
 
-        {/* Árbol de niveles y lecciones */}
-        <div className="lessons-tree">
-          {moduleDetail.levels.map(
-            (lvl, lvlIndex) => (
-              <div
-                key={lvl.id}
-                className="level-group"
-              >
-                <div className="level-header">
-                  <span className="level-badge">
-                    {lvlIndex + 1}
-                  </span>
-                  <span className="level-title">
-                    {lvl.title}
-                  </span>
-                </div>
+        {/* Mapa de Ruta Visual (Estilo Duolingo) */}
+        <div className="roadmap-container">
+          <div className="roadmap-line"></div>
 
-                <div className="lessons-list">
-                  {lvl.lessons.map(
-                    (lesson) => {
-                      const completed =
-                        isLessonCompleted(
-                          lesson.id
-                        );
+          {moduleDetail.levels.map((lvl, lvlIndex) => (
+            <React.Fragment key={lvl.id}>
+              {/* Encabezado del Nivel en la Ruta */}
+              <div className="roadmap-section-header">
+                <span className="roadmap-section-title">
+                  Nivel {lvlIndex + 1}: {lvl.title}
+                </span>
+              </div>
 
-                      return (
-                        <div
-                          key={lesson.id}
-                          className={`lesson-btn-card ${
-                            completed
-                              ? 'completed'
-                              : ''
-                          }`}
-                          onClick={() =>
-                            handleSelectLesson(
-                              lesson
-                            )
-                          }
-                          role="button"
-                          tabIndex={0}
+              {lvl.lessons.map((lesson) => {
+                const everCompleted = isLessonCompleted(lesson.id);
+                const completedToday = isLessonCompletedToday(lesson.id);
+                const unlocked = lessonUnlockMap[lesson.id];
+                const offsetClass = offsetSequence[globalLessonIndex % 4];
+                globalLessonIndex++;
+
+                let nodeStatusClass = 'locked';
+                let icon = '🔒';
+                let statusLabel = 'Bloqueado';
+                let statusLabelClass = 'locked';
+
+                if (completedToday) {
+                  nodeStatusClass = 'completed';
+                  icon = '✓';
+                  statusLabel = 'Completado hoy';
+                  statusLabelClass = 'completed';
+                } else if (unlocked) {
+                  nodeStatusClass = 'active';
+                  icon = '🧉';
+                  statusLabel = everCompleted ? '¡Practicar hoy!' : '¡Aprender ya!';
+                  statusLabelClass = 'active';
+                }
+
+                return (
+                  <div key={lesson.id} className={`roadmap-step ${offsetClass}`}>
+                    <button
+                      type="button"
+                      className={`roadmap-node ${nodeStatusClass}`}
+                      disabled={!unlocked}
+                      onClick={() => unlocked && handleSelectLesson(lesson)}
+                      title={unlocked ? `Empezar ${lesson.title}` : 'Completá las lecciones anteriores primero'}
+                    >
+                      {icon}
+                    </button>
+                    <div className="roadmap-label-box">
+                      <p className="roadmap-label-title">{lesson.title}</p>
+                      <span className={`roadmap-label-status ${statusLabelClass}`}>
+                        {statusLabel}
+                      </span>
+                      {unlocked && (
+                        <button
+                          type="button"
+                          className="learn-theory-btn"
+                          onClick={() => handleOpenTheoryOnly(lesson)}
                           style={{
-                            display: 'flex',
-                            justifyContent: 'space-between',
+                            marginTop: '6px',
+                            padding: '4px 10px',
+                            fontSize: '0.72rem',
+                            fontWeight: '700',
+                            color: '#7b61ff',
+                            backgroundColor: 'rgba(123, 97, 255, 0.08)',
+                            border: '1px solid rgba(123, 97, 255, 0.25)',
+                            borderRadius: '8px',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s ease',
+                            display: 'inline-flex',
                             alignItems: 'center',
-                            width: '100%',
-                            cursor: 'pointer'
+                            gap: '4px',
+                            fontFamily: "'Poppins', sans-serif"
                           }}
                         >
-                          <span 
-                            className="lesson-btn-left"
-                            style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '10px'
-                            }}
-                          >
-                            <span className="lesson-icon">
-                              {completed ? '✓' : '🧉'}
-                            </span>
-                            <span className="lesson-name">
-                              {lesson.title}
-                            </span>
-                          </span>
-
-                          <span className={`lesson-action ${completed ? 'lesson-action-done' : ''}`}>
-                            {completed
-                              ? 'COMPLETADO'
-                              : 'INICIAR ▶'}
-                          </span>
-                        </div>
-                      );
-                    }
-                  )}
-                </div>
-              </div>
-            )
-          )}
+                          📖 Leer teoría
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </React.Fragment>
+          ))}
         </div>
+        {theoryOnlyLesson && (
+          <div className="theory-overlay-backdrop" onClick={() => setTheoryOnlyLesson(null)}>
+            <div className="theory-modal-wrapper" onClick={(e) => e.stopPropagation()}>
+              <button 
+                type="button" 
+                className="theory-modal-close" 
+                onClick={() => setTheoryOnlyLesson(null)}
+                aria-label="Cerrar teoría"
+              >
+                ×
+              </button>
+              <div className="theory-modal-content">
+                {theoryOnlyLesson.id === 'multiplicacion' ? (
+                  currentTheoryIndex === 0 ? (
+                    <Microleccion1 onContinuar={() => setCurrentTheoryIndex(1)} />
+                  ) : (
+                    <Microleccion2 onContinuar={() => setTheoryOnlyLesson(null)} />
+                  )
+                ) : (
+                  theoryOnlyLesson.teoria && theoryOnlyLesson.teoria.length > 0 ? (
+                    <DynamicTheoryCard 
+                      theory={theoryOnlyLesson.teoria[currentTheoryIndex]} 
+                      moduleId={selectedModuleId}
+                      lessonId={theoryOnlyLesson.id}
+                      apiCall={apiCall}
+                      onContinuar={() => {
+                        if (currentTheoryIndex < theoryOnlyLesson.teoria.length - 1) {
+                          setCurrentTheoryIndex(prev => prev + 1);
+                        } else {
+                          setTheoryOnlyLesson(null);
+                        }
+                      }} 
+                    />
+                  ) : (
+                    <div style={{ padding: '30px', textAlign: 'center', fontFamily: "'Poppins', sans-serif" }}>
+                      <h3 style={{ color: '#163b74', fontSize: '1.2rem', marginBottom: '10px' }}>¡Lección práctica!</h3>
+                      <p style={{ color: '#64748b', fontSize: '0.9rem', marginBottom: '20px' }}>Esta lección es práctica. ¡Ingresá para poner a prueba tus conocimientos!</p>
+                      <button 
+                        type="button"
+                        onClick={() => {
+                          const temp = theoryOnlyLesson;
+                          setTheoryOnlyLesson(null);
+                          handleSelectLesson(temp);
+                        }}
+                        style={{
+                          padding: '10px 20px',
+                          background: '#7b61ff',
+                          color: '#fff',
+                          border: 'none',
+                          borderRadius: '12px',
+                          fontWeight: '700',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        Comenzar práctica
+                      </button>
+                    </div>
+                  )
+                )}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
@@ -544,309 +571,21 @@ export default function Modules({
     Lección activa.
   */
   if (activeLesson) {
-    const ejercicios = activeLesson.ejercicios || [];
-    const totalEjercicios = ejercicios.length;
-    const allCompleted = totalEjercicios > 0 && currentExerciseIndex >= totalEjercicios;
-
-    /*
-      Pantalla de éxito.
-    */
-    if (allCompleted) {
-      const totalPoints =
-        ejercicios.reduce(
-          (sum, ex) =>
-            sum +
-            (ex.puntos ?? 10),
-          0
-        );
-
-      return (
-        <div
-          className="card milestone-card"
-          style={{
-            textAlign: 'center',
-            border: '2px solid #7b61ff',
-            padding: '40px 30px',
-            borderRadius: '24px',
-            boxShadow: '0 12px 36px rgba(123, 97, 255, 0.15)',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: '18px'
-          }}
-        >
-          <img
-            src={loLograsteIcon}
-            alt="Hito Completado"
-            style={{
-              width: '180px',
-              height: 'auto',
-              marginBottom: '10px',
-              display: 'block'
-            }}
-          />
-
-          <h2
-            style={{
-              color: '#7b61ff',
-              fontFamily: "'Poppins', sans-serif",
-              fontWeight: '800',
-              fontSize: '1.8rem',
-              margin: '0'
-            }}
-          >
-            🏆 ¡HITO COMPLETADO! 🏆
-          </h2>
-
-          <p style={{ margin: '0', fontSize: '15px', color: '#4b5563', fontWeight: '500' }}>
-            ¡Excelente trabajo! Superaste todos los ejercicios con éxito y desbloqueaste nuevos conocimientos.
-          </p>
-
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'center',
-              gap: '15px',
-              width: '100%'
-            }}
-          >
-            <span className="badge badge-gold" style={{ fontSize: '14px', padding: '10px 20px' }}>
-              ✨ +{totalPoints} Puntos
-            </span>
-
-            <span className="badge badge-success" style={{ fontSize: '14px', padding: '10px 20px', backgroundColor: '#e6fffa', color: '#047481', border: '1px solid rgba(4, 116, 129, 0.1)' }}>
-              🔥 Racha mantenida
-            </span>
-          </div>
-
-          <button
-            type="button"
-            className="btn-primary"
-            style={{
-              marginTop: '15px',
-              width: '100%',
-              maxWidth: '300px',
-              height: '50px',
-              fontSize: '16px'
-            }}
-            onClick={async () => {
-              if (onRefreshProgress) {
-                await onRefreshProgress();
-              }
-              handleBackToCatalog();
-            }}
-          >
-            Finalizar Lección
-          </button>
-        </div>
-      );
-    }
-
-    /*
-      Ejercicio actual (paso a paso).
-    */
-    const ex = ejercicios[currentExerciseIndex];
-    if (!ex) return null;
-
-    const exState = exerciseStates[ex.id] || {};
-    const consecutiveErrors = errorCount[ex.id] || 0;
-
-    const isCorrect = exState.correcto;
-    const isChecked = exState.checked;
-    const isMultipleChoice = ex.tipo === 'multiple_choice';
-
-    const selectedOption = exState.selectedOption || '';
-    const numericValue = exState.userInput || '';
-
-    const hasHint = exState.comodinPista || (isChecked && !isCorrect && consecutiveErrors >= 2);
-    const hasError = isChecked && !isCorrect && exState.explicacionError;
-
-    const isSubmitDisabled = isCorrect || (
-      isMultipleChoice ? !selectedOption : !numericValue.trim()
-    );
-
-    const progressPercent = (currentExerciseIndex / totalEjercicios) * 100;
-    const progressPercentFilled = isCorrect
-      ? ((currentExerciseIndex + 1) / totalEjercicios) * 100
-      : progressPercent;
-
     return (
-      <div className="card modules-card">
-        {/* Cabecera con progreso */}
-        <div className="exercise-progress-header">
-          <button
-            onClick={handleBackToModule}
-            className="exercise-exit-btn"
-          >
-            ✕
-          </button>
-
-          <div className="exercise-progress-bar">
-            <div
-              className="exercise-progress-fill"
-              style={{ width: `${progressPercentFilled}%` }}
-            />
-          </div>
-
-          <span className="exercise-counter">
-            {currentExerciseIndex + 1}/{totalEjercicios}
-          </span>
-        </div>
-
-        {/* Ejercicio actual con animación */}
-        <div className="exercise-step" key={ex.id}>
-          <div className="exercise-card">
-            {/* Cabecera del Ejercicio */}
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                fontSize: '13px',
-                color: '#666',
-                marginBottom: '10px',
-              }}
-            >
-              <span style={{ fontWeight: '600', color: '#94a3b8' }}>
-                Ejercicio {currentExerciseIndex + 1}
-              </span>
-
-              <div>
-                {isCorrect ? (
-                  <span className="badge badge-success">
-                    ✓ ¡Correcto!
-                  </span>
-                ) : isChecked ? (
-                  <span className="badge badge-error">
-                    ❌ Reintentar
-                  </span>
-                ) : (
-                  <span className="badge">
-                    ✨ {ex.puntos} pts
-                  </span>
-                )}
-              </div>
-            </div>
-
-            {/* Enunciado del Ejercicio */}
-            <div
-              style={{
-                fontWeight: 'bold',
-                fontSize: '1.15rem',
-                color: '#1e293b',
-                marginBottom: '20px',
-                lineHeight: '1.5',
-              }}
-            >
-              {ex.enunciado ?? ex.prompt}
-            </div>
-
-            {/* Inputs / Opciones */}
-            {isMultipleChoice ? (
-              <div className="options-container">
-                {ex.opciones?.map((opt, oIdx) => {
-                  const isOptSelected = selectedOption === String(opt);
-
-                  let optClass = "option-btn";
-                  if (isOptSelected) {
-                    optClass += " selected";
-                    if (isChecked) {
-                      optClass += isCorrect ? " correct" : " incorrect";
-                    }
-                  }
-
-                  return (
-                    <button
-                      key={oIdx}
-                      type="button"
-                      className={optClass}
-                      disabled={isCorrect}
-                      onClick={() => handleSelectOption(ex.id, String(opt))}
-                    >
-                      <span style={{ marginRight: '10px', fontWeight: 'bold' }}>
-                        {['A', 'B', 'C', 'D'][oIdx] || '•'}.
-                      </span>
-                      {opt}
-                    </button>
-                  );
-                })}
-              </div>
-            ) : (
-              <div>
-                <input
-                  type="text"
-                  className="numeric-input"
-                  placeholder="Escribí tu respuesta acá..."
-                  disabled={isCorrect}
-                  value={numericValue}
-                  onChange={(e) => handleNumericChange(ex.id, e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && !isSubmitDisabled) {
-                      handleSubmitAnswer(ex, numericValue);
-                    }
-                  }}
-                />
-              </div>
-            )}
-
-            {/* Explicación de Error */}
-            {hasError && (
-              <div className="feedback-card error">
-                <img
-                  src={dudaIcon}
-                  alt="Mate de duda"
-                  className="feedback-img"
-                />
-                <div className="feedback-text">
-                  <strong>¡Sigamos practicando!</strong>
-                  {exState.explicacionError}
-                </div>
-              </div>
-            )}
-
-            {/* Pistas del Termo de Mate-Mático */}
-            {hasHint && exState.comodinPista && (
-              <div className="feedback-card pista">
-                <img
-                  src={luzIcon}
-                  alt="Mate brillante"
-                  className="feedback-img"
-                />
-                <div className="feedback-text">
-                  <strong>Pista de Mate-Mático:</strong>
-                  {exState.comodinPista}
-                </div>
-              </div>
-            )}
-
-            {/* Botón Comprobar */}
-            {!isCorrect && (
-              <div className="btn-check-container">
-                <button
-                  type="button"
-                  className="btn-check"
-                  disabled={isSubmitDisabled}
-                  onClick={() =>
-                    handleSubmitAnswer(
-                      ex,
-                      isMultipleChoice ? selectedOption : numericValue
-                    )
-                  }
-                >
-                  Comprobar
-                </button>
-              </div>
-            )}
-
-            {/* Indicador de avance automático */}
-            {isCorrect && (
-              <div className="exercise-advance-hint">
-                Avanzando al siguiente ejercicio...
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
+      <LessonFlow
+        leccion={activeLesson}
+        moduleId={selectedModuleId}
+        apiCall={apiCall}
+        onAnswerSuccess={onAnswerSuccess}
+        onRefreshProgress={onRefreshProgress}
+        progress={progress}
+        user={user}
+        moduleDetail={moduleDetail}
+        onComplete={() => {
+          setActiveLesson(null);
+          setExerciseStates({});
+        }}
+      />
     );
   }
 

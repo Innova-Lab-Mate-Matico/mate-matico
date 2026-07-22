@@ -78,3 +78,36 @@ export async function updateLessonProgress(uid, { moduleId, lessonId, completada
 
   return payload;
 }
+
+export async function getWeeklyActivity(uid, timezone = 'America/Argentina/Buenos_Aires') {
+  const hace8Dias = new Date();
+  hace8Dias.setDate(hace8Dias.getDate() - 8);
+
+  const snap = await db.collection('eventos')
+    .where('usuario_id', '==', uid)
+    .where('fecha_hora', '>=', hace8Dias.toISOString())
+    .get();
+
+  const diasActivos = new Set();
+  
+  snap.forEach(doc => {
+    const data = doc.data();
+    if (!data.fecha_hora) return;
+    const fecha = new Date(data.fecha_hora);
+    
+    try {
+      const formatted = new Intl.DateTimeFormat('en-CA', {
+        timeZone: timezone,
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+      }).format(fecha);
+      diasActivos.add(formatted);
+    } catch (err) {
+      const formatted = fecha.toISOString().split('T')[0];
+      diasActivos.add(formatted);
+    }
+  });
+
+  return Array.from(diasActivos);
+}

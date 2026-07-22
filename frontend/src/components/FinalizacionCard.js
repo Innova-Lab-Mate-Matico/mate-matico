@@ -2,15 +2,47 @@ import React from 'react';
 import '../styles/completo.css';
 
 import iconoNivel from '../assets/nivel.png';
-import avatarTuPuedes from '../assets/tuPuedes.png';
+import mateEscolar from '../assets/mate_escolar.png';
+import mateProfesor from '../assets/mate_profesor.png';
+import mateAcademico from '../assets/mate_academico.png';
 
-function FinalizacionCard({ onComplete }) {
+function FinalizacionCard({
+  onComplete,
+  points = 25,
+  userRole = "principiante"
+}) {
 
   const continuar = () => {
     if (onComplete) {
       onComplete();
     }
   };
+
+  const getMascotaData = () => {
+    switch (userRole) {
+      case 'avanzado':
+        return {
+          imgSrc: mateAcademico,
+          bubbleTop: '¡Nivel Experto!',
+          bubbleBottom: '¡Sos imparable! Seguí dominando las matemáticas.'
+        };
+      case 'intermedio':
+        return {
+          imgSrc: mateProfesor,
+          bubbleTop: '¡Nivel Intermedio!',
+          bubbleBottom: '¡Excelente progreso! Tu dedicación da frutos.'
+        };
+      case 'principiante':
+      default:
+        return {
+          imgSrc: mateEscolar,
+          bubbleTop: '¡Tú Puedes!',
+          bubbleBottom: 'Seguí esforzándote día a día.'
+        };
+    }
+  };
+
+  const mascota = getMascotaData();
 
   return (
     <div className="finalizacion-card-wrapper">
@@ -39,7 +71,7 @@ function FinalizacionCard({ onComplete }) {
               </span>
 
               <span className="finalizacion-card__metric-points-highlight">
-                25 puntos
+                {points} puntos
               </span>
 
               <span className="finalizacion-card__metric-label-progress">
@@ -69,8 +101,8 @@ function FinalizacionCard({ onComplete }) {
             <div className="finalizacion-card__motivation-avatar-container">
 
               <img
-                src={avatarTuPuedes}
-                alt="Tú puedes"
+                src={mascota.imgSrc}
+                alt="Mate"
                 className="finalizacion-card__motivation-avatar-massive"
               />
 
@@ -80,11 +112,11 @@ function FinalizacionCard({ onComplete }) {
             <div className="finalizacion-card__motivation-text-stack">
 
               <span className="finalizacion-card__motivation-line-top">
-                ¡Tú Puedes!
+                {mascota.bubbleTop}
               </span>
 
               <span className="finalizacion-card__motivation-line-bottom">
-                Seguí esforzándote
+                {mascota.bubbleBottom}
               </span>
 
             </div>
@@ -117,4 +149,3 @@ function FinalizacionCard({ onComplete }) {
 }
 
 export default FinalizacionCard;
-
