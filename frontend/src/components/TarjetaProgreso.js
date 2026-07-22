@@ -110,7 +110,7 @@ function TarjetaProgreso({
               </div>
              
               <div className="progreso-card__medalla-container">
-                <img src={imgMedalla} alt="Medalla Nivel" className="progreso-card__medalla-img" />
+                <img src={mascota.imgSrc} alt={mascota.levelTitle} className="progreso-card__medalla-img" style={{ width: '65px', height: '65px', objectFit: 'contain' }} />
               </div>
             </div>
           </section>

@@ -1,11 +1,32 @@
 import React from 'react';
 import Mascota from './Mascota';
 import './Profile.css';
+import mateEscolar from '../assets/mate_escolar.png';
+import mateProfesor from '../assets/mate_profesor.png';
+import mateAcademico from '../assets/mate_academico.png';
 
 /*
   MATE-MÁTICO — COMPONENTE PERFIL
   (REACT CLÁSICO)
 */
+
+const getMascotaImg = (rol) => {
+  const r = (rol || '').toLowerCase();
+  switch (r) {
+    case 'avanzado':
+    case 'experto':
+      return mateAcademico;
+    case 'intermedio':
+    case 'secundario':
+    case 'medio':
+      return mateEscolar;
+    case 'principiante':
+    case 'inicial':
+    case 'basico':
+    default:
+      return mateProfesor;
+  }
+};
 
 export default function Profile({
   user,
@@ -97,9 +118,12 @@ export default function Profile({
             <span style={{ fontSize: '1.2rem', fontWeight: '800' }}>{user.recordRacha ?? 0} {user.recordRacha === 1 ? 'día' : 'días'}</span>
           </div>
 
-          <div className="badge" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '12px', margin: 0, background: '#7b61ff', color: '#fff', borderColor: 'transparent' }}>
-            <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', opacity: 0.9, fontWeight: '700', marginBottom: '2px' }}>Nivel actual</span>
-            <span style={{ fontSize: '1.1rem', fontWeight: '800', textTransform: 'capitalize' }}>{rol}</span>
+          <div className="badge" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '12px', margin: 0, background: 'linear-gradient(135deg, #7b61ff 0%, #6366f1 100%)', color: '#fff', borderColor: 'transparent', boxShadow: '0 4px 12px rgba(123, 97, 255, 0.25)' }}>
+            <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', opacity: 0.9, fontWeight: '700', marginBottom: '4px' }}>Nivel actual</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <img src={getMascotaImg(rol)} alt="Mate Nivel" style={{ width: '28px', height: '28px', objectFit: 'contain' }} />
+              <span style={{ fontSize: '1.1rem', fontWeight: '800', textTransform: 'capitalize' }}>{rol}</span>
+            </div>
           </div>
         </div>
 
