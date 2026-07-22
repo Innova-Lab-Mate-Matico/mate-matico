@@ -7,20 +7,15 @@ import Auth from './components/Auth';
 import Profile from './components/Profile';
 import Modules from './components/Modules';
 import Progress from './components/Progress';
-import LessonFlow from './components/LessonFlow';
+import Logros from './components/Logros';
 
-
-// --- TUS COMPONENTES INYECTADOS (Unificados con tus flujos nuevos) ---
-import Header from './components/Header';
-import Navbar from './components/Navbar';
-import Faqs from './components/Faqs';
-import Opiniones from './components/Opiniones';
 
 // NUEVOS COMPONENTES: Control de flujo inicial de captación
 import OnboardingWizard from './components/OnboardingWizard';
 
 import olaSuperior from './assets/image 2.png';
 import olaInferior from './assets/image 10 (1).png';
+import descansoMascota from './assets/descanso.png';
 
 
 
@@ -58,8 +53,7 @@ export default function App() {
   // Pestaña activa
   const [activeTab, setActiveTab] = useState('perfil');
 
-  // Pestaña de visitantes
-  const [visitorTab, setVisitorTab] = useState('login'); // 'login' | 'faqs' | 'opiniones'
+  const [networkError, setNetworkError] = useState(false);
 
   /*
     Intentar recuperar sesión automáticamente al iniciar la aplicación.
@@ -94,6 +88,7 @@ export default function App() {
 const apiCall = async (path, options = {}, customToken = null) => {
   const headers = {
     "Content-Type": "application/json",
+    "x-client-timezone": Intl.DateTimeFormat().resolvedOptions().timeZone,
     ...options.headers,
   };
 
@@ -110,21 +105,11 @@ const apiCall = async (path, options = {}, customToken = null) => {
 
   const data = await res.json().catch(() => ({}));
 
-  // 🔴 DEBUG IMPORTANTE: ver respuesta real del backend
-  console.log("API RESPONSE:", {
-    status: res.status,
-    ok: res.ok,
-    data,
-  });
-
   if (!res.ok) {
-    console.log("API ERROR RAW:", data);
-
-    throw {
-      status: res.status,
-      message: data.error || res.statusText || "Error inesperado en la API",
-      raw: data,
-    };
+    const err = new Error(data.error || res.statusText || "Error inesperado en la API");
+    err.status = res.status;
+    err.raw = data;
+    throw err;
   }
 
   return data;
@@ -413,6 +398,15 @@ const apiCall = async (path, options = {}, customToken = null) => {
     setActiveTab('lecciones');
   };
 
+  const handleRetryConnection = () => {
+    setNetworkError(false);
+    const savedToken = token || localStorage.getItem('idToken');
+    if (savedToken) {
+      loadProfile(savedToken);
+      loadUserProgress(savedToken);
+    }
+  };
+
   if (!user) {
     /* PÁGINA DE INGRESO: Solo el Login/Registro a pantalla completa con su fondo y olas */
     return (
@@ -500,8 +494,17 @@ const apiCall = async (path, options = {}, customToken = null) => {
                 className={`tab-btn ${activeTab === 'progreso' ? 'active-tab' : ''}`}
                 onClick={() => setActiveTab('progreso')}
               >
-                <span className="tab-text-full">3. Mi Progreso y Logros</span>
+                <span className="tab-text-full">3. Mi Progreso</span>
                 <span className="tab-text-short">Progreso</span>
+              </button>
+
+              <button
+                type="button"
+                className={`tab-btn ${activeTab === 'logros' ? 'active-tab' : ''}`}
+                onClick={() => setActiveTab('logros')}
+              >
+                <span className="tab-text-full">4. Mis Logros 🏆</span>
+                <span className="tab-text-short">Logros</span>
               </button>
             </nav>
 
@@ -510,6 +513,7 @@ const apiCall = async (path, options = {}, customToken = null) => {
                 <Profile
                   user={user}
                   onLogout={logout}
+                  apiCall={apiCall}
                   onRefresh={() => {
                     loadProfile();
                     loadUserProgress();
@@ -517,21 +521,21 @@ const apiCall = async (path, options = {}, customToken = null) => {
                 />
               )}
               {activeTab === 'lecciones' && (
-           <div>
-           <Modules
-            apiCall={apiCall}
-           onAnswerSuccess={handleAnswerSuccess}
-            progress={progress}
-           onRefreshProgress={loadUserProgress}
-         />
-
-         <LessonFlow />
-
-        </div>
-        )}
+                <Modules
+                  apiCall={apiCall}
+                  onAnswerSuccess={handleAnswerSuccess}
+                  progress={progress}
+                  onRefreshProgress={loadUserProgress}
+                  user={user}
+                />
+              )}
 
            {activeTab === 'progreso' && (
                 <Progress apiCall={apiCall} />
+              )}
+
+              {activeTab === 'logros' && (
+                <Logros apiCall={apiCall} />
               )}
             </div>
           </div>
@@ -544,6 +548,55 @@ const apiCall = async (path, options = {}, customToken = null) => {
           </p>
         </footer>
       </div>
+      {networkError && (
+        <div 
+          style={{
+            position: 'fixed',
+            top: 0, left: 0, right: 0, bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.4)',
+            backdropFilter: 'blur(4px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 9999,
+            padding: '20px'
+          }}
+        >
+          <div 
+            className="app-card"
+            style={{
+              maxWidth: '440px',
+              width: '100%',
+              backgroundColor: '#ffffff',
+              borderRadius: '24px',
+              padding: '30px',
+              boxShadow: '0 20px 40px rgba(0, 0, 0, 0.15)',
+              textAlign: 'center',
+              boxSizing: 'border-box'
+            }}
+          >
+            <img 
+              src={descansoMascota} 
+              alt="Mascota descansando" 
+              style={{ width: '120px', marginBottom: '20px' }}
+            />
+            <h2 style={{ fontFamily: 'Poppins, sans-serif', color: '#163b74', fontWeight: 800, fontSize: '1.4rem', margin: '0 0 10px 0' }}>
+              ¡Ups! No pudimos conectar con Mate-Matico
+            </h2>
+            <p style={{ color: '#64748b', fontSize: '0.92rem', lineHeight: '1.5', margin: '0 0 24px 0' }}>
+              Parece que hay un problema temporal con tu conexión a internet o la pizarra de la aplicación está en mantenimiento.
+            </p>
+            <button
+              type="button"
+              className="btn-primary"
+              style={{ width: '100%', padding: '12px', fontSize: '0.95rem', fontWeight: 600, border: 'none', borderRadius: '12px', cursor: 'pointer' }}
+              onClick={handleRetryConnection}
+            >
+              Reintentar conexión ↻
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

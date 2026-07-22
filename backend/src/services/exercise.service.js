@@ -53,18 +53,22 @@ async function registrarIntento(uid, clave, correcto) {
  * Valida respuesta dinámica (semilla + operandos) o plantilla Firestore.
  * Sin vidas: reintentos ilimitados.
  */
-export async function validarEjercicio(uid, body) {
+export async function validarEjercicio(uid, body, timezone = 'America/Argentina/Buenos_Aires') {
   const { moduleId, lessonId, exerciseId, answer, semilla, operandos } = body;
 
   // Hábito empático: registrar que el usuario practicó hoy
-  await registrarActividadEmpatica(uid);
+  await registrarActividadEmpatica(uid, timezone);
+
+  const user = await obtenerUsuario(uid);
+  const userRole = user?.rolActual || 'principiante';
 
   let ejercicio = reconstruirEjercicio(
     moduleId,
     lessonId,
     exerciseId,
     semilla,
-    operandos
+    operandos,
+    userRole
   );
 
   const plantillaFs = await obtenerPlantillaFirestore(moduleId, lessonId, exerciseId);
@@ -131,12 +135,13 @@ export async function validarEjercicio(uid, body) {
 
   const recompensaPromise = aplicarRecompensaActividad(uid, puntosGanados, {
     actualizarRacha: true,
+    timezone,
   });
 
   const progressPromise = updateLessonProgress(uid, {
     moduleId,
     lessonId,
-    completada: true,
+    // completada no se marca en true aquí para evitar dar por terminada la lección con un solo ejercicio
     puntaje: puntosGanados,
     tiempo_segundos: body.tiempo_segundos !== undefined ? Number(body.tiempo_segundos) : null,
   });

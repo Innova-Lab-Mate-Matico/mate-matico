@@ -7,12 +7,22 @@ function toDate(valor) {
   return new Date(valor);
 }
 
-function esMismoDiaCalendario(a, b) {
-  return (
-    a.getFullYear() === b.getFullYear() &&
-    a.getMonth() === b.getMonth() &&
-    a.getDate() === b.getDate()
-  );
+function esMismoDiaCalendario(a, b, timezone = 'America/Argentina/Buenos_Aires') {
+  try {
+    const formatter = new Intl.DateTimeFormat('en-CA', {
+      timeZone: timezone,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    });
+    return formatter.format(a) === formatter.format(b);
+  } catch (err) {
+    return (
+      a.getFullYear() === b.getFullYear() &&
+      a.getMonth() === b.getMonth() &&
+      a.getDate() === b.getDate()
+    );
+  }
 }
 
 /**
@@ -21,7 +31,7 @@ function esMismoDiaCalendario(a, b) {
  *
  * @returns {{ rachaDias, recordRacha, ultimaLeccionCompletada, rachaRota, mensajeRacha? }}
  */
-export function evaluarRacha(usuario, ahora = new Date()) {
+export function evaluarRacha(usuario, ahora = new Date(), timezone = 'America/Argentina/Buenos_Aires') {
   const rachaActual = usuario.rachaDias ?? 0;
   const recordActual = usuario.recordRacha ?? 0;
   const ultima = toDate(usuario.ultimaLeccionCompletada);
@@ -51,7 +61,7 @@ export function evaluarRacha(usuario, ahora = new Date()) {
   }
 
   // Mismo día calendario: mantener racha
-  if (esMismoDiaCalendario(ultima, ahora)) {
+  if (esMismoDiaCalendario(ultima, ahora, timezone)) {
     return {
       rachaDias: Math.max(rachaActual, 1),
       recordRacha: recordActual,

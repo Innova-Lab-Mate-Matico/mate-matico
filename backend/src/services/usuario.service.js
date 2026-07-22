@@ -60,7 +60,7 @@ export async function contarLeccionesCompletadas(uid) {
 /**
  * Actualiza puntos, rol y racha tras actividad en lección (transaccional).
  */
-export async function aplicarRecompensaActividad(uid, puntosGanados, { actualizarRacha = true } = {}) {
+export async function aplicarRecompensaActividad(uid, puntosGanados, { actualizarRacha = true, timezone = 'America/Argentina/Buenos_Aires' } = {}) {
   const ref = usuariosCol().doc(uid);
   const leccionesCompletadas = await contarLeccionesCompletadas(uid);
 
@@ -86,7 +86,7 @@ export async function aplicarRecompensaActividad(uid, puntosGanados, { actualiza
 
     let rachaInfo = {};
     if (actualizarRacha) {
-      rachaInfo = evaluarRacha(data);
+      rachaInfo = evaluarRacha(data, new Date(), timezone);
       const mappedRacha = usuarioToDb({
         rachaDias: rachaInfo.rachaDias,
         recordRacha: rachaInfo.recordRacha,
@@ -107,14 +107,14 @@ export async function aplicarRecompensaActividad(uid, puntosGanados, { actualiza
 }
 
 /** Registra intento significativo (actualiza última actividad sin sumar puntos) */
-export async function registrarActividadEmpatica(uid) {
+export async function registrarActividadEmpatica(uid, timezone = 'America/Argentina/Buenos_Aires') {
   const ref = usuariosCol().doc(uid);
   const snap = await ref.get();
   if (!snap.exists) return;
 
   const data = dbToUsuario(snap.data());
   data.uid = snap.id;
-  const rachaInfo = evaluarRacha(data);
+  const rachaInfo = evaluarRacha(data, new Date(), timezone);
   await ref.update(
     usuarioToDb({
       ultimaLeccionCompletada: rachaInfo.ultimaLeccionCompletada,

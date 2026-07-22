@@ -1,5 +1,10 @@
 import React, { useState, useEffect } from "react";
 import "./NumericExercise.css";
+import Calculadora from './Calculadora';
+import { EfectosService } from '../services/EfectosService';
+import Microleccion1 from './microleccion1';
+import Microleccion2 from './microleccion2';
+import DynamicTheoryCard from './DynamicTheoryCard';
 
 import trabajo1 from "../assets/trabajo 1.png";
 import schedule from "../assets/schedule.svg";
@@ -12,12 +17,94 @@ import arrow2 from "../assets/Arrow 2.svg";
 import frame5 from "../assets/Frame 5.png";
 import imagen16 from "../assets/image16.png";
 import aprendamosJuntos from "../assets/aprendamosJuntos.png";
+import negativo from "../assets/Negativo.png";
+import descanso from "../assets/descanso.png";
+import "./MultipleChoice.css";
 
-function NumericExercise({ onComplete }) {
+function NumericExercise({ ejercicio, index, moduleId, lessonId, teoria, apiCall, onAnswerSuccess, onComplete }) {
 
   const [screen, setScreen] = useState("exercise");
   const [answer, setAnswer] = useState("");
+  const [showTheory, setShowTheory] = useState(false);
+  const [currentTheoryIndex, setCurrentTheoryIndex] = useState(0);
   const [activeDay, setActiveDay] = useState(1);
+  const [hintText, setHintText] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
+  const [pointsAwarded, setPointsAwarded] = useState(0);
+  const [showHintBubble, setShowHintBubble] = useState(false);
+  const [showCalc, setShowCalc] = useState(false);
+  const [isMuted, setIsMuted] = useState(EfectosService.isMuted());
+
+  const num1 = ejercicio ? (ejercicio.operandos?.num1 ?? 9) : 9;
+  const num2 = ejercicio ? (ejercicio.operandos?.num2 ?? 23) : 23;
+  const isFigmaExercise = false;
+
+  const getAdaptiveHint = () => {
+    // Si la API nos devolvió un comodín real y específico (no genérico), lo usamos prioritariamente
+    if (hintText && hintText !== "Pista: Revisa la operación paso a paso.") {
+      return hintText;
+    }
+
+    if (ejercicio?.comodinPista) {
+      return ejercicio.comodinPista;
+    }
+
+    if (!ejercicio) {
+      return "Pista: Pensá en descomponer el cálculo en pasos más pequeños.";
+    }
+
+    const { tipoGenerador, operandos } = ejercicio;
+    const gen = tipoGenerador || '';
+
+    if (gen.includes('suma') && !gen.includes('cocina') && !gen.includes('fraccion')) {
+      const a = operandos?.a ?? operandos?.num1 ?? 0;
+      const b = operandos?.b ?? operandos?.num2 ?? 0;
+      return `Pista: Empezá sumando las unidades (${a % 10} + ${b % 10}) y luego agregá las decenas.`;
+    }
+
+    if (gen.includes('resta')) {
+      const a = operandos?.a ?? operandos?.num1 ?? 0;
+      const b = operandos?.b ?? operandos?.num2 ?? 0;
+      return `Pista: Pensá cuánto le falta a ${b} para llegar a ${a}, o restá primero las decenas y luego las unidades.`;
+    }
+    
+    if (gen.includes('mult') || gen.includes('multiplicacion')) {
+      const a = operandos?.a ?? operandos?.num1 ?? num1;
+      const b = operandos?.b ?? operandos?.num2 ?? num2;
+      if (b % 10 === 0) {
+        return `Pista: Podés multiplicar ${a} × ${b / 10} y luego agregar un cero al resultado.`;
+      }
+      return `Pista: Podés multiplicar por partes: ${a} × ${b} es lo mismo que (${a} × ${Math.floor(b / 10) * 10}) + (${a} × ${b % 10}).`;
+    }
+
+    if (gen.includes('div') || gen.includes('division')) {
+      const a = operandos?.a ?? operandos?.num1 ?? 0;
+      const b = operandos?.b ?? operandos?.num2 ?? 0;
+      return `Pista: Pensá qué número de una cifra o dos multiplicado por ${b} da como resultado ${a}.`;
+    }
+
+    if (gen.includes('porcentaje')) {
+      const base = operandos?.base ?? 0;
+      const pct = operandos?.porcentaje ?? 10;
+      if (pct === 10) {
+        return `Pista: Calcular el 10% es muy sencillo, solo tenés que dividir ${base} entre 10.`;
+      }
+      if (pct === 50) {
+        return `Pista: Calcular el 50% es equivalente a calcular su mitad.`;
+      }
+      return `Pista: El ${pct}% es lo mismo que tomar la fracción ${pct}/100 de ${base}.`;
+    }
+
+    if (gen.includes('aumento')) {
+      const precio = operandos?.precio ?? 0;
+      const pct = operandos?.porcentaje ?? 0;
+      return `Pista: Primero calculá el ${pct}% de $${precio} y luego sumale ese resultado al valor original.`;
+    }
+
+    return "Pista de Mate-Mático: Leé detenidamente el enunciado y resolvé los pasos uno a uno.";
+  };
+
+  const currentHint = getAdaptiveHint();
 
   useEffect(() => {
 
@@ -31,7 +118,7 @@ function NumericExercise({ onComplete }) {
 
       setActiveDay(day);
 
-      if (day >= 23) {
+      if (day >= num2) {
         clearInterval(interval);
       }
 
@@ -39,20 +126,62 @@ function NumericExercise({ onComplete }) {
 
     return () => clearInterval(interval);
 
-  }, [screen]);
+  }, [screen, num2]);
 
-  const checkAnswer = () => {
+  const checkAnswer = async () => {
+    if (!answer.trim()) return;
 
-    if (screen === "exercise") {
-      setScreen("hint");
+    // Si no hay ejercicio del backend, usar comportamiento estático
+    if (!ejercicio) {
+      if (screen === "exercise") {
+        setScreen("hint");
+        return;
+      }
+      if (screen === "hint") {
+        setScreen("correct");
+        return;
+      }
       return;
     }
 
-    if (screen === "hint") {
-      setScreen("correct");
-      return;
-    }
+    try {
+      const result = await apiCall('/exercises/validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          moduleId,
+          lessonId,
+          exerciseId: ejercicio.id,
+          answer: Number(answer),
+          semilla: ejercicio.semilla,
+          operandos: ejercicio.operandos
+        })
+      });
 
+      if (result.correcto) {
+        setPointsAwarded(result.puntosGanados ?? 15);
+        if (onAnswerSuccess) {
+          onAnswerSuccess(result.puntosGanados ?? 15);
+        }
+        setScreen("correct");
+        EfectosService.reproducirSonido('acierto');
+      } else {
+        setErrorMsg(result.explicacionError ?? "La respuesta no es correcta.");
+        setHintText(result.comodinPista ?? "Pista: Revisa la operación paso a paso.");
+        setScreen("hint");
+        EfectosService.reproducirSonido('error');
+      }
+    } catch (err) {
+      console.error("Error al validar ejercicio numérico:", err);
+      setErrorMsg(ejercicio?.explicacionError || "La respuesta ingresada no es correcta.");
+      // Fallback local
+      const correctVal = ejercicio.operandos?.num1 * ejercicio.operandos?.num2;
+      if (Number(answer) === Number(correctVal)) {
+        setScreen("correct");
+      } else {
+        setScreen("hint");
+      }
+    }
   };
 
   const days = Array.from({ length: 30 }, (_, i) => i + 1);
@@ -61,105 +190,169 @@ function NumericExercise({ onComplete }) {
 
     <div className="numeric-exercise-page">
 
-      {/* ==========================
-          TARJETA 1
-      ========================== */}
-
       {screen === "exercise" && (
-
-       <div className="app-card numeric-exercise-container">
+        <div className="exercise-layout-wrapper">
+          <div className="app-card numeric-exercise-container">
 
           <div className="card-content">
 
             <h2 className="question">
-              Trabajás <span className="highlight">9 horas</span> por día durante{" "}
-              <span className="highlight">23 días</span> este mes.
-              <br />
-              ¿Cuántas horas trabajaste en total?
+              {ejercicio ? (ejercicio.enunciado ?? ejercicio.prompt) : (
+                <>
+                  Trabajás <span className="highlight">9 horas</span> por día durante{" "}
+                  <span className="highlight">23 días</span> este mes.
+                  <br />
+                  ¿Cuántas horas trabajaste en total?
+                </>
+              )}
             </h2>
 
-            <div className="exercise-box">
+            {/* Botón calculadora y volumen */}
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginBottom: '4px' }}>
+              <button
+                type="button"
+                onClick={() => {
+                  EfectosService.toggleMute();
+                  setIsMuted(EfectosService.isMuted());
+                }}
+                style={{
+                  background: '#f1f0ff',
+                  color: '#7b61ff',
+                  border: '1.5px solid rgba(123,97,255,0.25)',
+                  borderRadius: '10px',
+                  padding: '5px 12px',
+                  fontSize: '0.9rem',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  transition: 'all 0.15s',
+                }}
+                aria-label={isMuted ? "Activar sonido" : "Desactivar sonido"}
+              >
+                {isMuted ? '🔇' : '🔊'}
+              </button>
 
-              <div className="exercise-text">
+              <button
+                type="button"
+                onClick={() => setShowCalc(v => !v)}
+                style={{
+                  background: showCalc ? '#7b61ff' : '#f1f0ff',
+                  color: showCalc ? '#fff' : '#7b61ff',
+                  border: '1.5px solid rgba(123,97,255,0.25)',
+                  borderRadius: '10px',
+                  padding: '5px 12px',
+                  fontSize: '0.78rem',
+                  fontWeight: '700',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  transition: 'all 0.15s',
+                }}
+                aria-label="Abrir calculadora"
+              >
+                🧮 Calculadora
+              </button>
 
-                <img
-                  src={schedule}
-                  alt=""
-                  className="small-icon"
-                />
-
-                <p>Cada día trabajás</p>
-
-                <h3>9 horas</h3>
-
-              </div>
-
-              <img
-                src={trabajo1}
-                alt="Trabajo"
-                className="work-image"
-              />
-
+              {((teoria && teoria.length > 0) || lessonId === 'multiplicacion') && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowTheory(true);
+                    setCurrentTheoryIndex(0);
+                  }}
+                  style={{
+                    background: '#f1f0ff',
+                    color: '#7b61ff',
+                    border: '1.5px solid rgba(123,97,255,0.25)',
+                    borderRadius: '10px',
+                    padding: '5px 12px',
+                    fontSize: '0.78rem',
+                    fontWeight: '700',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '5px',
+                    transition: 'all 0.15s',
+                  }}
+                  aria-label="Ver teoría del tema"
+                >
+                  💡 Ver Teoría
+                </button>
+              )}
             </div>
 
-            <div className="calendar-box">
-
-              <div className="calendar-info">
-
-                <img
-                  src={calendarMonth}
-                  alt=""
-                  className="small-icon"
-                />
-
-                <p>Y lo hacés durante</p>
-
-                <h3>23 días</h3>
-
-              </div>
-
-              <div className="calendar-grid">
-
-                {days.map((day) => (
-
-                  <div
-                    key={day}
-                    className={
-                      day <= activeDay
-                        ? "calendar-day active"
-                        : "calendar-day"
-                    }
-                  >
-                    {day}
+            {isFigmaExercise && (
+              <>
+                <div className="exercise-box">
+                  <div className="exercise-text">
+                    <img src={schedule} alt="" className="small-icon" />
+                    <p>Cada día trabajás</p>
+                    <h3>{num1} horas</h3>
                   </div>
+                  <img src={trabajo1} alt="Trabajo" className="work-image" />
+                </div>
 
-                ))}
+                <div className="calendar-box">
+                  <div className="calendar-info">
+                    <img src={calendarMonth} alt="" className="small-icon" />
+                    <p>Y lo hacés durante</p>
+                    <h3>{num2} días</h3>
+                  </div>
+                  <div className="calendar-grid">
+                    {days.map((day) => (
+                      <div
+                        key={day}
+                        className={day <= activeDay ? "calendar-day active" : "calendar-day"}
+                      >
+                        {day}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </>
+            )}
 
-              </div>
-
-            </div>
-
-            <label className="input-label">
+            <label className="input-label" style={{ display: 'block', width: '100%', textAlign: 'center', marginBottom: '8px' }}>
               Ingresá tu respuesta
             </label>
 
-            <div className="input-wrapper">
-
+            <div className="input-wrapper" style={{ display: 'flex', justifyContent: 'center', width: '100%', position: 'relative' }}>
               <input
-                type="number"
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
                 value={answer}
-                onChange={(e) => setAnswer(e.target.value)}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (/^\d*$/.test(val)) {
+                    setAnswer(val);
+                  }
+                }}
                 className="answer-input"
+                style={!isFigmaExercise ? { width: '100%', maxWidth: '240px', textAlign: 'center' } : {}}
               />
-
-              <span className="hours-label">
-                Hs.
-              </span>
-
+              {isFigmaExercise && (
+                <span className="hours-label">
+                  Hs.
+                </span>
+              )}
             </div>
 
-            <div className="mate-container">
-
+            <div 
+              className="mate-container"
+              onClick={() => setShowHintBubble(prev => !prev)}
+              style={{
+                cursor: 'pointer',
+                position: 'relative',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                width: '100%',
+                gap: '12px',
+                marginTop: '15px'
+              }}
+            >
               <img
                 src={guino}
                 alt=""
@@ -172,6 +365,60 @@ function NumericExercise({ onComplete }) {
                 paso una pista
               </div>
 
+              {showHintBubble && (
+                <div 
+                  style={{
+                    position: 'absolute',
+                    bottom: '95px',
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    width: '260px',
+                    backgroundColor: '#7b61ff',
+                    color: '#ffffff',
+                    padding: '12px 16px',
+                    borderRadius: '16px',
+                    boxShadow: '0 8px 30px rgba(123, 97, 255, 0.35)',
+                    zIndex: 100,
+                    fontSize: '0.85rem',
+                    lineHeight: '1.4',
+                    textAlign: 'center',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    cursor: 'default'
+                  }}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div 
+                    style={{
+                      position: 'absolute',
+                      bottom: '-6px',
+                      left: '50%',
+                      transform: 'translateX(-50%) rotate(45deg)',
+                      width: '12px',
+                      height: '12px',
+                      backgroundColor: '#7b61ff',
+                    }}
+                  />
+                  <div 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowHintBubble(false);
+                    }}
+                    style={{
+                      position: 'absolute',
+                      top: '4px',
+                      right: '8px',
+                      cursor: 'pointer',
+                      fontWeight: 'bold',
+                      opacity: 0.8,
+                      fontSize: '11px'
+                    }}
+                  >
+                    ✕
+                  </div>
+                  <strong style={{ display: 'block', marginBottom: '4px', fontSize: '0.9rem' }}>💡 Pista de Mate-Mático</strong>
+                  {currentHint}
+                </div>
+              )}
             </div>
 
           </div>
@@ -183,216 +430,101 @@ function NumericExercise({ onComplete }) {
             Comprobá la respuesta
           </button>
 
+          </div>
+          {showCalc && <Calculadora onClose={() => setShowCalc(false)} onInsertResult={(v) => setAnswer(v)} />}
         </div>
-
       )}
       {/* ==========================
     TARJETA 2 - EXPLICACIÓN
 ========================== */}
 
 {screen === "hint" && (
+  <div className="app-card multiple-choice-card feedback-card">
 
-<div className="app-card numeric-hint-card">
+    <div className="card-content">
 
-    <div className="back-text">
-        ← volver
-    </div>
+      <img
+        src={negativo}
+        alt="Incorrecto"
+        className="feedback-icon"
+      />
 
-    {/* BLOQUE HORAS */}
+      <h2 className="wrong-title">
+        Casi lo tenés
+      </h2>
 
-    <div className="hint-card">
+      <p className="feedback-subtitle">
+        Esta vez no salió, pero estás más cerca de entenderlo.
+      </p>
 
-        <p className="hint-title">
-            Cada día trabajás
+      <div className="explanation-box" style={{ width: '100%', boxSizing: 'border-box' }}>
+
+        <h3 style={{ fontSize: '1.1rem', fontWeight: '800', color: '#7b61ff', marginBottom: '8px', fontFamily: "'Poppins', sans-serif" }}>Pista de Mate-Mático</h3>
+        <p style={{ fontSize: '0.92rem', color: '#334155', lineHeight: '1.4', fontWeight: '500', margin: '0 0 12px 0' }}>
+          {getAdaptiveHint()}
         </p>
 
-        <div className="hours-icons">
+        {errorMsg && (
+          <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px dashed #cbd5e1' }}>
+            <h4 style={{ fontSize: '0.85rem', fontWeight: '700', color: '#ef4444', marginBottom: '4px', margin: '0' }}>¿Por qué falló?</h4>
+            <p style={{ fontSize: '0.88rem', color: '#64748b', lineHeight: '1.4', margin: '0' }}>{errorMsg}</p>
+          </div>
+        )}
 
-            {Array.from({ length: 9 }).map((_, i) => (
-
-                <img
-                    key={i}
-                    src={schedule}
-                    alt=""
-                    className="mini-icon"
-                />
-
-            ))}
-
-        </div>
-
-        <h3 className="hint-number">
-            9 horas
-        </h3>
+      </div>
 
     </div>
 
-    {/* BLOQUE DÍAS */}
+    <div className="card-footer">
 
-    <div className="hint-card">
-
-        <p className="hint-title">
-            Ese mismo día se repite por
-        </p>
-
-        <div className="calendar-icons">
-
-            {Array.from({ length: 23 }).map((_, i) => (
-
-                <img
-                    key={i}
-                    src={calendarMonth}
-                    alt=""
-                    className="mini-calendar"
-                />
-
-            ))}
-
-        </div>
-
-        <h3 className="hint-number">
-            23 días
-        </h3>
-
-    </div>
-
-    {/* OPERACIÓN */}
-
-    <div className="operation-card">
-
-    <p className="operation-title">
-        Serían 9 horas × 23 días
-    </p>
-
-    {/* PASO 1 */}
-
-    <div className="step-one">
-
-        <div className="equation">
-
-            <div className="step-circle equation-circle">
-                1
-            </div>
-
-            <span>9 × 23 = 9 × (</span>
-
-            <span className="blue">
-                20
-            </span>
-
-            <span> + </span>
-
-            <span className="purple">
-                3
-            </span>
-
-            <span>)</span>
-
-            <img
-                src={arrow3}
-                alt=""
-                className="arrow-blue"
-            />
-
-            <img
-                src={arrow2}
-                alt=""
-                className="arrow-pink"
-            />
-
-        </div>
-
-    </div>
-
-    {/* PASOS 2 Y 3 */}
-
-    <div className="step-two">
-
-        <div className="mini-step">
-
-            <div className="step-circle">
-                2
-            </div>
-
-            <small>
-                Multiplicamos
-            </small>
-
-            <p>
-                9 × <span className="blue">20</span> =
-                <span className="blue">180</span>
-            </p>
-
-        </div>
-
-        <div className="mini-step">
-
-            <div className="step-circle">
-                3
-            </div>
-
-            <small>
-                Multiplicamos
-            </small>
-
-            <p>
-                9 × <span className="purple">3</span> =
-                <span className="purple">27</span>
-            </p>
-
-        </div>
-
-    </div>
-
-    {/* PASO 4 */}
-
-    <div className="step-three">
-
-        <div className="sum-box">
-
-            <div className="step-circle">
-                4
-            </div>
-
-            <div className="sum-title">
-                Sumamos los resultados
-            </div>
-
-            <div className="sum-line blue">
-                180
-            </div>
-
-            <div className="sum-line purple">
-                + 27
-            </div>
-
-            <hr />
-
-            <div className="sum-result green">
-                = 2?7
-            </div>
-
-        </div>
+      <div className="character-box">
 
         <img
-            src={guino}
-            alt=""
-            className="hint-mascot"
+          src={descanso}
+          alt="Mascota"
+          className="mascot"
         />
+
+        <div className="speech-bubble">
+          Tomate tu tiempo. Los matemáticos también aprenden mate a mate.
+        </div>
+
+      </div>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%', alignItems: 'center' }}>
+        <button
+          className="primary-button"
+          onClick={() => {
+            setAnswer("");
+            setScreen("exercise");
+          }}
+          style={{ width: '100%' }}
+        >
+          Intentar de nuevo
+        </button>
+        <span 
+          onClick={() => {
+            if (onComplete) {
+              onComplete();
+            }
+          }} 
+          style={{ 
+            fontSize: '0.85rem', 
+            color: '#64748b', 
+            textDecoration: 'underline', 
+            cursor: 'pointer', 
+            textAlign: 'center', 
+            fontWeight: '600',
+            marginTop: '4px'
+          }}
+        >
+          Saltar ejercicio
+        </span>
+      </div>
 
     </div>
 
-</div>
-
-    <button
-        className="primary-button"
-        onClick={checkAnswer}
-    >
-        Comprobá la respuesta
-    </button>
-
-</div>
-
+  </div>
 )}
 
 {/* ==========================
@@ -423,7 +555,7 @@ function NumericExercise({ onComplete }) {
           className="star-image"
         />
 
-        <span>+15 puntos</span>
+        <span>+{pointsAwarded || 15} puntos</span>
 
       </div>
 
@@ -460,6 +592,42 @@ function NumericExercise({ onComplete }) {
 
 )}
 
+      {showTheory && (
+        <div className="theory-overlay-backdrop" onClick={() => setShowTheory(false)}>
+          <div className="theory-modal-wrapper" onClick={(e) => e.stopPropagation()}>
+            <button 
+              type="button" 
+              className="theory-modal-close" 
+              onClick={() => setShowTheory(false)}
+              aria-label="Cerrar teoría"
+            >
+              ×
+            </button>
+            <div className="theory-modal-content">
+              {lessonId === 'multiplicacion' ? (
+                currentTheoryIndex === 0 ? (
+                  <Microleccion1 onContinuar={() => setCurrentTheoryIndex(1)} />
+                ) : (
+                  <Microleccion2 onContinuar={() => setShowTheory(false)} />
+                )
+              ) : (
+                teoria && teoria.length > 0 && (
+                  <DynamicTheoryCard 
+                    theory={teoria[currentTheoryIndex]} 
+                    onContinuar={() => {
+                      if (currentTheoryIndex < teoria.length - 1) {
+                        setCurrentTheoryIndex(prev => prev + 1);
+                      } else {
+                        setShowTheory(false);
+                      }
+                    }} 
+                  />
+                )
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
 
   );

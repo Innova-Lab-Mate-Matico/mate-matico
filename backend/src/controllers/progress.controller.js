@@ -1,4 +1,4 @@
-import { getProgress, updateLessonProgress } from '../services/progress.service.js';
+import { getProgress, updateLessonProgress, getWeeklyActivity } from '../services/progress.service.js';
 import { getUserProfile } from '../services/auth.service.js';
 
 export async function getUserProgress(req, res, next) {
@@ -44,6 +44,16 @@ export async function patchProgress(req, res, next) {
     });
 
     res.json({ success: true, progresoModulo: updated });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function getWeeklyActivityController(req, res, next) {
+  try {
+    const timezone = req.headers['x-client-timezone'] || 'America/Argentina/Buenos_Aires';
+    const activeDates = await getWeeklyActivity(req.user.uid, timezone);
+    res.json({ success: true, activeDates });
   } catch (err) {
     next(err);
   }

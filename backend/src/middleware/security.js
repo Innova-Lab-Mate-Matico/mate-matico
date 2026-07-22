@@ -27,7 +27,7 @@ export function applySecurity(app) {
         callback(null, false);
       },
       methods: ['GET', 'POST', 'PATCH', 'OPTIONS'],
-      allowedHeaders: ['Content-Type', 'Authorization'],
+      allowedHeaders: ['Content-Type', 'Authorization', 'x-client-timezone'],
       credentials: true,
     })
   );
