@@ -1,0 +1,30 @@
+meta {
+  name: Track Event
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/tracking
+  body: json
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "tipo_evento": "ejercicio_iniciado",
+    "metadata": {
+      "sesion_id": "sesion-prueba-123",
+      "ejercicio_id": "aritmetica_basica_1",
+      "dificultad": "bajo"
+    }
+  }
+}
