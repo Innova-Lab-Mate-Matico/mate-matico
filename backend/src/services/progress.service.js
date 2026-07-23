@@ -31,9 +31,10 @@ export async function getProgress(uid) {
 }
 
 export async function updateLessonProgress(uid, { moduleId, lessonId, completada, puntaje, tiempo_segundos }) {
+  const ref = progresoRef(uid).doc(moduleId);
   let existing = { moduleId };
+
   try {
-    const ref = progresoRef(uid).doc(moduleId);
     const doc = await ref.get();
     if (doc.exists) existing = doc.data();
   } catch (err) {
@@ -57,7 +58,14 @@ export async function updateLessonProgress(uid, { moduleId, lessonId, completada
     actualizadoEn: new Date().toISOString(),
   };
 
-  await ref.set(payload, { merge: true });
+  try {
+    await ref.set(payload, { merge: true });
+  } catch (err) {
+    if (!isQuotaError(err)) throw err;
+    const userModMap = memoryProgress.get(uid) || {};
+    userModMap[moduleId] = payload;
+    memoryProgress.set(uid, userModMap);
+  }
 
   // Si pasa a estar completada ahora y antes no lo estaba, disparamos leccion_completada y progreso_actualizado
   if (lecciones[lessonId].completada && !eraCompletada) {
