@@ -5,6 +5,8 @@ import { EfectosService } from '../services/EfectosService';
 import Microleccion1 from './microleccion1';
 import Microleccion2 from './microleccion2';
 import DynamicTheoryCard from './DynamicTheoryCard';
+import { TutorMateicoChat } from './DynamicTheoryCard';
+import mateico2Img from "../assets/Mateico2.png";
 
 import trabajo1 from "../assets/trabajo 1.png";
 import schedule from "../assets/schedule.svg";
@@ -33,6 +35,7 @@ function NumericExercise({ ejercicio, index, moduleId, lessonId, teoria, apiCall
   const [pointsAwarded, setPointsAwarded] = useState(0);
   const [showHintBubble, setShowHintBubble] = useState(false);
   const [showCalc, setShowCalc] = useState(false);
+  const [showMateico, setShowMateico] = useState(false);
   const [isMuted, setIsMuted] = useState(EfectosService.isMuted());
 
   const num1 = ejercicio ? (ejercicio.operandos?.num1 ?? 9) : 9;
@@ -280,6 +283,29 @@ function NumericExercise({ ejercicio, index, moduleId, lessonId, teoria, apiCall
                   💡 Ver Teoría
                 </button>
               )}
+
+              <button
+                type="button"
+                onClick={() => setShowMateico(true)}
+                style={{
+                  background: 'linear-gradient(135deg, #7b61ff 0%, #a855f7 100%)',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: '10px',
+                  padding: '5px 12px',
+                  fontSize: '0.78rem',
+                  fontWeight: '700',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  transition: 'all 0.15s',
+                  boxShadow: '0 2px 8px rgba(123,97,255,0.3)',
+                }}
+                aria-label="Preguntarle a Mateico"
+              >
+                <img src={mateico2Img} alt="Mateico" style={{ width: '22px', height: '22px', objectFit: 'contain' }} /> Mateico
+              </button>
             </div>
 
             {isFigmaExercise && (
@@ -628,10 +654,32 @@ function NumericExercise({ ejercicio, index, moduleId, lessonId, teoria, apiCall
           </div>
         </div>
       )}
+
+      {showMateico && (
+        <div className="theory-overlay-backdrop" onClick={() => setShowMateico(false)}>
+          <div className="theory-modal-wrapper" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '500px', width: '90%' }}>
+            <button
+              type="button"
+              className="theory-modal-close"
+              onClick={() => setShowMateico(false)}
+              aria-label="Cerrar chat Mateico"
+            >
+              ×
+            </button>
+            <div className="theory-modal-content" style={{ padding: '10px' }}>
+              <TutorMateicoChat
+                moduleId={moduleId}
+                lessonId={lessonId}
+                theoryId={teoria && teoria[0] ? teoria[0].id : ''}
+                apiCall={apiCall}
+                defaultOpen={true}
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
-
   );
-
 }
 
 export default NumericExercise;

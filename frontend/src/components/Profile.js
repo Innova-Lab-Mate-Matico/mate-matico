@@ -127,7 +127,7 @@ export default function Profile({
           <div className="badge" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '12px', margin: 0, background: 'linear-gradient(135deg, #7b61ff 0%, #6366f1 100%)', color: '#fff', borderColor: 'transparent', boxShadow: '0 4px 12px rgba(123, 97, 255, 0.25)' }}>
             <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', opacity: 0.9, fontWeight: '700', marginBottom: '4px' }}>Nivel actual</span>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <img src={getMascotaImg(rol)} alt="Mate Nivel" style={{ width: '28px', height: '28px', objectFit: 'contain' }} />
+              <img src={getMascotaImg(rol)} alt="Mate Nivel" style={{ width: '42px', height: '42px', objectFit: 'contain', filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.2))' }} />
               <span style={{ fontSize: '1.1rem', fontWeight: '800', textTransform: 'capitalize' }}>{rol}</span>
             </div>
           </div>

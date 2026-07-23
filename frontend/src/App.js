@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { initializeApp } from 'firebase/app';
-import { getAuth, GoogleAuthProvider, signInWithPopup, sendPasswordResetEmail } from 'firebase/auth';
+import { getAuth, GoogleAuthProvider, OAuthProvider, signInWithPopup, sendPasswordResetEmail, onIdTokenChanged } from 'firebase/auth';
 import './App.css'; // Tus estilos globales
 import './styles/Dashboard.css';
 import Auth from './components/Auth';
+import Home from './components/Home';
 import Profile from './components/Profile';
 import Modules from './components/Modules';
 import Progress from './components/Progress';
-import Logros from './components/Logros';
 
 
 // NUEVOS COMPONENTES: Control de flujo inicial de captación
@@ -61,9 +61,29 @@ export default function App() {
   const [isStatusOk, setIsStatusOk] = useState(true);
 
   // Pestaña activa
-  const [activeTab, setActiveTab] = useState('perfil');
+  const [activeTab, setActiveTab] = useState('inicio');
 
   const [networkError, setNetworkError] = useState(false);
+
+  /*
+    Escuchar cambios y renovación automática de token de Firebase
+  */
+  React.useEffect(() => {
+    if (firebaseAuth) {
+      const unsubscribe = onIdTokenChanged(firebaseAuth, async (currentUser) => {
+        if (currentUser) {
+          try {
+            const freshToken = await currentUser.getIdToken();
+            localStorage.setItem('idToken', freshToken);
+            setToken(freshToken);
+          } catch (err) {
+            console.warn("Error al renovar token de Firebase en listener:", err);
+          }
+        }
+      });
+      return () => unsubscribe();
+    }
+  }, []);
 
   /*
     Intentar recuperar sesión automáticamente al iniciar la aplicación.
@@ -93,7 +113,7 @@ export default function App() {
     setIsStatusOk(ok);
   };
 /*
-  Wrapper estándar para llamadas HTTP al backend (Memorizado para evitar re-fetches en useEffect).
+  Wrapper estándar para llamadas HTTP al backend con auto-refresh y reintento inteligente de token expirado.
 */
 const apiCall = React.useCallback(async (path, options = {}, customToken = null) => {
   const headers = {
@@ -102,16 +122,44 @@ const apiCall = React.useCallback(async (path, options = {}, customToken = null)
     ...options.headers,
   };
 
-  const activeToken = customToken || token;
+  let activeToken = customToken || token || localStorage.getItem('idToken');
+
+  // Si Firebase Auth está activo, obtener el token más actualizado posible
+  if (firebaseAuth && firebaseAuth.currentUser) {
+    try {
+      activeToken = await firebaseAuth.currentUser.getIdToken(false);
+      localStorage.setItem('idToken', activeToken);
+    } catch (e) {
+      console.warn("Auto-refresh previo de token falló:", e);
+    }
+  }
 
   if (activeToken) {
     headers.Authorization = `Bearer ${activeToken}`;
   }
 
-  const res = await fetch(`${API_BASE}${path}`, {
+  let res = await fetch(`${API_BASE}${path}`, {
     ...options,
     headers,
   });
+
+  // Interceptor de 401 Unauthorized: renovar forzosamente y reintentar la petición automáticamente
+  if (res.status === 401 && firebaseAuth && firebaseAuth.currentUser) {
+    try {
+      console.log("⚠️ Token 401 detectado. Renovando token con Firebase...");
+      const refreshedToken = await firebaseAuth.currentUser.getIdToken(true);
+      localStorage.setItem('idToken', refreshedToken);
+      setToken(refreshedToken);
+      headers.Authorization = `Bearer ${refreshedToken}`;
+
+      res = await fetch(`${API_BASE}${path}`, {
+        ...options,
+        headers,
+      });
+    } catch (refreshErr) {
+      console.error("Falló la renovación forzada de token expirado:", refreshErr);
+    }
+  }
 
   const data = await res.json().catch(() => ({}));
 
@@ -255,7 +303,7 @@ const apiCall = React.useCallback(async (path, options = {}, customToken = null)
       );
 
       setUser(data.usuario);
-      setActiveTab('perfil');
+      setActiveTab('inicio');
     } catch (err) {
       setStatus(err.message, false);
     }
@@ -291,7 +339,7 @@ const apiCall = React.useCallback(async (path, options = {}, customToken = null)
       );
 
       setUser(data.usuario);
-      setActiveTab('perfil');
+      setActiveTab('inicio');
     } catch (err) {
       setStatus(err.message, false);
     }
@@ -373,11 +421,56 @@ const apiCall = React.useCallback(async (path, options = {}, customToken = null)
       );
 
       setUser(data.usuario);
-      setActiveTab('perfil');
+      setActiveTab('inicio');
     } catch (err) {
       const friendlyMsg =
         err.code ===
         'auth/popup-closed-by-user'
+          ? 'Ventana cerrada por el usuario. Reintentá.'
+          : err.message;
+
+      setStatus(friendlyMsg, false);
+    }
+  };
+
+  /*
+    Login Microsoft/Outlook usando Firebase Popup.
+  */
+  const handleMicrosoftLogin = async () => {
+    try {
+      setStatus('Abriendo panel de Microsoft/Outlook...');
+      const { auth, signInWithPopup } = await getFirebaseAuth();
+      const provider = new OAuthProvider('microsoft.com');
+      provider.setCustomParameters({
+        prompt: 'select_account',
+      });
+
+      const credential = await signInWithPopup(auth, provider);
+      const msIdToken = await credential.user.getIdToken();
+
+      setStatus('Sincronizando perfil con el servidor...');
+      const data = await apiCall('/auth/google', {
+        method: 'POST',
+        body: JSON.stringify({
+          idToken: msIdToken,
+        }),
+      });
+
+      saveToken(data.idToken);
+      loadUserProgress(data.idToken);
+
+      setStatus(
+        data.esNuevo
+          ? `¡Cuenta creada! Hola, ${data.usuario?.displayName || data.usuario?.email}`
+          : `Bienvenido de nuevo, ${data.usuario?.displayName || data.usuario?.email}`,
+        true
+      );
+
+      setUser(data.usuario);
+      setActiveTab('inicio');
+    } catch (err) {
+      const friendlyMsg =
+        err.code === 'auth/popup-closed-by-user'
           ? 'Ventana cerrada por el usuario. Reintentá.'
           : err.message;
 
@@ -405,7 +498,7 @@ const apiCall = React.useCallback(async (path, options = {}, customToken = null)
   const handleOnboardingComplete = (updatedUser) => {
     setUser(updatedUser);
     loadUserProgress(token);
-    setActiveTab('lecciones');
+    setActiveTab('inicio');
   };
 
   const handleRetryConnection = () => {
@@ -426,6 +519,7 @@ const apiCall = React.useCallback(async (path, options = {}, customToken = null)
         <Auth
           onLogin={handleLogin}
           onGoogleLogin={handleGoogleLogin}
+          onMicrosoftLogin={handleMicrosoftLogin}
           onRegister={handleRegister}
           onRecoverPassword={handleRecoverPassword}
           statusMsg={statusMsg}
@@ -491,7 +585,15 @@ const apiCall = React.useCallback(async (path, options = {}, customToken = null)
                   }}
                 />
               )}
-              {(activeTab === 'inicio' || activeTab === 'lecciones') && (
+              {activeTab === 'inicio' && (
+                <Home
+                  user={user}
+                  progress={progress}
+                  onNavigate={(tab) => setActiveTab(tab)}
+                />
+              )}
+
+              {activeTab === 'lecciones' && (
                 <Modules
                   apiCall={apiCall}
                   onAnswerSuccess={handleAnswerSuccess}
@@ -505,8 +607,32 @@ const apiCall = React.useCallback(async (path, options = {}, customToken = null)
                 <Progress apiCall={apiCall} />
               )}
 
+              {activeTab === 'practicar' && (
+                <div
+                  className="card"
+                  style={{
+                    textAlign: 'center',
+                    padding: '50px 24px',
+                    borderRadius: '24px',
+                    backgroundColor: '#ffffff',
+                    margin: '20px auto',
+                    maxWidth: '600px',
+                    boxShadow: '0 8px 30px rgba(0,0,0,0.04)',
+                    border: '1.5px solid #e2e8f0'
+                  }}
+                >
+                  <div style={{ fontSize: '3.5rem', marginBottom: '16px' }}>🎯</div>
+                  <h2 style={{ color: '#163b74', margin: '0 0 10px 0', fontFamily: 'Poppins, sans-serif', fontSize: '1.5rem', fontWeight: 700 }}>
+                    Sección Practicar
+                  </h2>
+                  <p style={{ color: '#64748b', fontSize: '0.95rem', lineHeight: '1.6', margin: 0, maxWidth: '420px', marginLeft: 'auto', marginRight: 'auto' }}>
+                    Esta pestaña está reservada para los nuevos modos de práctica guiada. ¡Próximamente disponible!
+                  </p>
+                </div>
+              )}
+
               {activeTab === 'logros' && (
-                <Logros apiCall={apiCall} />
+                <Progress apiCall={apiCall} />
               )}
             </div>
           </div>
@@ -539,8 +665,8 @@ const apiCall = React.useCallback(async (path, options = {}, customToken = null)
 
           <button
             type="button"
-            className={`figma-nav-item ${activeTab === 'logros' ? 'active' : ''}`}
-            onClick={() => setActiveTab('logros')}
+            className={`figma-nav-item ${activeTab === 'practicar' ? 'active' : ''}`}
+            onClick={() => setActiveTab('practicar')}
           >
             <img src={navPracticarSvg} alt="Practicar" />
             <span>Practicar</span>
