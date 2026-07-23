@@ -25,28 +25,50 @@ function intentosRef(uid, clave) {
     .doc(clave);
 }
 
+const memoryAttempts = new Map();
+
+function isQuotaError(err) {
+  return err && (err.code === 8 || err.message?.includes('Quota exceeded') || err.details?.includes('Quota exceeded'));
+}
+
 /** Busca explicación en Firestore si existe plantilla estática */
 async function obtenerPlantillaFirestore(moduleId, lessonId, exerciseId) {
-  const id = claveEjercicio(moduleId, lessonId, exerciseId);
-  const doc = await db.collection(COLECCION_PLANTILLAS).doc(id).get();
-  if (!doc.exists) return null;
-  return doc.data();
+  try {
+    const id = claveEjercicio(moduleId, lessonId, exerciseId);
+    const doc = await db.collection(COLECCION_PLANTILLAS).doc(id).get();
+    if (!doc.exists) return null;
+    return doc.data();
+  } catch (err) {
+    return null;
+  }
 }
 
 async function registrarIntento(uid, clave, correcto) {
-  const ref = intentosRef(uid, clave);
-  const doc = await ref.get();
-  const prev = doc.exists ? doc.data() : { erroresConsecutivos: 0 };
+  const key = `${uid}_${clave}`;
+  try {
+    const ref = intentosRef(uid, clave);
+    const doc = await ref.get();
+    const prev = doc.exists ? doc.data() : { erroresConsecutivos: 0 };
 
-  const erroresConsecutivos = correcto ? 0 : (prev.erroresConsecutivos ?? 0) + 1;
+    const erroresConsecutivos = correcto ? 0 : (prev.erroresConsecutivos ?? 0) + 1;
 
-  await ref.set({
-    erroresConsecutivos,
-    ultimoIntento: new Date().toISOString(),
-    ultimoResultado: correcto ? 'correcto' : 'incorrecto',
-  });
+    await ref.set({
+      erroresConsecutivos,
+      ultimoIntento: new Date().toISOString(),
+      ultimoResultado: correcto ? 'correcto' : 'incorrecto',
+    });
 
-  return erroresConsecutivos;
+    memoryAttempts.set(key, erroresConsecutivos);
+    return erroresConsecutivos;
+  } catch (err) {
+    if (isQuotaError(err)) {
+      const prev = memoryAttempts.get(key) || 0;
+      const erroresConsecutivos = correcto ? 0 : prev + 1;
+      memoryAttempts.set(key, erroresConsecutivos);
+      return erroresConsecutivos;
+    }
+    throw err;
+  }
 }
 
 /**
