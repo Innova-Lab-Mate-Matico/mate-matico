@@ -108,67 +108,92 @@ export async function contarLeccionesCompletadas(uid) {
  * Actualiza puntos, rol y racha tras actividad en lección (transaccional).
  */
 export async function aplicarRecompensaActividad(uid, puntosGanados, { actualizarRacha = true, timezone = 'America/Argentina/Buenos_Aires' } = {}) {
-  const ref = usuariosCol().doc(uid);
-  const leccionesCompletadas = await contarLeccionesCompletadas(uid);
+  try {
+    const ref = usuariosCol().doc(uid);
+    const leccionesCompletadas = await contarLeccionesCompletadas(uid);
 
-  return db.runTransaction(async (tx) => {
-    const snap = await tx.get(ref);
-    if (!snap.exists) {
-      const err = new Error('Usuario no encontrado');
-      err.status = 404;
-      throw err;
-    }
+    return await db.runTransaction(async (tx) => {
+      const snap = await tx.get(ref);
+      if (!snap.exists) {
+        const err = new Error('Usuario no encontrado');
+        err.status = 404;
+        throw err;
+      }
 
-    const rawData = snap.data();
-    const data = dbToUsuario(rawData);
-    data.uid = snap.id;
-    const puntosActuales = (data.puntosTotales ?? 0) + puntosGanados;
-    const rolAnterior = data.rolActual;
-    const rolNuevo = calcularRolActual(puntosActuales, leccionesCompletadas);
+      const rawData = snap.data();
+      const data = dbToUsuario(rawData);
+      data.uid = snap.id;
+      const puntosActuales = (data.puntosTotales ?? 0) + puntosGanados;
+      const rolAnterior = data.rolActual;
+      const rolNuevo = calcularRolActual(puntosActuales, leccionesCompletadas);
 
-    const updates = usuarioToDb({
-      puntosTotales: FieldValue.increment(puntosGanados),
-      rolActual: rolNuevo,
-    });
-
-    let rachaInfo = {};
-    if (actualizarRacha) {
-      rachaInfo = evaluarRacha(data, new Date(), timezone);
-      const mappedRacha = usuarioToDb({
-        rachaDias: rachaInfo.rachaDias,
-        recordRacha: rachaInfo.recordRacha,
-        ultimaLeccionCompletada: rachaInfo.ultimaLeccionCompletada,
+      const updates = usuarioToDb({
+        puntosTotales: FieldValue.increment(puntosGanados),
+        rolActual: rolNuevo,
       });
-      Object.assign(updates, mappedRacha);
+
+      let rachaInfo = {};
+      if (actualizarRacha) {
+        rachaInfo = evaluarRacha(data, new Date(), timezone);
+        const mappedRacha = usuarioToDb({
+          rachaDias: rachaInfo.rachaDias,
+          recordRacha: rachaInfo.recordRacha,
+          ultimaLeccionCompletada: rachaInfo.ultimaLeccionCompletada,
+        });
+        Object.assign(updates, mappedRacha);
+      }
+
+      tx.update(ref, updates);
+
+      return {
+        puntosTotales: puntosActuales,
+        rolActual: rolNuevo,
+        rolSubio: rolSubio(rolAnterior, rolNuevo),
+        ...rachaInfo,
+      };
+    });
+  } catch (err) {
+    if (isQuotaError(err)) {
+      console.warn('⚠️ Firestore cuota superada en aplicarRecompensaActividad. Actualizando perfil local.');
+      const user = memoryUsers.get(uid) || { uid, puntosTotales: 0, rolActual: 'Estudiante', rachaDias: 1 };
+      user.puntosTotales = (user.puntosTotales ?? 0) + puntosGanados;
+      user.rolActual = calcularRolActual(user.puntosTotales, 1);
+      memoryUsers.set(uid, user);
+      return {
+        puntosTotales: user.puntosTotales,
+        rolActual: user.rolActual,
+        rolSubio: false,
+        rachaDias: user.rachaDias ?? 1,
+        recordRacha: 1,
+      };
     }
-
-    tx.update(ref, updates);
-
-    return {
-      puntosTotales: puntosActuales,
-      rolActual: rolNuevo,
-      rolSubio: rolSubio(rolAnterior, rolNuevo),
-      ...rachaInfo,
-    };
-  });
+    throw err;
+  }
 }
 
 /** Registra intento significativo (actualiza última actividad sin sumar puntos) */
 export async function registrarActividadEmpatica(uid, timezone = 'America/Argentina/Buenos_Aires') {
-  const ref = usuariosCol().doc(uid);
-  const snap = await ref.get();
-  if (!snap.exists) return;
+  try {
+    const ref = usuariosCol().doc(uid);
+    const snap = await ref.get();
+    if (!snap.exists) return;
 
-  const data = dbToUsuario(snap.data());
-  data.uid = snap.id;
-  const rachaInfo = evaluarRacha(data, new Date(), timezone);
-  await ref.update(
-    usuarioToDb({
-      ultimaLeccionCompletada: rachaInfo.ultimaLeccionCompletada,
-      rachaDias: rachaInfo.rachaDias,
-      recordRacha: rachaInfo.recordRacha,
-    })
-  );
+    const data = dbToUsuario(snap.data());
+    data.uid = snap.id;
+    const rachaInfo = evaluarRacha(data, new Date(), timezone);
+    await ref.update(
+      usuarioToDb({
+        ultimaLeccionCompletada: rachaInfo.ultimaLeccionCompletada,
+        rachaDias: rachaInfo.rachaDias,
+        recordRacha: rachaInfo.recordRacha,
+      })
+    );
+  } catch (err) {
+    if (isQuotaError(err)) {
+      return; // Fallback silencioso en memoria
+    }
+    throw err;
+  }
 }
 
 export function perfilPublico(usuario) {
