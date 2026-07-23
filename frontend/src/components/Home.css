@@ -1,0 +1,509 @@
+/* ============================================================
+   HOME.CSS — Pantalla Inicio / Home (Figma Alta Fidelidad)
+   ============================================================ */
+
+.home-container {
+  max-width: 600px;
+  margin: 0 auto 30px;
+  padding: 0 16px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  font-family: 'Poppins', sans-serif;
+}
+
+/* ── Encabezado Principal ───────────────────────────── */
+.home-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 10px;
+  position: relative;
+}
+
+.home-header-text {
+  flex: 1;
+}
+
+.home-title {
+  font-family: 'Poppins', sans-serif !important;
+  font-size: clamp(2rem, 6vw, 2.5rem) !important;
+  font-weight: 800 !important;
+  color: #1A1A1A !important;
+  margin: 0 0 4px 0 !important;
+  line-height: 1.15 !important;
+}
+
+.home-subtitle {
+  font-family: 'Poppins', sans-serif !important;
+  font-size: clamp(1.05rem, 3.5vw, 1.25rem) !important;
+  font-weight: 700 !important;
+  color: #1A1A1A !important;
+  margin: 0 !important;
+  line-height: 1.3 !important;
+  max-width: 260px;
+}
+
+.home-mate-img {
+  width: 145px;
+  height: 145px;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 12px rgba(0,0,0,0.12));
+}
+
+/* ── Tarjeta de Estadísticas Rápida (Racha + Puntos) ── */
+.home-stats-card {
+  background: #FFFFFF;
+  border: 1.5px solid #B8B8B8;
+  border-radius: 24px;
+  padding: 18px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
+}
+
+.home-stat-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex: 1;
+  justify-content: center;
+}
+
+.home-stat-icon-flame {
+  width: 60px;
+  height: 60px;
+  background: #9747FF;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 6px 16px rgba(151, 71, 255, 0.3);
+}
+
+.home-stat-icon-flame img {
+  width: 32px;
+  height: 32px;
+  filter: brightness(0) invert(1);
+}
+
+.home-stat-icon-star {
+  width: 60px;
+  height: 60px;
+  background: #FEC32F;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 6px 16px rgba(254, 195, 47, 0.35);
+}
+
+.home-stat-icon-star img {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
+
+.home-stat-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.home-stat-label {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #1A1A1A;
+}
+
+.home-stat-value {
+  font-size: clamp(1.3rem, 4vw, 1.6rem);
+  font-weight: 800;
+  color: #1A1A1A;
+  margin: 1px 0 0 0;
+  line-height: 1.1;
+}
+
+.home-stat-subtext {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #656565;
+}
+
+.home-stats-divider {
+  width: 1.5px;
+  height: 52px;
+  background: #E2E8F0;
+  margin: 0 10px;
+}
+
+/* ── Tarjeta Destacada: Practicá con IA ──────────────── */
+.home-ia-card {
+  background: #F8F5FF;
+  border: 1.5px solid #B8B8B8;
+  border-radius: 24px;
+  padding: 24px;
+  position: relative;
+  overflow: visible;
+  box-shadow: 0 4px 18px rgba(151, 71, 255, 0.05);
+}
+
+.home-ia-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.home-ia-badge-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.home-ia-frame11-img {
+  width: 52px;
+  height: 48px;
+  object-fit: contain;
+}
+
+.home-ia-badge {
+  background: #9747FF;
+  color: #FFFFFF;
+  font-size: 0.9rem;
+  font-weight: 700;
+  padding: 5px 18px;
+  border-radius: 100px;
+}
+
+.home-mate-ia-img {
+  position: absolute;
+  top: -35px;
+  right: 8px;
+  width: 155px;
+  height: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 8px 18px rgba(151, 71, 255, 0.3));
+  pointer-events: none;
+  z-index: 2;
+}
+
+.home-ia-body {
+  margin-top: 14px;
+}
+
+.home-ia-title {
+  font-family: 'Poppins', sans-serif !important;
+  font-size: clamp(1.2rem, 4vw, 1.4rem) !important;
+  font-weight: 800 !important;
+  color: #1A1A1A !important;
+  margin: 0 0 6px 0 !important;
+}
+
+.home-ia-desc {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #475569;
+  line-height: 1.45;
+  margin: 0 0 18px 0;
+  max-width: 300px;
+}
+
+.home-ia-btn {
+  width: 100%;
+  background: #9747FF;
+  color: #FFFFFF;
+  border: none;
+  border-radius: 16px;
+  padding: 14px 20px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(151, 71, 255, 0.3);
+  transition: all 0.25s ease;
+}
+
+.home-ia-btn:hover {
+  background: #8330ed;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(151, 71, 255, 0.4);
+}
+
+/* ── Sección: Módulos recomendados ─────────────────── */
+.home-recommended-section {
+  background: #FFFFFF;
+  border: 1.5px solid #B8B8B8;
+  border-radius: 24px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.02);
+}
+
+.home-recommended-title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #1A1A1A;
+  margin: 0;
+}
+
+.home-recommended-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+
+.home-recommended-card {
+  border-radius: 20px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 130px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+}
+
+.home-recommended-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.06);
+}
+
+.home-card-green {
+  background: #F3FFF6;
+  border: 1px solid #C8E6C9;
+}
+
+.home-card-blue {
+  background: #EFF6FE;
+  border: 1px solid #BBDEFB;
+}
+
+.home-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.home-card-icon-box {
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.home-icon-green {
+  background: #89C75F;
+}
+
+.home-icon-blue {
+  background: #4285F4;
+}
+
+.home-card-badge-actual {
+  background: #89C75F;
+  color: #FFFFFF;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 100px;
+}
+
+.home-card-title {
+  font-family: 'Poppins', sans-serif !important;
+  font-size: clamp(1rem, 3.5vw, 1.15rem) !important;
+  font-weight: 700 !important;
+  color: #1A1A1A !important;
+  margin: 12px 0 0 0 !important;
+  line-height: 1.25 !important;
+}
+
+.home-see-all-link {
+  background: transparent;
+  border: none;
+  color: #1E3A5F;
+  font-family: 'Poppins', sans-serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+  cursor: pointer;
+  align-self: flex-end;
+  padding: 4px 0;
+  transition: color 0.2s ease;
+}
+
+.home-see-all-link:hover {
+  color: #0f172a;
+  text-decoration: underline;
+}
+
+@media (max-width: 480px) {
+  .home-recommended-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.home-ia-body {
+  margin-top: 10px;
+}
+
+.home-ia-title {
+  font-family: 'Poppins', sans-serif !important;
+  font-size: clamp(1.2rem, 4vw, 1.4rem) !important;
+  font-weight: 800 !important;
+  color: #1A1A1A !important;
+  margin: 0 0 6px 0 !important;
+}
+
+.home-ia-desc {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #475569;
+  line-height: 1.45;
+  margin: 0 0 18px 0;
+  max-width: 320px;
+}
+
+.home-ia-btn {
+  width: 100%;
+  background: #9747FF;
+  color: #FFFFFF;
+  border: none;
+  border-radius: 16px;
+  padding: 14px 20px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(151, 71, 255, 0.3);
+  transition: all 0.25s ease;
+}
+
+.home-ia-btn:hover {
+  background: #8330ed;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(151, 71, 255, 0.4);
+}
+
+/* ── Sección: Módulos recomendados ─────────────────── */
+.home-recommended-section {
+  background: #FFFFFF;
+  border: 1.5px solid #B8B8B8;
+  border-radius: 24px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.02);
+}
+
+.home-recommended-title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #1A1A1A;
+  margin: 0;
+}
+
+.home-recommended-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+
+.home-recommended-card {
+  border-radius: 20px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 130px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+}
+
+.home-recommended-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.06);
+}
+
+.home-card-green {
+  background: #F3FFF6;
+  border: 1px solid #C8E6C9;
+}
+
+.home-card-blue {
+  background: #EFF6FE;
+  border: 1px solid #BBDEFB;
+}
+
+.home-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.home-card-icon-box {
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.home-icon-green {
+  background: #89C75F;
+}
+
+.home-icon-blue {
+  background: #4285F4;
+}
+
+.home-card-badge-actual {
+  background: #89C75F;
+  color: #FFFFFF;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 100px;
+}
+
+.home-card-title {
+  font-family: 'Poppins', sans-serif !important;
+  font-size: clamp(1rem, 3.5vw, 1.15rem) !important;
+  font-weight: 700 !important;
+  color: #1A1A1A !important;
+  margin: 12px 0 0 0 !important;
+  line-height: 1.25 !important;
+}
+
+.home-see-all-link {
+  background: transparent;
+  border: none;
+  color: #1E3A5F;
+  font-family: 'Poppins', sans-serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+  cursor: pointer;
+  align-self: flex-end;
+  padding: 4px 0;
+  transition: color 0.2s ease;
+}
+
+.home-see-all-link:hover {
+  color: #0f172a;
+  text-decoration: underline;
+}
+
+@media (max-width: 480px) {
+  .home-recommended-grid {
+    grid-template-columns: 1fr;
+  }
+}

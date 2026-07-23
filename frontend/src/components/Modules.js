@@ -22,7 +22,7 @@ import DynamicTheoryCard from './DynamicTheoryCard';
 
 import paymentSvg from '../assets/payment_arrow_down.svg';
 import percentSvg from '../assets/percent.svg';
-import group18Svg from '../assets/Group 18.svg';
+import shoppingCartSvg from '../assets/shopping_cart.svg';
 import frame10Svg from '../assets/Frame 10.svg';
 import aritmeticaPng from '../assets/aritmetica.png';
 import mateAcademico from '../assets/mate_academico.webp';
@@ -40,7 +40,7 @@ const MODULE_THEMES = {
   porcentajes: {
     icon: <img src={percentSvg} alt="Porcentajes" className="figma-svg-icon" />,
     iconBg: '#4285F4',
-    circleBg: '#89C75F',
+    circleBg: '#4285F4',
     title: 'Porcentajes',
     badge: 'En curso'
   },
@@ -52,7 +52,7 @@ const MODULE_THEMES = {
     badge: 'En curso'
   },
   economia: {
-    icon: <img src={group18Svg} alt="Economía de hogar" className="figma-svg-icon-full" />,
+    icon: <img src={shoppingCartSvg} alt="Economía de hogar" className="figma-svg-icon-full" />,
     iconBg: '#B95B1E',
     circleBg: '#B95B1E',
     title: 'Economía de hogar',
