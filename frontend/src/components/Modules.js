@@ -228,10 +228,10 @@ export default function Modules({
     Helper: Verificar si una lección está completada en el estado de progreso
   */
   const isLessonCompleted = (lessonId) => {
-    if (!progress || !progress.progreso || !progress.progreso.modulos) {
-      return false;
-    }
-    const mod = progress.progreso.modulos[selectedModuleId];
+    if (!progress) return false;
+    const modMap = progress.progreso?.modulos || progress.modulos || progress;
+    if (!modMap) return false;
+    const mod = modMap[selectedModuleId];
     if (!mod) return false;
     const lecciones = mod.lecciones ?? mod.lessons;
     if (!lecciones) return false;
@@ -246,10 +246,10 @@ export default function Modules({
     Helper: Verificar si una lección fue completada HOY (para badge de racha)
   */
   const isLessonCompletedToday = (lessonId) => {
-    if (!progress || !progress.progreso || !progress.progreso.modulos) {
-      return false;
-    }
-    const mod = progress.progreso.modulos[selectedModuleId];
+    if (!progress) return false;
+    const modMap = progress.progreso?.modulos || progress.modulos || progress;
+    if (!modMap) return false;
+    const mod = modMap[selectedModuleId];
     if (!mod) return false;
     const lecciones = mod.lecciones ?? mod.lessons;
     if (!lecciones) return false;

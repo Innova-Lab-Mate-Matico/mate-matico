@@ -477,7 +477,7 @@ const apiCall = React.useCallback(async (path, options = {}, customToken = null)
           </div>
         </header>
 
-        <main style={{ paddingBottom: '75px' }}>
+        <main style={{ paddingBottom: '120px', minHeight: 'calc(100vh - 180px)', position: 'relative' }}>
           <div>
             <div className="layout-grid">
               {activeTab === 'perfil' && (
@@ -510,6 +510,20 @@ const apiCall = React.useCallback(async (path, options = {}, customToken = null)
               )}
             </div>
           </div>
+
+          {/* Footer Profesional Innova Lab */}
+          <footer className="figma-pro-footer">
+            <div className="footer-content">
+              <h3 className="footer-brand">Mate-Mático — Innova Lab</h3>
+              <p className="footer-tagline">
+                Plataforma Educativa Adaptativa con Gamificación e Inteligencia Artificial
+              </p>
+              <div className="footer-divider"></div>
+              <p className="footer-copyright">
+                © 2026 Innova Lab — Todos los derechos reservados.
+              </p>
+            </div>
+          </footer>
         </main>
 
         {/* Barra de navegación inferior fija estilo Figma */}
@@ -559,20 +573,6 @@ const apiCall = React.useCallback(async (path, options = {}, customToken = null)
             <span>Perfil</span>
           </button>
         </nav>
-
-        {/* Footer Profesional Innova Lab */}
-        <footer className="figma-pro-footer">
-          <div className="footer-content">
-            <h3 className="footer-brand">Mate-Mático — Innova Lab</h3>
-            <p className="footer-tagline">
-              Plataforma Educativa Adaptativa con Gamificación e Inteligencia Artificial
-            </p>
-            <div className="footer-divider"></div>
-            <p className="footer-copyright">
-              © 2026 Innova Lab — Todos los derechos reservados.
-            </p>
-          </div>
-        </footer>
       </div>
       {networkError && (
         <div 
