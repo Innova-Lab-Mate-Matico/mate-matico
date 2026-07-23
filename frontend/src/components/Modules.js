@@ -23,33 +23,52 @@ import DynamicTheoryCard from './DynamicTheoryCard';
 import paymentSvg from '../assets/payment_arrow_down.svg';
 import percentSvg from '../assets/percent.svg';
 import group18Svg from '../assets/Group 18.svg';
+import frame10Svg from '../assets/Frame 10.svg';
 import aritmeticaPng from '../assets/aritmetica.png';
+import mateAcademico from '../assets/mate_academico.webp';
+import mateEscolar from '../assets/mate_escolar.webp';
+import mateProfesor from '../assets/mate_profesor.webp';
 
 const MODULE_THEMES = {
-  fracciones: {
-    icon: '💲',
-    iconBg: '#76c845',
-    title: 'Finanzas Personales',
-    badge: 'En curso'
-  },
   aritmetica: {
     icon: <img src={aritmeticaPng} alt="Base aritmética" className="figma-svg-icon" />,
-    iconBg: '#c85a28',
+    iconBg: '#89C75F',
+    circleBg: '#89C75F',
     title: 'Base aritmética',
-    badge: 'Recomendado'
-  },
-  economia: {
-    icon: <img src={group18Svg} alt="Economía" className="figma-svg-icon-full" />,
-    iconBg: '#3b82f6',
-    title: 'Economía de hogar',
     badge: 'En curso'
   },
   porcentajes: {
-    icon: <img src={percentSvg} alt="Descuentos" className="figma-svg-icon" />,
-    iconBg: '#a855f7',
-    title: 'Promociones y descuentos',
-    badge: 'Nuevo'
+    icon: <img src={percentSvg} alt="Porcentajes" className="figma-svg-icon" />,
+    iconBg: '#4285F4',
+    circleBg: '#89C75F',
+    title: 'Porcentajes',
+    badge: 'En curso'
+  },
+  fracciones: {
+    icon: <img src={frame10Svg} alt="Fracciones y decimales" className="figma-svg-icon-full" />,
+    iconBg: '#FBBC05',
+    circleBg: '#FBBC05',
+    title: 'Fracciones y decimales',
+    badge: 'En curso'
+  },
+  economia: {
+    icon: <img src={group18Svg} alt="Economía de hogar" className="figma-svg-icon-full" />,
+    iconBg: '#B95B1E',
+    circleBg: '#B95B1E',
+    title: 'Economía de hogar',
+    badge: 'En curso'
   }
+};
+
+const getMateAvatar = (rolActual) => {
+  const rol = String(rolActual || '').toLowerCase();
+  if (rol.includes('intermedio') || rol.includes('secundari')) {
+    return mateProfesor;
+  }
+  if (rol.includes('avanzado') || rol.includes('experto') || rol.includes('academico') || rol.includes('académico')) {
+    return mateAcademico;
+  }
+  return mateEscolar;
 };
 
 export default function Modules({
@@ -336,9 +355,10 @@ export default function Modules({
                   >
                     {modules.map((mod) => {
                       const prog = getModuleProgress(mod.id);
-                      const theme = MODULE_THEMES[mod.id] || { icon: '📘', iconBg: '#7b61ff', badge: 'En curso' };
+                      const theme = MODULE_THEMES[mod.id] || { icon: '📘', iconBg: '#89C75F', circleBg: '#89C75F', badge: 'En curso' };
                       const isRecommended = user?.onboarding?.moduloRecomendado === mod.id;
                       const badgeText = isRecommended ? '★ Recomendado' : (theme.badge || 'En curso');
+                      const mateAvatar = getMateAvatar(user?.rolActual);
 
                       return (
                         <div
@@ -349,14 +369,24 @@ export default function Modules({
                           <div className="featured-card">
                             <div className="featured-card-header">
                               <div className="featured-icon-badge">
-                                <div className="featured-icon-box">
-                                  <span>💳</span>
+                                <div
+                                  className="featured-icon-box"
+                                  style={{ backgroundColor: theme.iconBg }}
+                                >
+                                  {theme.icon}
                                 </div>
                                 <span className="featured-badge">{badgeText}</span>
                               </div>
 
-                              <div className="featured-illustration-circle">
-                                <span>💳🧮</span>
+                              <div
+                                className="featured-illustration-circle"
+                                style={{ backgroundColor: theme.circleBg || '#89C75F' }}
+                              >
+                                <img
+                                  src={mateAvatar}
+                                  alt="Mascota Mate"
+                                  className="featured-mate-avatar"
+                                />
                               </div>
                             </div>
 
