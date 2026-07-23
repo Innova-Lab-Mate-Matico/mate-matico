@@ -10,14 +10,14 @@ export default function Login({
   isStatusOk
 }) {
   return (
-    <div className="auth-form-wrapper" style={{ padding: '24px 20px', background: '#ffffff', borderRadius: '24px', boxShadow: '0 10px 30px rgba(0,0,0,0.05)' }}>
-      <div className="auth-header" style={{ marginBottom: '16px' }}>
+    <div className="auth-form-wrapper" style={{ padding: '0', background: 'transparent', borderRadius: '0', boxShadow: 'none' }}>
+      <div className="auth-header" style={{ marginBottom: '20px' }}>
         <img
           src={logoPrincipal}
           className="auth-logo"
           alt="Mate-Mático"
         />
-        <p className="auth-subtitle" style={{ margin: '8px 0 0 0' }}>
+        <p className="auth-subtitle">
           Aprendé matemáticas mate a mate
         </p>
       </div>
