@@ -31,8 +31,8 @@ export async function trackEvent(userId, eventType, metadata = {}) {
 
   // 1. Registrar en Firestore (Solo si no es evento redundante o si no se ha agotado la cuota)
   try {
-    // Evitar saturación de Firestore con eventos de telemetría de alto volumen
-    if (process.env.NODE_ENV !== 'test') {
+    // Evitar saturación de Firestore con eventos de telemetría de alto volumen en producción
+    if (process.env.NODE_ENV !== 'production' || process.env.FIRESTORE_EMULATOR_HOST) {
       await db.collection('eventos').add(eventDoc);
     }
   } catch (error) {

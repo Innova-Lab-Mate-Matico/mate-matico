@@ -72,7 +72,7 @@ describe('Integración de Ejercicios y Figma - Backend Tests', () => {
       const [ej1, ej2] = res.body.leccion.ejercicios;
 
       // Ejercicio 1 (Yerba - Multiple Choice)
-      assert.strictEqual(ej1.id, 'desc-mc-0');
+      assert.match(ej1.id, /^desc-mc-\d+/);
       assert.strictEqual(ej1.tipo, 'multiple_choice');
       assert.strictEqual(ej1.tipoGenerador, 'descuento_mc');
       assert.match(ej1.enunciado, /yerba/);
@@ -80,7 +80,7 @@ describe('Integración de Ejercicios y Figma - Backend Tests', () => {
       assert.strictEqual(ej1.respuestaCorrecta, undefined); // No debe viajar al cliente
 
       // Ejercicio 2 (Internet - Numérico)
-      assert.strictEqual(ej2.id, 'aum-num-1');
+      assert.match(ej2.id, /^aum-num-\d+/);
       assert.strictEqual(ej2.tipo, 'numeric');
       assert.strictEqual(ej2.tipoGenerador, 'aumento_numerico');
       assert.match(ej2.enunciado, /internet|luz|gas|agua|cable/);

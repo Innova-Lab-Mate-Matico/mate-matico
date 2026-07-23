@@ -20,7 +20,8 @@ const sizeLimitMiddleware = (req, res, next) => {
 // Whitelist acotada estrictamente a eventos emitidos de forma directa por el cliente
 const whitelist = [
   'ejercicio_iniciado',
-  'feedback_enviado'
+  'feedback_enviado',
+  'logro_desbloqueado'
 ];
 
 router.post('/', requireAuth, sizeLimitMiddleware, async (req, res) => {

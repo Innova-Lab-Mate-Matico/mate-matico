@@ -186,3 +186,47 @@ export function validateOnboardingBody(req, res, next) {
 
   next();
 }
+
+export function validateExplainBody(req, res, next) {
+  const { moduleId, lessonId, theoryId, question, history, sesion_id } = req.body ?? {};
+
+  // 1. Validar campos requeridos en la raíz del body
+  if (!moduleId || typeof moduleId !== 'string' || !moduleId.trim()) {
+    return res.status(400).json({ success: false, error: 'El campo moduleId es obligatorio y debe ser un texto.' });
+  }
+  if (!lessonId || typeof lessonId !== 'string' || !lessonId.trim()) {
+    return res.status(400).json({ success: false, error: 'El campo lessonId es obligatorio y debe ser un texto.' });
+  }
+  if (!theoryId || typeof theoryId !== 'string' || !theoryId.trim()) {
+    return res.status(400).json({ success: false, error: 'El campo theoryId es obligatorio y debe ser un texto.' });
+  }
+  if (!question || typeof question !== 'string' || !question.trim()) {
+    return res.status(400).json({ success: false, error: 'El campo question es obligatorio y debe ser un texto.' });
+  }
+  if (!sesion_id || typeof sesion_id !== 'string' || !sesion_id.trim()) {
+    return res.status(400).json({ success: false, error: 'El campo sesion_id es obligatorio en la raíz de la petición.' });
+  }
+
+  // 2. Validar historial (history) si está presente
+  if (history !== undefined) {
+    if (!Array.isArray(history)) {
+      return res.status(400).json({ success: false, error: 'El campo history debe ser un arreglo.' });
+    }
+
+    for (let i = 0; i < history.length; i++) {
+      const msg = history[i];
+      if (!msg || typeof msg !== 'object') {
+        return res.status(400).json({ success: false, error: `El mensaje en el índice ${i} del historial no es un objeto válido.` });
+      }
+      if (!msg.role || typeof msg.role !== 'string' || !['user', 'model', 'assistant'].includes(msg.role)) {
+        return res.status(400).json({ success: false, error: `El campo role en el índice ${i} debe ser 'user', 'assistant' o 'model'.` });
+      }
+      if (!msg.text || typeof msg.text !== 'string' || !msg.text.trim()) {
+        return res.status(400).json({ success: false, error: `El campo text en el índice ${i} debe ser un texto no vacío.` });
+      }
+    }
+  }
+
+  next();
+}
+
