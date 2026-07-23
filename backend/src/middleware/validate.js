@@ -37,18 +37,18 @@ export function validateRegisterBody(req, res, next) {
     });
   }
 
-  // 4. Validar contraseña (8-12 chars, mayús + minús + número + especial)
+  // 4. Validar contraseña (mínimo 8 caracteres, mayús + minús + número + especial, sin límite máximo)
   const passStr = String(password);
   const hasUpper = /[A-Z]/.test(passStr);
   const hasLower = /[a-z]/.test(passStr);
   const hasDigit = /\d/.test(passStr);
   const hasSpecial = /[^A-Za-z0-9]/.test(passStr);
-  const isCorrectLength = passStr.length >= 8 && passStr.length <= 12;
+  const isCorrectLength = passStr.length >= 8;
 
   if (!hasUpper || !hasLower || !hasDigit || !hasSpecial || !isCorrectLength) {
     return res.status(400).json({
       success: false,
-      error: 'La contraseña no cumple los requisitos mínimos.',
+      error: 'La contraseña debe tener al menos 8 caracteres, e incluir mayúscula, minúscula, número y un carácter especial.',
     });
   }
 
@@ -152,13 +152,13 @@ export function validateOnboardingBody(req, res, next) {
     });
   }
 
-  // 3. edad: opcional, entero, rango 5-120
+  // 3. edad: opcional, entero, rango 18-120 (Público +18)
   if (edad !== undefined && edad !== null && edad !== '') {
     const edadNum = Number(edad);
-    if (!Number.isInteger(edadNum) || edadNum < 5 || edadNum > 120) {
+    if (!Number.isInteger(edadNum) || edadNum < 18 || edadNum > 120) {
       return res.status(400).json({
         success: false,
-        error: 'La edad debe ser un número entero válido entre 5 y 120 años',
+        error: 'La edad debe ser un número entero válido de al menos 18 años',
       });
     }
   }

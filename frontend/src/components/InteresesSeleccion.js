@@ -4,8 +4,11 @@ const INTERESES_MOCK = [
   { id: 'cuotas', label: 'Cuotas y préstamos' },
   { id: 'promos', label: 'Promociones y descuentos' },
   { id: 'sueldos', label: 'Sueldos e ingresos' },
-  { id: 'economia', label: 'Economía de hogar' },
-  { id: 'finanzas', label: 'Finanzas personales' }
+  { id: 'economia', label: 'Economía de hogar 🏠' },
+  { id: 'finanzas', label: 'Finanzas personales 💰' },
+  { id: 'basicas', label: 'Cálculos y operaciones básicas 🧮' },
+  { id: 'repartos', label: 'Repartos y divisiones 🍕' },
+  { id: 'recetas', label: 'Recetas, partes y medidas ⚖️' }
 ];
 
 function InteresesSeleccion({ selectedIntereses = [], onToggleInteres, onNext, onBack }) {

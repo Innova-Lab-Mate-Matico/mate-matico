@@ -48,6 +48,7 @@ export class Ejercicio {
       puntos: this.puntos,
       operandos: this.operandos,
       semilla: this.semilla,
+      comodinPista: this.comodinPista,
       ...(this.opciones ? { opciones: this.opciones } : {})
     };
   }

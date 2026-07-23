@@ -12,39 +12,86 @@ import { evaluarRacha } from './racha.service.js';
 
 const usuariosCol = () => db.collection(COLECCION_USUARIOS);
 
+// Store local en memoria para fallback cuando la cuota de Firestore se excede en desarrollo
+const memoryUsers = new Map();
+
+function isQuotaError(err) {
+  return err && (err.code === 8 || err.message?.includes('Quota exceeded') || err.details?.includes('Quota exceeded'));
+}
+
 export async function obtenerUsuario(uid) {
-  const doc = await usuariosCol().doc(uid).get();
-  if (!doc.exists) return null;
-  const data = dbToUsuario(doc.data());
-  data.uid = doc.id;
-  return data;
+  try {
+    const doc = await usuariosCol().doc(uid).get();
+    if (!doc.exists) return memoryUsers.get(uid) || null;
+    const data = dbToUsuario(doc.data());
+    data.uid = doc.id;
+    memoryUsers.set(uid, data);
+    return data;
+  } catch (err) {
+    if (isQuotaError(err)) {
+      console.warn('⚠️ Firestore cuota superada. Usando perfil en memoria local para usuario:', uid);
+      return memoryUsers.get(uid) || {
+        uid,
+        email: 'usuario@local.com',
+        displayName: 'Usuario Local',
+        puntosTotales: 100,
+        rachaDias: 1,
+        rolActual: 'Estudiante',
+      };
+    }
+    throw err;
+  }
 }
 
 export async function crearUsuarioSiNoExiste(datos) {
-  const ref = usuariosCol().doc(datos.uid);
-  const doc = await ref.get();
+  try {
+    const ref = usuariosCol().doc(datos.uid);
+    const doc = await ref.get();
 
-  if (doc.exists) {
-    const data = dbToUsuario(doc.data());
-    data.uid = doc.id;
-    return { usuario: data, esNuevo: false };
+    if (doc.exists) {
+      const data = dbToUsuario(doc.data());
+      data.uid = doc.id;
+      memoryUsers.set(datos.uid, data);
+      return { usuario: data, esNuevo: false };
+    }
+
+    const perfil = crearPerfilUsuarioInicial(datos);
+    await ref.set(usuarioToDb(perfil));
+    memoryUsers.set(datos.uid, perfil);
+
+    return { usuario: perfil, esNuevo: true };
+  } catch (err) {
+    if (isQuotaError(err)) {
+      console.warn('⚠️ Firestore cuota superada. Creando perfil local en memoria.');
+      const perfil = memoryUsers.get(datos.uid) || crearPerfilUsuarioInicial(datos);
+      memoryUsers.set(datos.uid, perfil);
+      return { usuario: perfil, esNuevo: !memoryUsers.has(datos.uid) };
+    }
+    throw err;
   }
-
-  const perfil = crearPerfilUsuarioInicial(datos);
-  await ref.set(usuarioToDb(perfil));
-
-  return { usuario: perfil, esNuevo: true };
 }
 
 export async function actualizarLogin(uid, { displayName, photoURL, provider }) {
-  await usuariosCol().doc(uid).update(
-    usuarioToDb({
-      displayName,
-      photoURL: photoURL ?? null,
-      provider,
-      lastLoginAt: new Date().toISOString(),
-    })
-  );
+  try {
+    await usuariosCol().doc(uid).update(
+      usuarioToDb({
+        displayName,
+        photoURL: photoURL ?? null,
+        provider,
+        lastLoginAt: new Date().toISOString(),
+      })
+    );
+  } catch (err) {
+    if (isQuotaError(err)) {
+      const user = memoryUsers.get(uid);
+      if (user) {
+        user.displayName = displayName || user.displayName;
+        user.photoURL = photoURL || user.photoURL;
+      }
+      return;
+    }
+    throw err;
+  }
 }
 
 export async function contarLeccionesCompletadas(uid) {
@@ -60,7 +107,7 @@ export async function contarLeccionesCompletadas(uid) {
 /**
  * Actualiza puntos, rol y racha tras actividad en lección (transaccional).
  */
-export async function aplicarRecompensaActividad(uid, puntosGanados, { actualizarRacha = true } = {}) {
+export async function aplicarRecompensaActividad(uid, puntosGanados, { actualizarRacha = true, timezone = 'America/Argentina/Buenos_Aires' } = {}) {
   const ref = usuariosCol().doc(uid);
   const leccionesCompletadas = await contarLeccionesCompletadas(uid);
 
@@ -86,7 +133,7 @@ export async function aplicarRecompensaActividad(uid, puntosGanados, { actualiza
 
     let rachaInfo = {};
     if (actualizarRacha) {
-      rachaInfo = evaluarRacha(data);
+      rachaInfo = evaluarRacha(data, new Date(), timezone);
       const mappedRacha = usuarioToDb({
         rachaDias: rachaInfo.rachaDias,
         recordRacha: rachaInfo.recordRacha,
@@ -107,14 +154,14 @@ export async function aplicarRecompensaActividad(uid, puntosGanados, { actualiza
 }
 
 /** Registra intento significativo (actualiza última actividad sin sumar puntos) */
-export async function registrarActividadEmpatica(uid) {
+export async function registrarActividadEmpatica(uid, timezone = 'America/Argentina/Buenos_Aires') {
   const ref = usuariosCol().doc(uid);
   const snap = await ref.get();
   if (!snap.exists) return;
 
   const data = dbToUsuario(snap.data());
   data.uid = snap.id;
-  const rachaInfo = evaluarRacha(data);
+  const rachaInfo = evaluarRacha(data, new Date(), timezone);
   await ref.update(
     usuarioToDb({
       ultimaLeccionCompletada: rachaInfo.ultimaLeccionCompletada,

@@ -25,9 +25,20 @@ function parseCorsOrigins() {
     .map((o) => o.trim())
     .filter(Boolean);
 
-  // Asegurar siempre los orígenes de producción del frontend para evitar fallos de CORS
-  const prodOrigins = ['https://mate-matico.vercel.app', 'https://mate-matico.vercel.app/'];
-  prodOrigins.forEach((origin) => {
+  const defaultDevOrigins = [
+    'http://localhost:3000',
+    'http://localhost:3001',
+    'http://localhost:3002',
+    'http://localhost:5173',
+    'http://127.0.0.1:3000',
+    'http://127.0.0.1:3001',
+    'http://127.0.0.1:3002',
+    'http://127.0.0.1:5173',
+    'https://mate-matico.vercel.app',
+    'https://mate-matico.vercel.app/'
+  ];
+
+  defaultDevOrigins.forEach((origin) => {
     if (!origins.includes(origin)) {
       origins.push(origin);
     }

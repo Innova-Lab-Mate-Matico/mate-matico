@@ -12,18 +12,34 @@ import {
   generarEjercicioFracciones,
   resolverRespuestaFracciones,
 } from './modules/fracciones.js';
+import {
+  generarEjercicioEconomia,
+  resolverRespuestaEconomia,
+} from './modules/economiaBasica.js';
 
 export const LECCION_GENERADORES = {
   aritmetica: {
     'suma-basica': ['suma_mc', 'suma_numerica'],
+    'resta-basica': ['resta_mc', 'resta_num'],
     multiplicacion: ['multiplicacion_mc', 'multiplicacion_num'],
+    division: ['division_mc', 'division_num'],
   },
   porcentajes: {
     'concepto-porcentaje': ['porcentaje_mc', 'porcentaje_numerico'],
-    descuentos: ['descuento_mc', 'aumento_numerico'], // alineado con Figma Yerba + Internet
+    descuentos: ['descuento_mc', 'aumento_numerico'],
   },
   fracciones: {
     'fracciones-basicas': ['fraccion_decimal_mc', 'decimal_fraccion_mc', 'fraccion_comparar_mc'],
+    'fracciones-equivalentes': ['fraccion_equivalente_mc'],
+    'cocina-suma': ['cocina_suma_num'],
+    'decimales-dinero': ['decimales_dinero_mc'],
+  },
+  economia: {
+    'iva-basico':         ['iva_mc', 'iva_num'],
+    'regla-de-tres':      ['regla3_mc', 'regla3_num'],
+    'interes-simple':     ['interes_simple_mc', 'interes_simple_num'],
+    'interes-compuesto':  ['interes_compuesto_mc', 'interes_compuesto_num'],
+    'presupuesto':        ['presupuesto_mc', 'presupuesto_num'],
   },
 };
 
@@ -31,12 +47,14 @@ const GENERADORES_MODULO = {
   aritmetica: generarEjercicioAritmetica,
   porcentajes: generarEjercicioPorcentajes,
   fracciones: generarEjercicioFracciones,
+  economia: generarEjercicioEconomia,
 };
 
 const RESOLVERS_MODULO = {
   aritmetica: resolverRespuestaAritmetica,
   porcentajes: resolverRespuestaPorcentajes,
   fracciones: resolverRespuestaFracciones,
+  economia: resolverRespuestaEconomia,
 };
 
 const META_TIPOS = buildMetaTipos();
@@ -56,14 +74,20 @@ function buildMetaTipos() {
   return map;
 }
 
-export function generarEjerciciosLeccion(moduleId, lessonId, semillaBase = null) {
+export function generarEjerciciosLeccion(moduleId, lessonId, semillaBase = null, userRole = 'principiante') {
   const tiposOriginales = LECCION_GENERADORES[moduleId]?.[lessonId];
   if (!tiposOriginales?.length) return [];
 
   const generar = GENERADORES_MODULO[moduleId];
   if (!generar) return [];
 
-  const base = semillaBase ?? semillaNueva();
+  let base = semillaBase ?? semillaNueva();
+  if (typeof base === 'string') {
+    base = Number(base);
+  }
+  if (isNaN(base)) {
+    base = semillaNueva();
+  }
 
   // Asegurar al menos 5 ejercicios ciclando los tipos de plantilla originales
   const tipos = [];
@@ -74,7 +98,7 @@ export function generarEjerciciosLeccion(moduleId, lessonId, semillaBase = null)
   return tipos
     .map((tipo, index) => {
       const semilla = base + index * 9973;
-      const datosEjercicio = generar(tipo, semilla);
+      const datosEjercicio = generar(tipo, semilla, userRole);
       if (!datosEjercicio) return null;
 
       // Hacer el ID único agregando el índice para evitar colisiones
@@ -93,7 +117,7 @@ export function generarEjerciciosLeccion(moduleId, lessonId, semillaBase = null)
 /**
  * Reconstruye el ejercicio para validar usando semilla + operandos enviados por el front.
  */
-export function reconstruirEjercicio(moduleId, lessonId, exerciseId, semilla, operandos) {
+export function reconstruirEjercicio(moduleId, lessonId, exerciseId, semilla, operandos, userRole = 'principiante') {
   // Los IDs de ejercicio ahora llevan un sufijo de índice (e.g. 'pct-mc-0').
   // Extraer el ID base quitando el último segmento '-N' para comparar con el generador.
   const baseExerciseId = exerciseId.replace(/-\d+$/, '');
@@ -109,7 +133,7 @@ export function reconstruirEjercicio(moduleId, lessonId, exerciseId, semilla, op
   if (!generar || !resolver) return null;
 
   for (const tipo of tipos) {
-    const ejercicio = generar(tipo, semilla);
+    const ejercicio = generar(tipo, semilla, userRole);
     if (ejercicio?.id !== baseExerciseId) continue;
 
     const respuesta = resolver(operandos ?? ejercicio.operandos, tipo);
