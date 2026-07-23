@@ -163,7 +163,7 @@ export async function validarEjercicio(uid, body, timezone = 'America/Argentina/
   const progressPromise = updateLessonProgress(uid, {
     moduleId,
     lessonId,
-    // completada no se marca en true aquí para evitar dar por terminada la lección con un solo ejercicio
+    completada: true,
     puntaje: puntosGanados,
     tiempo_segundos: body.tiempo_segundos !== undefined ? Number(body.tiempo_segundos) : null,
   });
