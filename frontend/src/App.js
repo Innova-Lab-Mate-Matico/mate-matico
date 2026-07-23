@@ -511,12 +511,14 @@ const apiCall = React.useCallback(async (path, options = {}, customToken = null)
   };
 
   if (!user) {
-    /* PÁGINA DE INGRESO: Con fondo transparente, tarjeta responsiva y Footer Innova Lab */
+    /* PÁGINA DE INGRESO: Login centrado con leyenda discreta al pie, todo dentro de 100vh */
     return (
-      <div className="app-main-layout" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+      <div className="app-main-layout" style={{ height: '100vh', overflow: 'hidden', display: 'flex', flexDirection: 'column', position: 'relative' }}>
         <img src={olaSuperior} alt="" className="global-wave ola-superior" />
         <img src={olaInferior} alt="" className="global-wave ola-inferior" />
-        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', padding: '20px 0' }}>
+
+        {/* Login centrado en el espacio disponible */}
+        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', padding: '0 20px', overflow: 'hidden' }}>
           <Auth
             onLogin={handleLogin}
             onGoogleLogin={handleGoogleLogin}
@@ -527,18 +529,24 @@ const apiCall = React.useCallback(async (path, options = {}, customToken = null)
             isStatusOk={isStatusOk}
           />
         </div>
-        <footer className="figma-pro-footer" style={{ zIndex: 10, width: '100%', marginTop: 'auto' }}>
-          <div className="footer-content">
-            <h3 className="footer-brand">Mate-Mático — Innova Lab</h3>
-            <p className="footer-tagline">
-              Plataforma Educativa Adaptativa con Gamificación e Inteligencia Artificial
-            </p>
-            <div className="footer-divider"></div>
-            <p className="footer-copyright">
-              © 2026 Innova Lab — Todos los derechos reservados.
-            </p>
-          </div>
-        </footer>
+
+        {/* Leyenda pie de página discreta — sin generar scroll */}
+        <div style={{
+          position: 'relative',
+          zIndex: 10,
+          textAlign: 'center',
+          padding: '10px 16px 14px',
+          fontSize: '0.75rem',
+          color: '#94a3b8',
+          lineHeight: 1.5,
+          flexShrink: 0,
+        }}>
+          <span style={{ fontWeight: '600', color: '#7b61ff' }}>Mate-Mático — Innova Lab</span>
+          {'  ·  '}
+          <span>Plataforma educativa con IA y gamificación</span>
+          {'  ·  '}
+          <span>© 2026 Innova Lab</span>
+        </div>
       </div>
     );
   }
