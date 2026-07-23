@@ -511,20 +511,34 @@ const apiCall = React.useCallback(async (path, options = {}, customToken = null)
   };
 
   if (!user) {
-    /* PÁGINA DE INGRESO: Solo el Login/Registro a pantalla completa con su fondo y olas */
+    /* PÁGINA DE INGRESO: Con fondo transparente, tarjeta responsiva y Footer Innova Lab */
     return (
-      <div className="app-main-layout">
+      <div className="app-main-layout" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
         <img src={olaSuperior} alt="" className="global-wave ola-superior" />
         <img src={olaInferior} alt="" className="global-wave ola-inferior" />
-        <Auth
-          onLogin={handleLogin}
-          onGoogleLogin={handleGoogleLogin}
-          onMicrosoftLogin={handleMicrosoftLogin}
-          onRegister={handleRegister}
-          onRecoverPassword={handleRecoverPassword}
-          statusMsg={statusMsg}
-          isStatusOk={isStatusOk}
-        />
+        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', padding: '20px 0' }}>
+          <Auth
+            onLogin={handleLogin}
+            onGoogleLogin={handleGoogleLogin}
+            onMicrosoftLogin={handleMicrosoftLogin}
+            onRegister={handleRegister}
+            onRecoverPassword={handleRecoverPassword}
+            statusMsg={statusMsg}
+            isStatusOk={isStatusOk}
+          />
+        </div>
+        <footer className="figma-pro-footer" style={{ zIndex: 10, width: '100%', marginTop: 'auto' }}>
+          <div className="footer-content">
+            <h3 className="footer-brand">Mate-Mático — Innova Lab</h3>
+            <p className="footer-tagline">
+              Plataforma Educativa Adaptativa con Gamificación e Inteligencia Artificial
+            </p>
+            <div className="footer-divider"></div>
+            <p className="footer-copyright">
+              © 2026 Innova Lab — Todos los derechos reservados.
+            </p>
+          </div>
+        </footer>
       </div>
     );
   }
