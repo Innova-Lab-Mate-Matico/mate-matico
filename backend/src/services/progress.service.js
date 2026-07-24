@@ -113,55 +113,67 @@ export async function updateLessonProgress(uid, { moduleId, lessonId, completada
   return payload;
 }
 
-const weeklyCache = new Map(); // uid -> { data, timestamp }
-
-export async function getWeeklyActivity(uid, timezone = 'America/Argentina/Buenos_Aires') {
-  const cached = weeklyCache.get(uid);
-  if (cached && (Date.now() - cached.timestamp < 5 * 60 * 1000)) {
-    return cached.data;
-  }
-
-  const hace8Dias = new Date();
-  hace8Dias.setDate(hace8Dias.getDate() - 8);
-
-  const diasActivos = new Set();
+export function updateWeeklyLogins(userDocData, timezone = 'America/Argentina/Buenos_Aires') {
+  const d = new Date();
+  let todayStr = d.toISOString().split('T')[0];
+  let mondayStr = todayStr;
 
   try {
-    const snap = await db.collection('eventos')
-      .where('usuario_id', '==', uid)
-      .where('fecha_hora', '>=', hace8Dias.toISOString())
-      .limit(50)
-      .get();
-
-    snap.forEach(doc => {
-      const data = doc.data();
-      if (!data.fecha_hora) return;
-      const fecha = new Date(data.fecha_hora);
-      
-      try {
-        const formatted = new Intl.DateTimeFormat('en-CA', {
-          timeZone: timezone,
-          year: 'numeric',
-          month: '2-digit',
-          day: '2-digit'
-        }).format(fecha);
-        diasActivos.add(formatted);
-      } catch (err) {
-        const formatted = fecha.toISOString().split('T')[0];
-        diasActivos.add(formatted);
-      }
+    const formatter = new Intl.DateTimeFormat('en-CA', {
+      timeZone: timezone,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
     });
+    todayStr = formatter.format(d);
+    const [year, month, day] = todayStr.split('-').map(Number);
+    const dateObj = new Date(year, month - 1, day);
+    const getDay = dateObj.getDay(); // 0=Sun, 1=Mon...
+    const diffToMonday = getDay === 0 ? -6 : 1 - getDay;
+    dateObj.setDate(dateObj.getDate() + diffToMonday);
+
+    const y = dateObj.getFullYear();
+    const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+    const da = String(dateObj.getDate()).padStart(2, '0');
+    mondayStr = `${y}-${m}-${da}`;
+  } catch (err) {}
+
+  const currentLogins = userDocData?.loginsSemana ?? userDocData?.logins_semana ?? [];
+  // Reset semana a semana: solo mantener días de logueo de la semana actual (>= Lunes)
+  const currentWeekLogins = currentLogins.filter(dateStr => dateStr >= mondayStr);
+
+  // Registrar el día de hoy si no estaba cargado
+  if (!currentWeekLogins.includes(todayStr)) {
+    currentWeekLogins.push(todayStr);
+  }
+
+  return { todayStr, mondayStr, updatedLogins: currentWeekLogins };
+}
+
+export async function getWeeklyActivity(uid, timezone = 'America/Argentina/Buenos_Aires') {
+  try {
+    const ref = db.collection(COLECCION_USUARIOS).doc(uid);
+    const snap = await ref.get();
+    
+    let existingData = {};
+    if (snap.exists) {
+      existingData = snap.data();
+    }
+
+    const { updatedLogins } = updateWeeklyLogins(existingData, timezone);
+
+    // Actualización atómica de logueos semanales en Firestore
+    if (snap.exists) {
+      ref.update({ logins_semana: updatedLogins }).catch(() => {});
+    }
+
+    return updatedLogins;
   } catch (err) {
     if (isQuotaError(err)) {
-      console.warn('⚠️ Firestore cuota superada en getWeeklyActivity. Usando caché local.');
-      const fallbackResult = [new Date().toISOString().split('T')[0]];
-      weeklyCache.set(uid, { data: fallbackResult, timestamp: Date.now() });
-      return fallbackResult;
+      const { updatedLogins } = updateWeeklyLogins({}, timezone);
+      return updatedLogins;
     }
     throw err;
   }
-
-  const result = Array.from(diasActivos);
-  weeklyCache.set(uid, { data: result, timestamp: Date.now() });
-  return result;
 }
+

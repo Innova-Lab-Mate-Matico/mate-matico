@@ -27,6 +27,7 @@ export function crearPerfilUsuarioInicial({ uid, email, displayName, photoURL = 
     porcentajeProgreso: 0,
     ejerciciosCorrectos: 0,
     ejerciciosTotales: 0,
+    loginsSemana: [],
     onboarding: {
       completado: false,
       edad: null,
@@ -66,6 +67,7 @@ export function usuarioToDb(usuario) {
     porcentajeProgreso: 'porcentaje_progreso',
     ejerciciosCorrectos: 'ejercicios_correctos',
     ejerciciosTotales: 'ejercicios_totales',
+    loginsSemana: 'logins_semana',
   };
 
   for (const [key, val] of Object.entries(usuario)) {
@@ -102,6 +104,7 @@ export function dbToUsuario(docData) {
     porcentaje_progreso: 'porcentajeProgreso',
     ejercicios_correctos: 'ejerciciosCorrectos',
     ejercicios_totales: 'ejerciciosTotales',
+    logins_semana: 'loginsSemana',
   };
 
   for (const [key, val] of Object.entries(docData)) {
@@ -143,6 +146,7 @@ export function serializarUsuario(doc) {
     porcentajeProgreso: doc.porcentajeProgreso ?? 0,
     ejerciciosCorrectos: doc.ejerciciosCorrectos ?? 0,
     ejerciciosTotales: doc.ejerciciosTotales ?? 0,
+    loginsSemana: doc.loginsSemana ?? [],
     onboarding: doc.onboarding ?? {
       completado: false,
       edad: null,
