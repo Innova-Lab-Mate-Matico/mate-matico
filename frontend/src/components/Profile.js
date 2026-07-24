@@ -141,9 +141,14 @@ export default function Profile({
           </h4>
           <div style={{ display: 'flex', justifyContent: 'space-between', gap: '8px', padding: '5px 0' }}>
             {weekDates.map((day, idx) => {
-              const active = activeDates.includes(day.dateStr);
               const todayObj = new Date();
               const todayStr = `${todayObj.getFullYear()}-${String(todayObj.getMonth() + 1).padStart(2, '0')}-${String(todayObj.getDate()).padStart(2, '0')}`;
+
+              const userLogins = user?.loginsSemana || [];
+              const allActive = new Set([...userLogins, ...activeDates]);
+              
+              // Si el usuario está navegando hoy en el perfil, cuenta como logueo del día
+              const active = allActive.has(day.dateStr) || day.dateStr === todayStr;
               const isToday = day.dateStr === todayStr;
 
               return (
@@ -185,6 +190,7 @@ export default function Profile({
           </div>
         </div>
       </div>
+
 
 
       <div
