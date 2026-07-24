@@ -50,6 +50,21 @@ export default function Progress({ apiCall }) {
 
   const diasSemana = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
 
+  // Día actual de la semana: getDay() devuelve 0=Dom..6=Sáb.
+  // Lo convertimos al índice del array (0=Lun..6=Dom)
+  const hoy = new Date();
+  const getDay = hoy.getDay(); // 0=Dom, 1=Lun ... 6=Sáb
+  const hoyIdx = getDay === 0 ? 6 : getDay - 1; // 0=Lun..6=Dom
+
+  // Determinar qué días están activos: los últimos rachaDias incluyendo hoy
+  const diasActivos = new Set();
+  const rachaAMostrar = Math.min(rachaDias, 7);
+  for (let i = 0; i < rachaAMostrar; i++) {
+    // índice circular hacia atrás
+    const idx = (hoyIdx - i + 7) % 7;
+    diasActivos.add(idx);
+  }
+
   return (
     <div className="figma-progreso-container">
       {/* Encabezado con Mascota Mate */}
@@ -81,10 +96,11 @@ export default function Progress({ apiCall }) {
         {/* Días de la semana con checks */}
         <div className="figma-streak-days-row">
           {diasSemana.map((dia, index) => {
-            const esActivo = index < Math.min(rachaDias, 7);
+            const esActivo = diasActivos.has(index);
+            const esHoy = index === hoyIdx;
             return (
-              <div key={index} className="figma-streak-day-item">
-                <span className="figma-streak-day-name">{dia}</span>
+              <div key={index} className={`figma-streak-day-item${esHoy ? ' figma-streak-day-today' : ''}`}>
+                <span className={`figma-streak-day-name${esHoy ? ' figma-streak-day-name--today' : ''}`}>{dia}</span>
                 {esActivo ? (
                   <img src={checkIcon} alt="Completado" className="figma-streak-check" />
                 ) : (

@@ -130,6 +130,16 @@
   color: #1A1A1A;
 }
 
+/* Resalte del día actual */
+.figma-streak-day-name--today {
+  color: #9747FF;
+}
+
+.figma-streak-day-today .figma-streak-empty-circle {
+  border-color: #9747FF;
+  background: rgba(151, 71, 255, 0.08);
+}
+
 .figma-streak-check {
   width: 28px;
   height: 28px;
@@ -142,6 +152,7 @@
   border-radius: 50%;
   box-sizing: border-box;
 }
+
 
 /* ── Tarjeta 2: Tus puntos ────────────────────────────── */
 .figma-points-card {
