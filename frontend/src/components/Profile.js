@@ -4,6 +4,7 @@ import './Profile.css';
 import mateEscolar from '../assets/mate_escolar.webp';
 import mateProfesor from '../assets/mate_profesor.webp';
 import mateAcademico from '../assets/mate_academico.webp';
+import contentoImg from '../assets/contento.png';
 
 /*
   MATE-MÁTICO — COMPONENTE PERFIL
@@ -135,43 +136,56 @@ export default function Profile({
 
         {/* Tracker Semanal de Hábito */}
         <div style={{ marginTop: '20px', borderTop: '1.5px dashed rgba(123, 97, 255, 0.15)', paddingTop: '15px' }}>
-          <h4 style={{ fontSize: '1.05rem', fontWeight: '700', color: '#163b74', marginBottom: '12px', textAlign: 'center' }}>
+          <h4 style={{ fontSize: '1.05rem', fontWeight: '700', color: '#163b74', marginBottom: '14px', textAlign: 'center' }}>
             Tu Constancia esta Semana
           </h4>
           <div style={{ display: 'flex', justifyContent: 'space-between', gap: '8px', padding: '5px 0' }}>
             {weekDates.map((day, idx) => {
               const active = activeDates.includes(day.dateStr);
+              const todayObj = new Date();
+              const todayStr = `${todayObj.getFullYear()}-${String(todayObj.getMonth() + 1).padStart(2, '0')}-${String(todayObj.getDate()).padStart(2, '0')}`;
+              const isToday = day.dateStr === todayStr;
+
               return (
                 <div key={idx} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1, gap: '6px' }}>
-                  <div
-                    style={{
-                      width: '36px',
-                      height: '36px',
-                      borderRadius: '50%',
-                      background: active ? 'linear-gradient(135deg, #7b61ff 0%, #6366f1 100%)' : '#f3f4f6',
-                      color: active ? '#fff' : '#9ca3af',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: active ? '1.2rem' : '0.85rem',
-                      fontWeight: '700',
-                      border: active ? 'none' : '1.5px solid #e5e7eb',
-                      boxShadow: active ? '0 4px 10px rgba(99, 102, 241, 0.25)' : 'none',
-                      transition: 'all 0.3s ease'
-                    }}
-                    title={day.dateStr}
-                  >
-                    {active ? '🧉' : day.label}
-                  </div>
-                  <span style={{ fontSize: '0.65rem', fontWeight: '600', color: active ? '#7b61ff' : '#9ca3af' }}>
-                    {active ? '¡Listo!' : '—'}
+                  <span style={{ fontSize: '0.85rem', fontWeight: '700', color: isToday ? '#9747FF' : '#1A1A1A' }}>
+                    {day.label}
                   </span>
+                  {active ? (
+                    <div
+                      style={{
+                        width: '32px',
+                        height: '32px',
+                        borderRadius: '50%',
+                        background: '#9747FF',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        boxShadow: '0 3px 10px rgba(151, 71, 255, 0.4)'
+                      }}
+                      title={day.dateStr}
+                    >
+                      <img src={contentoImg} alt="Completado" style={{ width: '22px', height: '22px', objectFit: 'contain' }} />
+                    </div>
+                  ) : (
+                    <div
+                      style={{
+                        width: '32px',
+                        height: '32px',
+                        borderRadius: '50%',
+                        border: '2px solid #C4B5FD',
+                        boxSizing: 'border-box'
+                      }}
+                      title={day.dateStr}
+                    />
+                  )}
                 </div>
               );
             })}
           </div>
         </div>
       </div>
+
 
       <div
         className="profile-actions"
