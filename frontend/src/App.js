@@ -574,10 +574,9 @@ const apiCall = React.useCallback(async (path, options = {}, customToken = null)
               />
             </section>
           </main>
-          <footer className="footer" style={{ borderTop: 'none' }}>
-            <p>API Endpoint: <code>{API_BASE}</code></p>
-            <p style={{ marginTop: '5px' }}>
-              Mate-Mático Monorepo MVP — React Frontend © 2026
+          <footer className="auth-footer-fixed">
+            <p className="auth-footer-text">
+              Innova Lab — Innovación Educativa © 2026 Mate-Matico
             </p>
           </footer>
         </div>
