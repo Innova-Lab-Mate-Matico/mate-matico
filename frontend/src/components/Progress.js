@@ -9,7 +9,7 @@ import estrellaImg from '../assets/Progreso_img/Imagenes_progreso/image.png';
 import escudoNivelImg from '../assets/Progreso_img/Imagenes_progreso/image 20.png';
 
 import fuegoIcon from '../assets/Progreso_img/Iconos_progreso/local_fire_department.svg';
-import checkIcon from '../assets/Progreso_img/Iconos_progreso/check_circle.svg';
+import checkCircleImg from '../assets/check_circle.png';
 import barraNivelIcon from '../assets/Progreso_img/Iconos_progreso/android_cell_4_bar.svg';
 import libroIcon from '../assets/Progreso_img/Iconos_progreso/two_pager.svg';
 import dataCheckIcon from '../assets/Progreso_img/Iconos_progreso/data_check.svg';
@@ -44,9 +44,11 @@ export default function Progress({ apiCall }) {
     });
   }
 
-  const rachaDias = progressData?.gamificacion?.rachaDias ?? 1;
-  const puntosTotales = progressData?.gamificacion?.puntosTotales ?? 70;
-  const rolActual = progressData?.gamificacion?.rolActual ?? 'Nivel Intermedio';
+  const rachaDias          = progressData?.gamificacion?.rachaDias          ?? 1;
+  const puntosTotales      = progressData?.gamificacion?.puntosTotales      ?? 70;
+  const rolActual          = progressData?.gamificacion?.rolActual          ?? 'Nivel Intermedio';
+  const minutosAprendidos  = progressData?.gamificacion?.minutosAprendidos  ?? null;
+  const porcentajeCorrectos = progressData?.gamificacion?.porcentajeCorrectos ?? null;
 
   const diasSemana = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
 
@@ -102,7 +104,7 @@ export default function Progress({ apiCall }) {
               <div key={index} className={`figma-streak-day-item${esHoy ? ' figma-streak-day-today' : ''}`}>
                 <span className={`figma-streak-day-name${esHoy ? ' figma-streak-day-name--today' : ''}`}>{dia}</span>
                 {esActivo ? (
-                  <img src={checkIcon} alt="Completado" className="figma-streak-check" />
+                  <img src={checkCircleImg} alt="Completado" className="figma-streak-check-circle" />
                 ) : (
                   <div className="figma-streak-empty-circle"></div>
                 )}
@@ -157,14 +159,21 @@ export default function Progress({ apiCall }) {
           {/* Métricas 2: Ejercicios correctos */}
           <div className="figma-metric-card figma-metric-card-highlight">
             <img src={dataCheckIcon} alt="Ejercicios correctos" className="figma-metric-icon" />
-            <h3 className="figma-metric-value">86%</h3>
+            <h3 className="figma-metric-value">
+              {porcentajeCorrectos !== null ? `${porcentajeCorrectos}%` : '--'}
+            </h3>
             <p className="figma-metric-label">Ejercicios correctos</p>
           </div>
 
           {/* Métricas 3: Tiempo aprendiendo */}
           <div className="figma-metric-card">
             <img src={relojIcon} alt="Tiempo aprendiendo" className="figma-metric-icon" />
-            <h3 className="figma-metric-value">10 min</h3>
+            <h3 className="figma-metric-value">
+              {minutosAprendidos !== null && minutosAprendidos > 0
+                ? `${minutosAprendidos} min`
+                : minutosAprendidos === 0 && progressData ? '< 1 min' : '--'
+              }
+            </h3>
             <p className="figma-metric-label">Tiempo aprendiendo</p>
           </div>
         </div>

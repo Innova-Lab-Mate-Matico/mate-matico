@@ -17,14 +17,21 @@ export async function getProgress(uid) {
   try {
     const snap = await progresoRef(uid).get();
     const modulos = {};
+    let segundosTotales = 0;
     snap.forEach((doc) => {
-      modulos[doc.id] = doc.data();
+      const data = doc.data();
+      modulos[doc.id] = data;
+      // Sumar tiempo de cada lección sin query extra
+      const lecciones = data.lecciones ?? data.lessons ?? {};
+      for (const leccion of Object.values(lecciones)) {
+        if (leccion.tiempo_segundos) segundosTotales += Number(leccion.tiempo_segundos);
+      }
     });
-    return { modulos };
+    return { modulos, minutosAprendidos: Math.round(segundosTotales / 60) };
   } catch (err) {
     if (isQuotaError(err)) {
       console.warn('⚠️ Firestore cuota superada en getProgress. Usando fallback en memoria local.');
-      return { modulos: memoryProgress.get(uid) || {} };
+      return { modulos: memoryProgress.get(uid) || {}, minutosAprendidos: 0 };
     }
     throw err;
   }

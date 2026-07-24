@@ -1,5 +1,7 @@
 import { db } from '../config/firebase.js';
+import admin from '../config/firebase.js';
 import { COLECCION_USUARIOS } from '../models/usuario.model.js';
+
 import { reconstruirEjercicio } from '../exercises/registry.js';
 import { findLesson } from '../data/moduleCatalog.js';
 import {
@@ -126,6 +128,11 @@ export async function validarEjercicio(uid, body, timezone = 'America/Argentina/
       tiempo_segundos: body.tiempo_segundos !== undefined ? Number(body.tiempo_segundos) : null,
     });
 
+    // Incrementar contadores de ejercicios (sin costo extra de lectura)
+    db.collection(COLECCION_USUARIOS).doc(uid).update({
+      ejercicios_totales: admin.firestore.FieldValue.increment(1),
+    }).catch(() => {});
+
     const user = await obtenerUsuario(uid);
 
     return {
@@ -154,6 +161,12 @@ export async function validarEjercicio(uid, body, timezone = 'America/Argentina/
     resultado: 'correcto',
     tiempo_segundos: body.tiempo_segundos !== undefined ? Number(body.tiempo_segundos) : null,
   });
+
+  // Incrementar contadores de ejercicios (sin costo extra de lectura)
+  db.collection(COLECCION_USUARIOS).doc(uid).update({
+    ejercicios_correctos: admin.firestore.FieldValue.increment(1),
+    ejercicios_totales: admin.firestore.FieldValue.increment(1),
+  }).catch(() => {});
 
   const recompensaPromise = aplicarRecompensaActividad(uid, puntosGanados, {
     actualizarRacha: true,
