@@ -10,51 +10,32 @@ export function validateRegisterBody(req, res, next) {
     });
   }
 
-  // 1. Validar nombre (solo letras)
+  // 1. Validar nombre
   const nameStr = String(displayName).trim();
-  const nameRe = /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]+$/;
-  if (!nameRe.test(nameStr)) {
+  if (nameStr.length < 2) {
     return res.status(400).json({
       success: false,
-      error: 'El nombre solo debe contener letras',
+      error: 'El nombre debe tener al menos 2 caracteres',
     });
   }
 
-  // 2. Validar formato de email
+  // 2. Validar formato de email (Flexible: Acepta cualquier dominio de correo válido)
   const emailStr = String(email).trim().toLowerCase();
   if (!EMAIL_RE.test(emailStr)) {
     return res.status(400).json({ success: false, error: 'Email inválido' });
   }
 
-  // 3. Validar dominios permitidos
-  const domainParts = emailStr.split('@')[1]?.split('.') ?? [];
-  const baseDomain = domainParts[0];
-  const allowedDomains = ['gmail', 'outlook', 'yahoo', 'hotmail'];
-  if (!allowedDomains.includes(baseDomain)) {
-    return res.status(400).json({
-      success: false,
-      error: 'Email con dominio no permitido. Solo se aceptan gmail, outlook, yahoo o hotmail.',
-    });
-  }
-
-  // 4. Validar contraseña (mínimo 8 caracteres, mayús + minús + número + especial, sin límite máximo)
+  // 3. Validar contraseña (Flexible: Mínimo 6 caracteres)
   const passStr = String(password);
-  const hasUpper = /[A-Z]/.test(passStr);
-  const hasLower = /[a-z]/.test(passStr);
-  const hasDigit = /\d/.test(passStr);
-  const hasSpecial = /[^A-Za-z0-9]/.test(passStr);
-  const isCorrectLength = passStr.length >= 8;
-
-  if (!hasUpper || !hasLower || !hasDigit || !hasSpecial || !isCorrectLength) {
+  if (passStr.length < 6) {
     return res.status(400).json({
       success: false,
-      error: 'La contraseña debe tener al menos 8 caracteres, e incluir mayúscula, minúscula, número y un carácter especial.',
+      error: 'La contraseña debe tener al menos 6 caracteres.',
     });
   }
 
   next();
 }
-
 
 export function validateLoginBody(req, res, next) {
   const { email, password } = req.body ?? {};
@@ -76,7 +57,7 @@ export function validateLoginBody(req, res, next) {
 export function validateGoogleBody(req, res, next) {
   const { idToken } = req.body ?? {};
 
-  if (!idToken || typeof idToken !== 'string' || idToken.length < 100) {
+  if (!idToken || typeof idToken !== 'string' || idToken.length < 50) {
     return res.status(400).json({
       success: false,
       error: 'idToken inválido',
@@ -152,7 +133,7 @@ export function validateOnboardingBody(req, res, next) {
     });
   }
 
-  // 3. edad: opcional, entero, rango 18-120 (Público +18)
+  // 3. edad: opcional, entero, rango 18-120
   if (edad !== undefined && edad !== null && edad !== '') {
     const edadNum = Number(edad);
     if (!Number.isInteger(edadNum) || edadNum < 18 || edadNum > 120) {
@@ -163,7 +144,7 @@ export function validateOnboardingBody(req, res, next) {
     }
   }
 
-  // 4. nivelEducativo: opcional, lista controlada
+  // 4. nivelEducativo: opcional
   if (nivelEducativo !== undefined && nivelEducativo !== null && nivelEducativo !== '') {
     const nivelesValidos = ['primaria', 'secundaria', 'terciaria', 'universitaria', 'ninguno'];
     if (!nivelesValidos.includes(String(nivelEducativo).trim().toLowerCase())) {
@@ -181,6 +162,44 @@ export function validateOnboardingBody(req, res, next) {
         success: false,
         error: 'El objetivo debe ser un texto y no puede superar los 500 caracteres',
       });
+    }
+  }
+
+  next();
+}
+
+export function validateExplainBody(req, res, next) {
+  const { moduleId, lessonId, theoryId, question, history, sesion_id } = req.body ?? {};
+
+  if (!moduleId || typeof moduleId !== 'string' || !moduleId.trim()) {
+    return res.status(400).json({ success: false, error: 'El campo moduleId es obligatorio y debe ser un texto.' });
+  }
+  if (!lessonId || typeof lessonId !== 'string' || !lessonId.trim()) {
+    return res.status(400).json({ success: false, error: 'El campo lessonId es obligatorio y debe ser un texto.' });
+  }
+  if (!theoryId || typeof theoryId !== 'string' || !theoryId.trim()) {
+    return res.status(400).json({ success: false, error: 'El campo theoryId es obligatorio y debe ser un texto.' });
+  }
+  if (!question || typeof question !== 'string' || !question.trim()) {
+    return res.status(400).json({ success: false, error: 'El campo question es obligatorio y debe ser un texto.' });
+  }
+
+  if (history !== undefined) {
+    if (!Array.isArray(history)) {
+      return res.status(400).json({ success: false, error: 'El campo history debe ser un arreglo.' });
+    }
+
+    for (let i = 0; i < history.length; i++) {
+      const msg = history[i];
+      if (!msg || typeof msg !== 'object') {
+        return res.status(400).json({ success: false, error: `El mensaje en el índice ${i} del historial no es un objeto válido.` });
+      }
+      if (!msg.role || typeof msg.role !== 'string' || !['user', 'model', 'assistant'].includes(msg.role)) {
+        return res.status(400).json({ success: false, error: `El campo role en el índice ${i} debe ser 'user', 'assistant' o 'model'.` });
+      }
+      if (!msg.text || typeof msg.text !== 'string' || !msg.text.trim()) {
+        return res.status(400).json({ success: false, error: `El campo text en el índice ${i} debe ser un texto no vacío.` });
+      }
     }
   }
 
