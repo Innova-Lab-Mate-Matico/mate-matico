@@ -57,24 +57,29 @@
   background: #FFFFFF;
   border: 1.5px solid #B8B8B8;
   border-radius: 24px;
-  padding: 18px 20px;
+  padding: 16px 14px;
   display: flex;
   align-items: center;
   justify-content: space-around;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .home-stat-item {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 10px;
   flex: 1;
   justify-content: center;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .home-stat-icon-flame {
-  width: 60px;
-  height: 60px;
+  width: 48px;
+  height: 48px;
   background: #9747FF;
   border-radius: 50%;
   display: flex;
@@ -85,14 +90,14 @@
 }
 
 .home-stat-icon-flame img {
-  width: 32px;
-  height: 32px;
+  width: 26px;
+  height: 26px;
   filter: brightness(0) invert(1);
 }
 
 .home-stat-icon-star {
-  width: 60px;
-  height: 60px;
+  width: 48px;
+  height: 48px;
   background: #FEC32F;
   border-radius: 50%;
   display: flex;
@@ -103,41 +108,79 @@
 }
 
 .home-stat-icon-star img {
-  width: 32px;
-  height: 32px;
+  width: 26px;
+  height: 26px;
   object-fit: contain;
 }
 
 .home-stat-text {
   display: flex;
   flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .home-stat-label {
-  font-size: 0.88rem;
+  font-size: 0.8rem;
   font-weight: 600;
   color: #1A1A1A;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .home-stat-value {
-  font-size: clamp(1.3rem, 4vw, 1.6rem);
+  font-size: clamp(1.1rem, 5vw, 1.5rem);
   font-weight: 800;
   color: #1A1A1A;
   margin: 1px 0 0 0;
   line-height: 1.1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .home-stat-subtext {
-  font-size: 0.8rem;
+  font-size: 0.72rem;
   font-weight: 600;
   color: #656565;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .home-stats-divider {
   width: 1.5px;
-  height: 52px;
+  height: 48px;
   background: #E2E8F0;
-  margin: 0 10px;
+  margin: 0 8px;
+  flex-shrink: 0;
+}
+
+/* En desktop, iconos más grandes */
+@media (min-width: 420px) {
+  .home-stat-icon-flame,
+  .home-stat-icon-star {
+    width: 60px;
+    height: 60px;
+  }
+  .home-stat-icon-flame img,
+  .home-stat-icon-star img {
+    width: 32px;
+    height: 32px;
+  }
+  .home-stat-label {
+    font-size: 0.88rem;
+  }
+  .home-stat-subtext {
+    font-size: 0.8rem;
+  }
+  .home-stats-card {
+    padding: 18px 20px;
+  }
+  .home-stat-item {
+    gap: 14px;
+  }
 }
 
 /* ── Tarjeta Destacada: Practicá con IA ──────────────── */
