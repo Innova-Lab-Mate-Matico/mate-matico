@@ -5,11 +5,12 @@
  min-height: 100vh;
  width: 100%;
  display: flex;
- justify-content: center;
+ flex-direction: column;
+ justify-content: space-between;
  align-items: center;
  position: relative;
  isolation: isolate;
- padding: 20px;
+ padding: 0;
  background: linear-gradient(
  135deg,
  #ffffff 0%,
@@ -24,32 +25,39 @@
 ========================= */
 .auth-card {
  width: 100%;
- max-width: 420px;
+ max-width: 440px;
+ margin: auto;
+ padding: 24px 20px;
  position: relative;
  z-index: 10;
  display: flex;
  flex-direction: column;
- gap: 10px;
+ gap: 12px;
+ background: transparent;
+ box-shadow: none;
+ border-radius: 0;
 }
 /* =========================
  LOGO Y TEXTOS
 ========================= */
 .auth-logo {
- width: 180px;
- margin: 0 auto 10px;
+ width: 210px;
+ max-width: 85%;
+ margin: 0 auto 12px;
  display: block;
+ filter: drop-shadow(0 4px 12px rgba(123, 97, 255, 0.15));
 }
 .auth-title {
- font-size: 1rem;
+ font-size: 1.1rem;
  font-weight: 700;
  color: #777a80;
  margin-bottom: 5px;
 }
 .auth-subtitle {
- font-size: 0.95rem;
- font-weight: 600;
- color: #333131;
- margin-bottom: 20px;
+ font-size: 1.05rem;
+ font-weight: 700;
+ color: #1e293b;
+ margin-bottom: 24px;
  text-align: center;
 }
 /* =========================
@@ -64,12 +72,12 @@
 .auth-container .ola-superior {
  top: 0;
  right: 0;
- width: 220px;
+ width: 280px;
 }
 .auth-container .ola-inferior {
  bottom: 0;
  left: 0;
- width: 220px;
+ width: 280px;
 }
 /* =========================
  FORMULARIOS
@@ -127,11 +135,11 @@
 ========================= */
 .btn-primary {
  width: 100%;
- height: 50px;
+ height: 52px;
  background: #163b74;
  color: white;
  border: none;
- border-radius: 12px;
+ border-radius: 14px;
  font-weight: 600;
  font-size: 15px;
  cursor: pointer;
@@ -139,31 +147,41 @@
 }
 .btn-google {
  width: 100%;
- height: 50px;
+ height: 52px;
  background: white;
- border: 1px solid #ddd;
- border-radius: 12px;
+ border: 1.5px solid #e2e8f0;
+ border-radius: 14px;
  display: flex;
  align-items: center;
  justify-content: center;
- gap: 10px;
- font-size: 14px;
+ gap: 12px;
+ font-size: 0.95rem;
+ font-weight: 700;
  cursor: pointer;
- margin-top: 10px;
+ transition: all 0.2s ease;
+ box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+.btn-google:hover {
+ transform: translateY(-2px);
+ boxShadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+}
+.btn-microsoft:hover {
+ transform: translateY(-2px);
+ boxShadow: 0 6px 16px rgba(0, 120, 212, 0.15);
 }
 .google-icon {
- width: 18px;
- height: 18px;
+ width: 22px;
+ height: 22px;
  flex-shrink: 0;
  display: block;
 }
 .btn-secondary {
  width: 100%;
- height: 50px;
+ height: 52px;
  background: #163b74;
  border: none;
  color: white;
- border-radius: 12px;
+ border-radius: 14px;
  font-weight: 600;
  cursor: pointer;
  margin-top: 10px;
@@ -209,14 +227,24 @@
   transform: translateY(0);
 }
 /* =========================
- DESKTOP
+ DESKTOP RESPONSIVE (LARGE CARD)
 ========================= */
 @media (min-width: 1024px) {
- .auth-logo {
- width: 200px;
- }
  .auth-card {
- max-width: 420px;
+   max-width: 560px;
+   padding: 40px 30px;
+ }
+ .auth-logo {
+   width: 270px;
+ }
+ .auth-subtitle {
+   font-size: 1.25rem;
+ }
+ .auth-container .ola-superior {
+   width: 360px;
+ }
+ .auth-container .ola-inferior {
+   width: 360px;
  }
 }
 /* =========================
@@ -224,32 +252,25 @@
 ========================= */
 @media (max-width: 576px) {
  .auth-container {
- padding: 16px;
- align-items: center;
+   padding: 0;
  }
  .auth-card {
- width: 100%;
- max-width: 380px;
+   width: 100%;
+   max-width: 360px;
+   padding: 16px;
  }
  .auth-logo {
- width: 130px;
+   width: 160px;
  }
  .auth-title {
- font-size: 1.2rem;
+   font-size: 1.1rem;
  }
  .auth-subtitle {
- font-size: 0.85rem;
+   font-size: 0.9rem;
  }
  .ola-superior,
  .ola-inferior {
- width: 100px;
- opacity: 0.5;
- }
- .btn-primary,
- .btn-secondary,
- .btn-google,
- .form-group input {
- min-height: 44px;
- height: auto;
+   width: 140px;
+   opacity: 0.7;
  }
 }

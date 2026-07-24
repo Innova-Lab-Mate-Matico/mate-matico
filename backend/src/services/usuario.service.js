@@ -71,14 +71,23 @@ export async function crearUsuarioSiNoExiste(datos) {
   }
 }
 
-export async function actualizarLogin(uid, { displayName, photoURL, provider }) {
+import { updateWeeklyLogins } from './progress.service.js';
+
+export async function actualizarLogin(uid, { displayName, photoURL, provider }, timezone = 'America/Argentina/Buenos_Aires') {
   try {
-    await usuariosCol().doc(uid).update(
+    const docRef = usuariosCol().doc(uid);
+    const snap = await docRef.get();
+    const existingData = snap.exists ? dbToUsuario(snap.data()) : {};
+
+    const { updatedLogins } = updateWeeklyLogins(existingData, timezone);
+
+    await docRef.update(
       usuarioToDb({
-        displayName,
-        photoURL: photoURL ?? null,
-        provider,
+        displayName: displayName || existingData.displayName,
+        photoURL: photoURL ?? existingData.photoURL ?? null,
+        provider: provider || existingData.provider,
         lastLoginAt: new Date().toISOString(),
+        loginsSemana: updatedLogins,
       })
     );
   } catch (err) {

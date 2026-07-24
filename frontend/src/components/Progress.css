@@ -1,118 +1,342 @@
-/* Card and layout style for Progress */
-.card.progress-card {
-  background: #ffffff;
-  border: 1px solid rgba(123, 97, 255, 0.1);
-  padding: 16px;
-  border-radius: 16px;
-  box-shadow: 0 10px 30px rgba(123, 97, 255, 0.05);
+/* ============================================================
+   PROGRESS.CSS — Pantalla de Progreso (Figma Alta Fidelidad)
+   ============================================================ */
+
+.figma-progreso-container {
+  max-width: 600px;
+  margin: 0 auto 30px;
+  padding: 0 16px;
   box-sizing: border-box;
-  transition: all 0.3s ease;
-  max-width: 650px;
-  margin: 0 auto 20px;
-}
-
-@media (min-width: 768px) {
-  .card.progress-card {
-    padding: 30px;
-    border-radius: 24px;
-    margin: 0 auto 30px;
-  }
-}
-
-.card.progress-card h2,
-.card.progress-card h3,
-.card.progress-card h4 {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
   font-family: 'Poppins', sans-serif;
-  font-weight: 700;
-  color: #163b74;
 }
 
-.progress-header {
+/* ── Header ───────────────────────────────────────────── */
+.figma-progreso-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  position: relative;
+}
+
+.figma-progreso-header-text {
+  flex: 1;
+}
+
+.figma-progreso-title {
+  font-family: 'Poppins', sans-serif !important;
+  font-size: clamp(1.8rem, 5vw, 2.2rem) !important;
+  font-weight: 700 !important;
+  color: #1A1A1A !important;
+  margin: 0 0 4px 0 !important;
+}
+
+.figma-progreso-subtitle {
+  font-family: 'Poppins', sans-serif !important;
+  font-size: clamp(0.95rem, 3.2vw, 1.1rem) !important;
+  font-weight: 600 !important;
+  color: #656565 !important;
+  margin: 0 !important;
+}
+
+.figma-progreso-mate-img {
+  width: 90px;
+  height: 90px;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 10px rgba(0,0,0,0.12));
+}
+
+/* ── Tarjeta 1: Tu racha actual ──────────────────────── */
+.figma-streak-card {
+  background: #F2F0FD;
+  border: 1.5px solid #9747FF;
+  border-radius: 24px;
+  padding: 20px;
+  box-shadow: 0 4px 16px rgba(151, 71, 255, 0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.figma-streak-top-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.figma-streak-flame-circle {
+  width: 64px;
+  height: 64px;
+  background: #9747FF;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 6px 16px rgba(151, 71, 255, 0.3);
+}
+
+.figma-streak-flame-circle img {
+  width: 34px;
+  height: 34px;
+  filter: brightness(0) invert(1);
+}
+
+.figma-streak-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.figma-streak-label {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #1A1A1A;
+}
+
+.figma-streak-days {
+  font-size: clamp(1.6rem, 5vw, 2rem);
+  font-weight: 700;
+  color: #9747FF;
+  margin: 2px 0 0 0;
+  line-height: 1.1;
+}
+
+.figma-streak-subtext {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #656565;
+}
+
+.figma-streak-days-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  flex-wrap: wrap;
-  margin-bottom: 20px;
-  gap: 16px;
-  width: 100%;
+  padding-top: 4px;
 }
 
-.progress-header h2 {
+.figma-streak-day-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.figma-streak-day-name {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #1A1A1A;
+}
+
+/* Resalte del día actual */
+.figma-streak-day-name--today {
+  color: #9747FF;
+}
+
+.figma-streak-day-today .figma-streak-empty-circle {
+  border-color: #9747FF;
+  background: rgba(151, 71, 255, 0.08);
+}
+
+/* Día activo: imagen check_circle.png (círculo violeta + tilde integrado) */
+.figma-streak-check-circle {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+}
+
+/* Día inactivo: círculo vacío con borde violeta claro */
+.figma-streak-empty-circle {
+  width: 30px;
+  height: 30px;
+  border: 2px solid #C4B5FD;
+  border-radius: 50%;
+  box-sizing: border-box;
+}
+
+
+
+
+/* ── Tarjeta 2: Tus puntos ────────────────────────────── */
+.figma-points-card {
+  background: #FAF8F2;
+  border: 1.5px solid #B8B8B8;
+  border-radius: 24px;
+  padding: 20px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.figma-points-top-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.figma-points-star-img {
+  width: 50px;
+  height: 50px;
+  object-fit: contain;
+}
+
+.figma-points-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.figma-points-label {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #1A1A1A;
+}
+
+.figma-points-value {
+  font-size: clamp(1.6rem, 5vw, 2rem);
+  font-weight: 700;
+  color: #1A1A1A;
+  margin: 0;
+  line-height: 1.1;
+}
+
+.figma-points-banner {
+  background: #FFFFFF;
+  border-radius: 16px;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+}
+
+.figma-points-banner-text {
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: #656565;
+  margin: 0;
+  line-height: 1.35;
   flex: 1;
-  min-width: 280px;
+}
+
+.figma-points-podium-img {
+  width: 60px;
+  height: auto;
+  object-fit: contain;
+}
+
+/* ── Tarjeta 3: Nivel actual ──────────────────────────── */
+.figma-level-card {
+  background: #FFFFFF;
+  border: 1.5px solid #B8B8B8;
+  border-radius: 24px;
+  padding: 18px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
+}
+
+.figma-level-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.figma-level-icon {
+  width: 32px;
+  height: 32px;
+}
+
+.figma-level-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.figma-level-label {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #656565;
+}
+
+.figma-level-name {
+  font-size: clamp(1.1rem, 3.8vw, 1.3rem);
+  font-weight: 700;
+  color: #1A1A1A;
   margin: 0;
 }
 
-.progress-lesson-item {
+.figma-level-shield-img {
+  width: 54px;
+  height: 54px;
+  object-fit: contain;
+}
+
+/* ── Sección: Tus logros (3 métricas) ────────────────── */
+.figma-metrics-section {
+  margin-top: 8px;
+}
+
+.figma-metrics-section-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #1A1A1A;
+  margin: 0 0 14px 0;
+}
+
+.figma-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.figma-metric-card {
+  background: #FFFFFF;
+  border: 1.5px solid #B8B8B8;
+  border-radius: 20px;
+  padding: 16px 8px;
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
   align-items: center;
-  background-color: #f8fafc;
-  padding: 8px 12px;
-  border-radius: 8px;
-  font-size: 13px;
-  gap: 12px;
+  text-align: center;
+  gap: 6px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.02);
 }
 
-@media (max-width: 576px) {
-  .progress-header {
-    flex-direction: column;
-    align-items: stretch;
-    text-align: center;
-    gap: 12px;
+.figma-metric-card-highlight {
+  background: #EFF6FE;
+}
+
+.figma-metric-icon {
+  width: 28px;
+  height: 28px;
+  margin-bottom: 2px;
+}
+
+.figma-metric-value {
+  font-size: clamp(1.2rem, 3.8vw, 1.45rem);
+  font-weight: 700;
+  color: #1E3A5F;
+  margin: 0;
+  line-height: 1.1;
+}
+
+.figma-metric-label {
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: #656565;
+  margin: 0;
+  line-height: 1.25;
+}
+
+@media (max-width: 480px) {
+  .figma-metrics-grid {
+    gap: 8px;
   }
-  .progress-header h2 {
-    font-size: 1.35rem;
-    min-width: 100%;
+  .figma-metric-card {
+    padding: 14px 6px;
   }
-  .progress-lesson-item {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 6px;
-    padding: 12px 14px;
-  }
-}
-
-/* Cajas de mascotas */
-.progress-card .mascota-box {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-  padding: 15px;
-  background-color: #f8fafc;
-  border-radius: 16px;
-  border: 1px solid #e2e8f0;
-  margin-top: 15px;
-  margin-bottom: 25px;
-}
-
-/* Badges */
-.progress-card .badge {
-  display: inline-block;
-  padding: 8px 16px;
-  border-radius: 12px;
-  font-size: 0.88rem;
-  font-weight: 600;
-  margin-bottom: 8px;
-  font-family: 'Poppins', sans-serif;
-  border: 1px solid transparent;
-  margin-right: 8px;
-}
-
-.progress-card .badge-gold {
-  background-color: #fff9e6;
-  color: #d97706;
-  border-color: rgba(217, 119, 6, 0.1);
-}
-
-.progress-card .badge-success {
-  background-color: #ecfdf5;
-  color: #065f46;
-  border-color: rgba(6, 95, 70, 0.1);
-}
-
-.progress-card .badge:not(.badge-gold):not(.badge-success) {
-  background-color: #f7f2ff;
-  color: #7b61ff;
-  border-color: rgba(123, 97, 255, 0.1);
 }

@@ -6,6 +6,7 @@ import Microleccion1 from './microleccion1';
 import Microleccion2 from './microleccion2';
 import DynamicTheoryCard from './DynamicTheoryCard';
 import { TutorMateicoChat } from './DynamicTheoryCard';
+import mateico2Img from '../assets/Mateico2.png';
 
 // Tarjeta 3
 import tuPuedes from "../assets/tuPuedes.png";
@@ -206,7 +207,7 @@ function MultipleChoice({ ejercicio, moduleId, lessonId, teoria, apiCall, onAnsw
                 }}
                 aria-label="Preguntarle a Mateico"
               >
-                🧉 Mateico
+                <img src={mateico2Img} alt="Mateico" style={{ width: '22px', height: '22px', objectFit: 'contain' }} /> Mateico
               </button>
             </div>
 

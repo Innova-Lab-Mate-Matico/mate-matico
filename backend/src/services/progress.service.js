@@ -17,14 +17,21 @@ export async function getProgress(uid) {
   try {
     const snap = await progresoRef(uid).get();
     const modulos = {};
+    let segundosTotales = 0;
     snap.forEach((doc) => {
-      modulos[doc.id] = doc.data();
+      const data = doc.data();
+      modulos[doc.id] = data;
+      // Sumar tiempo de cada lección sin query extra
+      const lecciones = data.lecciones ?? data.lessons ?? {};
+      for (const leccion of Object.values(lecciones)) {
+        if (leccion.tiempo_segundos) segundosTotales += Number(leccion.tiempo_segundos);
+      }
     });
-    return { modulos };
+    return { modulos, minutosAprendidos: Math.round(segundosTotales / 60) };
   } catch (err) {
     if (isQuotaError(err)) {
       console.warn('⚠️ Firestore cuota superada en getProgress. Usando fallback en memoria local.');
-      return { modulos: memoryProgress.get(uid) || {} };
+      return { modulos: memoryProgress.get(uid) || {}, minutosAprendidos: 0 };
     }
     throw err;
   }
@@ -105,55 +112,82 @@ export async function updateLessonProgress(uid, { moduleId, lessonId, completada
   return payload;
 }
 
-const weeklyCache = new Map(); // uid -> { data, timestamp }
-
-export async function getWeeklyActivity(uid, timezone = 'America/Argentina/Buenos_Aires') {
-  const cached = weeklyCache.get(uid);
-  if (cached && (Date.now() - cached.timestamp < 5 * 60 * 1000)) {
-    return cached.data;
-  }
-
-  const hace8Dias = new Date();
-  hace8Dias.setDate(hace8Dias.getDate() - 8);
-
-  const diasActivos = new Set();
+export function updateWeeklyLogins(userDocData, timezone = 'America/Argentina/Buenos_Aires') {
+  const d = new Date();
+  let year, month, day;
 
   try {
-    const snap = await db.collection('eventos')
-      .where('usuario_id', '==', uid)
-      .where('fecha_hora', '>=', hace8Dias.toISOString())
-      .limit(50)
-      .get();
+    const parts = new Intl.DateTimeFormat('en-US', {
+      timeZone: timezone,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    }).formatToParts(d);
 
-    snap.forEach(doc => {
-      const data = doc.data();
-      if (!data.fecha_hora) return;
-      const fecha = new Date(data.fecha_hora);
+    const p = {};
+    parts.forEach(part => { p[part.type] = part.value; });
+    year = Number(p.year);
+    month = Number(p.month);
+    day = Number(p.day);
+  } catch (err) {
+    year = d.getFullYear();
+    month = d.getMonth() + 1;
+    day = d.getDate();
+  }
 
-      try {
-        const formatted = new Intl.DateTimeFormat('en-CA', {
-          timeZone: timezone,
-          year: 'numeric',
-          month: '2-digit',
-          day: '2-digit'
-        }).format(fecha);
-        diasActivos.add(formatted);
-      } catch (err) {
-        const formatted = fecha.toISOString().split('T')[0];
-        diasActivos.add(formatted);
-      }
-    });
+  const yStr = String(year);
+  const mStr = String(month).padStart(2, '0');
+  const dStr = String(day).padStart(2, '0');
+  const todayStr = `${yStr}-${mStr}-${dStr}`;
+
+  // Calcular Lunes de la semana actual
+  const dateObj = new Date(year, month - 1, day);
+  const getDay = dateObj.getDay(); // 0=Dom, 1=Lun... 6=Sáb
+  const diffToMonday = getDay === 0 ? -6 : 1 - getDay;
+  dateObj.setDate(dateObj.getDate() + diffToMonday);
+
+  const monY = dateObj.getFullYear();
+  const monM = String(dateObj.getMonth() + 1).padStart(2, '0');
+  const monD = String(dateObj.getDate()).padStart(2, '0');
+  const mondayStr = `${monY}-${monM}-${monD}`;
+
+  const currentLogins = userDocData?.loginsSemana ?? userDocData?.logins_semana ?? [];
+  // Reset semana a semana: solo mantener días de logueo de la semana actual (>= Lunes)
+  const currentWeekLogins = currentLogins.filter(dateStr => dateStr >= mondayStr);
+
+  // Registrar el día de hoy si no estaba cargado
+  if (!currentWeekLogins.includes(todayStr)) {
+    currentWeekLogins.push(todayStr);
+  }
+
+  return { todayStr, mondayStr, updatedLogins: currentWeekLogins };
+}
+
+export async function getWeeklyActivity(uid, timezone = 'America/Argentina/Buenos_Aires') {
+  try {
+    const ref = db.collection(COLECCION_USUARIOS).doc(uid);
+    const snap = await ref.get();
+
+    let existingData = {};
+    if (snap.exists) {
+      existingData = snap.data();
+    }
+
+    const { updatedLogins } = updateWeeklyLogins(existingData, timezone);
+
+    // Actualización en Firestore
+    if (snap.exists) {
+      ref.update({ logins_semana: updatedLogins }).catch(() => { });
+    }
+
+    return updatedLogins;
   } catch (err) {
     if (isQuotaError(err)) {
-      console.warn('⚠️ Firestore cuota superada en getWeeklyActivity. Usando caché local.');
-      const fallbackResult = [new Date().toISOString().split('T')[0]];
-      weeklyCache.set(uid, { data: fallbackResult, timestamp: Date.now() });
-      return fallbackResult;
+      const { updatedLogins } = updateWeeklyLogins({}, timezone);
+      return updatedLogins;
     }
     throw err;
   }
-
-  const result = Array.from(diasActivos);
-  weeklyCache.set(uid, { data: result, timestamp: Date.now() });
-  return result;
 }
+
+

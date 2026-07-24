@@ -19,7 +19,7 @@ const NOMBRE_CATEGORIA = {
 
 const ORDEN_CATEGORIA = ['inicio', 'racha', 'leccion', 'modulo', 'puntaje'];
 
-export default function Logros({ apiCall }) {
+export default function Logros({ apiCall, embedded = false }) {
   const [logros, setLogros]     = useState([]);
   const [resumen, setResumen]   = useState(null);
   const [loading, setLoading]   = useState(false);
@@ -59,20 +59,27 @@ export default function Logros({ apiCall }) {
     : 0;
 
   return (
-    <div className="card logros-card">
-      {/* Cabecera */}
-      <div className="logros-header">
-        <h2>🏆 Mis Logros</h2>
-        <button
-          type="button"
-          className="btn-primary"
-          onClick={cargarLogros}
-          disabled={loading}
-          style={{ height: '38px', padding: '0 16px', border: 'none' }}
-        >
-          {loading ? 'Actualizando...' : 'Actualizar'}
-        </button>
-      </div>
+    <div className={embedded ? "logros-embedded" : "card logros-card"}>
+      {!embedded && (
+        <div className="logros-header">
+          <h2>🏆 Mis Logros</h2>
+          <button
+            type="button"
+            className="btn-primary"
+            onClick={cargarLogros}
+            disabled={loading}
+            style={{ height: '38px', padding: '0 16px', border: 'none' }}
+          >
+            {loading ? 'Actualizando...' : 'Actualizar'}
+          </button>
+        </div>
+      )}
+
+      {embedded && (
+        <div style={{ marginTop: '24px', paddingTop: '20px', borderTop: '2px dashed #e2e8f0' }}>
+          <h3 style={{ margin: '0 0 16px 0', color: '#163b74', fontSize: '1.25rem', fontWeight: 700 }}>🏆 Mis Logros e Insignias</h3>
+        </div>
+      )}
 
       {/* Barra de progreso global */}
       {resumen && (

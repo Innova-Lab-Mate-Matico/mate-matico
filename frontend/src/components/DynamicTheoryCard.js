@@ -3,6 +3,7 @@ import './ejercicios.css';
 import BotonAncla from './BotonAncla';
 import luzIcon from '../assets/luz.png';
 import changuitoIcon from '../assets/changuito.png';
+import mateicoImg from '../assets/Mateico.png';
 
 function renderVisualAid(theoryId) {
   if (theoryId === 'fracciones-equivalentes') {
@@ -304,22 +305,44 @@ export function TutorMateicoChat({ moduleId, lessonId, theoryId, apiCall, defaul
 
   return (
     <div className="tutor-ia-section">
-      <div className="tutor-ia-header" onClick={() => setIsOpen(!isOpen)}>
-        <h3>🧉 Preguntale a Mateico (Tutor IA)</h3>
-        <span>{isOpen ? '▲' : '▼'}</span>
+      <div className="tutor-ia-header" onClick={() => setIsOpen(!isOpen)} style={{ padding: '4px 0' }}>
+        <div className="tutor-header-title-box" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <img
+            src={mateicoImg}
+            alt="Mateico IA"
+            className="tutor-header-mateico-img"
+            style={{
+              width: '60px',
+              height: '60px',
+              objectFit: 'contain',
+              flexShrink: 0,
+              filter: 'drop-shadow(0 4px 10px rgba(123, 97, 255, 0.35))'
+            }}
+          />
+          <h3 style={{ fontSize: '1.05rem', fontWeight: '800', color: '#7b61ff', margin: 0 }}>
+            Preguntale a Mateico (Tutor IA)
+          </h3>
+        </div>
+        <span style={{ fontSize: '1.1rem', color: '#7b61ff', fontWeight: 'bold' }}>{isOpen ? '▲' : '▼'}</span>
       </div>
 
       {isOpen && (
         <div className="tutor-ia-chat-box">
           <div className="tutor-messages">
             {messages.map((m, idx) => (
-              <div key={idx} className={`tutor-message ${m.sender}`}>
-                {m.text}
+              <div key={idx} className={`tutor-message-row ${m.sender}`} style={{ display: 'flex', gap: '10px', alignItems: 'flex-end', justifyContent: m.sender === 'user' ? 'flex-end' : 'flex-start', margin: '6px 0' }}>
+                {m.sender === 'tutor' && (
+                  <img src={mateicoImg} alt="Mateico" className="tutor-chat-avatar" style={{ width: '36px', height: '36px', objectFit: 'contain', flexShrink: 0, filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.12))' }} />
+                )}
+                <div className={`tutor-message ${m.sender}`}>
+                  {m.text}
+                </div>
               </div>
             ))}
             {loading && (
-              <div className="tutor-loading">
-                🧉 Mateico está pensando...
+              <div className="tutor-loading-row" style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '6px 0' }}>
+                <img src={mateicoImg} alt="Pensando" className="tutor-chat-avatar-thinking" style={{ width: '36px', height: '36px', objectFit: 'contain' }} />
+                <span style={{ fontSize: '0.85rem', color: '#7b61ff', fontWeight: '600' }}>Mateico está pensando...</span>
               </div>
             )}
           </div>

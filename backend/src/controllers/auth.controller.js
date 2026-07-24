@@ -6,7 +6,18 @@ import {
   loginWithGoogle,
   exchangeCustomTokenForIdToken,
 } from '../services/auth.service.js';
+import { evaluarRacha } from '../services/racha.service.js';
 
+
+function attachRachaRota(usuario) {
+  if (!usuario) return usuario;
+  let rachaRota = false;
+  if (usuario.ultimaLeccionCompletada) {
+    const resultado = evaluarRacha(usuario);
+    rachaRota = resultado.rachaRota === true;
+  }
+  return { ...usuario, rachaRota };
+}
 
 export async function register(req, res, next) {
   try {
@@ -34,7 +45,7 @@ export async function register(req, res, next) {
 
     res.status(201).json({
       success: true,
-      usuario: user,
+      usuario: attachRachaRota(user),
       ...(idToken && { idToken, refreshToken, expiresIn }),
     });
   } catch (err) {
@@ -43,7 +54,6 @@ export async function register(req, res, next) {
       err.status = 409;
       err.message = 'El email ya está registrado. ¿Querés iniciar sesión?';
     } else if (err.code?.startsWith('auth/')) {
-
       err.status = err.status || 400;
     }
     next(err);
@@ -67,6 +77,10 @@ export async function login(req, res, next) {
       env.firebase.webApiKey
     );
 
+    if (session.usuario) {
+      session.usuario = attachRachaRota(session.usuario);
+    }
+
     res.json({ success: true, ...session });
   } catch (err) {
     console.error('Error en login:', err);
@@ -81,6 +95,11 @@ export async function googleAuth(req, res, next) {
   try {
     const { idToken } = req.body;
     const session = await loginWithGoogle(idToken);
+
+    if (session.usuario) {
+      session.usuario = attachRachaRota(session.usuario);
+    }
+
     res.json({ success: true, ...session });
   } catch (err) {
     console.error('Error en googleAuth:', err);
@@ -111,11 +130,12 @@ export async function me(req, res, next) {
 
     res.json({
       success: true,
-      usuario: profile,
+      usuario: attachRachaRota(profile),
     });
   } catch (err) {
     console.error('Error en me:', err);
     next(err);
   }
 }
+
 
