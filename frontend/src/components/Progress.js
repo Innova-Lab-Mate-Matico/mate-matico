@@ -44,9 +44,9 @@ export default function Progress({ apiCall }) {
     });
   }
 
-  const rachaDias          = progressData?.gamificacion?.rachaDias          ?? 1;
-  const puntosTotales      = progressData?.gamificacion?.puntosTotales      ?? 70;
-  const rolActual          = progressData?.gamificacion?.rolActual          ?? 'Nivel Intermedio';
+  const rachaDias          = progressData?.gamificacion?.rachaDias          ?? 0;
+  const puntosTotales      = progressData?.gamificacion?.puntosTotales      ?? 0;
+  const rolActual          = progressData?.gamificacion?.rolActual          ?? 'principiante';
   const minutosAprendidos  = progressData?.gamificacion?.minutosAprendidos  ?? null;
   const porcentajeCorrectos = progressData?.gamificacion?.porcentajeCorrectos ?? null;
 
@@ -152,7 +152,7 @@ export default function Progress({ apiCall }) {
           {/* Métricas 1: Lecciones completadas */}
           <div className="figma-metric-card">
             <img src={libroIcon} alt="Lecciones completadas" className="figma-metric-icon" />
-            <h3 className="figma-metric-value">{totalCompletadas || 3}</h3>
+            <h3 className="figma-metric-value">{totalCompletadas}</h3>
             <p className="figma-metric-label">Lecciones completadas</p>
           </div>
 
