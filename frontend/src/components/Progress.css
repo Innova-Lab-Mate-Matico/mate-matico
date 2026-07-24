@@ -140,18 +140,23 @@
   background: rgba(151, 71, 255, 0.08);
 }
 
-.figma-streak-check {
-  width: 28px;
-  height: 28px;
+/* Día activo: imagen check_circle.png (círculo violeta + tilde integrado) */
+.figma-streak-check-circle {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
 }
 
+/* Día inactivo: círculo vacío con borde violeta claro */
 .figma-streak-empty-circle {
-  width: 26px;
-  height: 26px;
-  border: 2px solid #9747FF;
+  width: 30px;
+  height: 30px;
+  border: 2px solid #C4B5FD;
   border-radius: 50%;
   box-sizing: border-box;
 }
+
+
 
 
 /* ── Tarjeta 2: Tus puntos ────────────────────────────── */
