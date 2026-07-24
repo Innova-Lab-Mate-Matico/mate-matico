@@ -112,7 +112,10 @@ SELECT
   usuario_id,
   ejercicio AS ejercicio_id,
   (resultado = 'correcto') AS es_correcta,
-  intentos AS numero_intento,
+  (ROW_NUMBER() OVER (
+    PARTITION BY usuario_id, ejercicio 
+    ORDER BY fecha ASC
+  ))::INT AS numero_intento,
   tiempo_segundos AS tiempo_respuesta_seg,
   metadata->>'respuesta_usuario' AS respuesta_usuario,
   metadata->>'tipo_error_pedagogico' AS tipo_error_pedagogico,
