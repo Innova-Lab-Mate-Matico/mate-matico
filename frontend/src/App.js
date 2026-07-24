@@ -8,7 +8,7 @@ import Home from './components/Home';
 import Profile from './components/Profile';
 import Modules from './components/Modules';
 import Progress from './components/Progress';
-
+import RachaRotaModal from './components/RachaRotaModal';
 
 // NUEVOS COMPONENTES: Control de flujo inicial de captación
 import OnboardingWizard from './components/OnboardingWizard';
@@ -56,6 +56,14 @@ export default function App() {
 
   const [user, setUser] = useState(null);
   const [progress, setProgress] = useState(null);
+  const [showRachaRota, setShowRachaRota] = useState(false);
+
+  const handleSetUser = (userData) => {
+    setUser(userData);
+    if (userData?.rachaRota) {
+      setShowRachaRota(true);
+    }
+  };
 
   const [statusMsg, setStatusMsg] = useState('');
   const [isStatusOk, setIsStatusOk] = useState(true);
@@ -184,7 +192,7 @@ const apiCall = React.useCallback(async (path, options = {}, customToken = null)
         activeToken
       );
 
-      setUser(data.usuario);
+      handleSetUser(data.usuario);
     } catch (err) {
       console.error('Error al cargar perfil:', err);
       logout();
@@ -302,7 +310,7 @@ const apiCall = React.useCallback(async (path, options = {}, customToken = null)
         true
       );
 
-      setUser(data.usuario);
+      handleSetUser(data.usuario);
       setActiveTab('inicio');
     } catch (err) {
       setStatus(err.message, false);
@@ -338,7 +346,7 @@ const apiCall = React.useCallback(async (path, options = {}, customToken = null)
         true
       );
 
-      setUser(data.usuario);
+      handleSetUser(data.usuario);
       setActiveTab('inicio');
     } catch (err) {
       setStatus(err.message, false);
@@ -420,7 +428,7 @@ const apiCall = React.useCallback(async (path, options = {}, customToken = null)
         true
       );
 
-      setUser(data.usuario);
+      handleSetUser(data.usuario);
       setActiveTab('inicio');
     } catch (err) {
       const friendlyMsg =
@@ -466,7 +474,7 @@ const apiCall = React.useCallback(async (path, options = {}, customToken = null)
         true
       );
 
-      setUser(data.usuario);
+      handleSetUser(data.usuario);
       setActiveTab('inicio');
     } catch (err) {
       const friendlyMsg =
@@ -722,6 +730,15 @@ const apiCall = React.useCallback(async (path, options = {}, customToken = null)
           </button>
         </nav>
       </div>
+      {showRachaRota && (
+        <RachaRotaModal
+          onClose={() => setShowRachaRota(false)}
+          onPracticar={() => {
+            setShowRachaRota(false);
+            setActiveTab('lecciones');
+          }}
+        />
+      )}
       {networkError && (
         <div 
           style={{
