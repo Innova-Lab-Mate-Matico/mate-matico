@@ -115,28 +115,42 @@ export async function updateLessonProgress(uid, { moduleId, lessonId, completada
 
 export function updateWeeklyLogins(userDocData, timezone = 'America/Argentina/Buenos_Aires') {
   const d = new Date();
-  let todayStr = d.toISOString().split('T')[0];
-  let mondayStr = todayStr;
+  let year, month, day;
 
   try {
-    const formatter = new Intl.DateTimeFormat('en-CA', {
+    const parts = new Intl.DateTimeFormat('en-US', {
       timeZone: timezone,
       year: 'numeric',
       month: '2-digit',
-      day: '2-digit'
-    });
-    todayStr = formatter.format(d);
-    const [year, month, day] = todayStr.split('-').map(Number);
-    const dateObj = new Date(year, month - 1, day);
-    const getDay = dateObj.getDay(); // 0=Sun, 1=Mon...
-    const diffToMonday = getDay === 0 ? -6 : 1 - getDay;
-    dateObj.setDate(dateObj.getDate() + diffToMonday);
+      day: '2-digit',
+    }).formatToParts(d);
 
-    const y = dateObj.getFullYear();
-    const m = String(dateObj.getMonth() + 1).padStart(2, '0');
-    const da = String(dateObj.getDate()).padStart(2, '0');
-    mondayStr = `${y}-${m}-${da}`;
-  } catch (err) {}
+    const p = {};
+    parts.forEach(part => { p[part.type] = part.value; });
+    year = Number(p.year);
+    month = Number(p.month);
+    day = Number(p.day);
+  } catch (err) {
+    year = d.getFullYear();
+    month = d.getMonth() + 1;
+    day = d.getDate();
+  }
+
+  const yStr = String(year);
+  const mStr = String(month).padStart(2, '0');
+  const dStr = String(day).padStart(2, '0');
+  const todayStr = `${yStr}-${mStr}-${dStr}`;
+
+  // Calcular Lunes de la semana actual
+  const dateObj = new Date(year, month - 1, day);
+  const getDay = dateObj.getDay(); // 0=Dom, 1=Lun... 6=Sáb
+  const diffToMonday = getDay === 0 ? -6 : 1 - getDay;
+  dateObj.setDate(dateObj.getDate() + diffToMonday);
+
+  const monY = dateObj.getFullYear();
+  const monM = String(dateObj.getMonth() + 1).padStart(2, '0');
+  const monD = String(dateObj.getDate()).padStart(2, '0');
+  const mondayStr = `${monY}-${monM}-${monD}`;
 
   const currentLogins = userDocData?.loginsSemana ?? userDocData?.logins_semana ?? [];
   // Reset semana a semana: solo mantener días de logueo de la semana actual (>= Lunes)
@@ -162,7 +176,7 @@ export async function getWeeklyActivity(uid, timezone = 'America/Argentina/Bueno
 
     const { updatedLogins } = updateWeeklyLogins(existingData, timezone);
 
-    // Actualización atómica de logueos semanales en Firestore
+    // Actualización en Firestore
     if (snap.exists) {
       ref.update({ logins_semana: updatedLogins }).catch(() => {});
     }
@@ -176,4 +190,5 @@ export async function getWeeklyActivity(uid, timezone = 'America/Argentina/Bueno
     throw err;
   }
 }
+
 
