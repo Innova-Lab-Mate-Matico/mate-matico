@@ -4,11 +4,13 @@ import { LECCION_GENERADORES } from '../exercises/registry.js';
 import { generarEjercicioAritmetica } from '../exercises/modules/aritmeticaBasica.js';
 import { generarEjercicioPorcentajes } from '../exercises/modules/porcentajes.js';
 import { generarEjercicioFracciones } from '../exercises/modules/fracciones.js';
+import { generarEjercicioEconomia } from '../exercises/modules/economiaBasica.js';
 
 const GENERADORES = {
   aritmetica: generarEjercicioAritmetica,
   porcentajes: generarEjercicioPorcentajes,
   fracciones: generarEjercicioFracciones,
+  economia: generarEjercicioEconomia,
 };
 
 async function seed() {

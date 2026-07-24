@@ -101,9 +101,9 @@ export function generarEjerciciosLeccion(moduleId, lessonId, semillaBase = null,
       const datosEjercicio = generar(tipo, semilla, userRole);
       if (!datosEjercicio) return null;
 
-      // Hacer el ID único agregando el índice para evitar colisiones
+      // Hacer el ID único agregando la semilla para evitar colisiones
       // cuando la misma plantilla se cicla varias veces
-      datosEjercicio.id = `${datosEjercicio.id}-${index}`;
+      datosEjercicio.id = `${datosEjercicio.id}-${semilla}`;
 
       // Instanciar usando la Fábrica
       datosEjercicio.semilla = semilla;
@@ -118,13 +118,30 @@ export function generarEjerciciosLeccion(moduleId, lessonId, semillaBase = null,
  * Reconstruye el ejercicio para validar usando semilla + operandos enviados por el front.
  */
 export function reconstruirEjercicio(moduleId, lessonId, exerciseId, semilla, operandos, userRole = 'principiante') {
-  // Los IDs de ejercicio ahora llevan un sufijo de índice (e.g. 'pct-mc-0').
-  // Extraer el ID base quitando el último segmento '-N' para comparar con el generador.
-  const baseExerciseId = exerciseId.replace(/-\d+$/, '');
+  const parts = String(exerciseId).split('-');
+  let baseExerciseId = exerciseId;
+  let resolvedSemilla = NaN;
 
-  const meta = Object.values(META_TIPOS).find(
-    (m) => m.moduleId === moduleId && m.lessonId === lessonId
-  );
+  if (parts.length > 1) {
+    const ultimaParte = parts.pop();
+    resolvedSemilla = Number(ultimaParte);
+    baseExerciseId = parts.join('-');
+  }
+
+  // Fallback 1: Si no hay semilla en el ID (NaN), tomar el parámetro 'semilla' recibido
+  if (isNaN(resolvedSemilla)) {
+    resolvedSemilla = Number(semilla);
+  }
+
+  // Fallback 2: Buscar en los operandos si el parámetro tampoco es un número válido
+  if (isNaN(resolvedSemilla) && operandos && (operandos.semilla !== undefined && operandos.semilla !== null)) {
+    resolvedSemilla = Number(operandos.semilla);
+  }
+
+  // Fallback 3: Si todo falla, usar la constante estática segura
+  if (isNaN(resolvedSemilla)) {
+    resolvedSemilla = 12345;
+  }
 
   const tipos = LECCION_GENERADORES[moduleId]?.[lessonId] ?? [];
   const generar = GENERADORES_MODULO[moduleId];
@@ -133,13 +150,13 @@ export function reconstruirEjercicio(moduleId, lessonId, exerciseId, semilla, op
   if (!generar || !resolver) return null;
 
   for (const tipo of tipos) {
-    const ejercicio = generar(tipo, semilla, userRole);
+    const ejercicio = generar(tipo, resolvedSemilla, userRole);
     if (ejercicio?.id !== baseExerciseId) continue;
 
     const respuesta = resolver(operandos ?? ejercicio.operandos, tipo);
     return FabricaEjercicios.crear({
       ...ejercicio,
-      semilla,
+      semilla: resolvedSemilla,
       tipoGenerador: tipo,
       operandos: operandos ?? ejercicio.operandos,
       respuestaCorrecta: respuesta ?? ejercicio.respuestaCorrecta,
@@ -158,7 +175,7 @@ export function reconstruirEjercicio(moduleId, lessonId, exerciseId, semilla, op
         'Revisá la operación con calma. No perdés puntos por equivocarte.',
       comodinPista: 'Mate-Matico te sugiere descomponer el cálculo en pasos pequeños.',
       puntos: 10,
-      semilla,
+      semilla: resolvedSemilla,
     });
   }
 

@@ -270,31 +270,54 @@ export function generarEjercicioEconomia(tipoGenerador, semilla, userRole = 'pri
 
 // ─── Resolver de respuesta (usado en validación) ───────────────────────────
 export function resolverRespuestaEconomia(operandos, tipoGenerador = null) {
+  if (!operandos) return null;
   const { tipo } = operandos;
 
   if (tipo === 'iva') {
-    return Math.round(Number(operandos.precio) * (1 + Number(operandos.iva_pct) / 100));
+    const precio = Number(operandos.precio ?? 0);
+    const iva_pct = Number(operandos.iva_pct ?? 0);
+    if (isNaN(precio) || isNaN(iva_pct)) return 0;
+    return Math.round(precio * (1 + iva_pct / 100));
   }
   if (tipo === 'regla3') {
-    return Math.round((Number(operandos.precio1) * Number(operandos.cantidad2)) / Number(operandos.cantidad1));
+    const precio1 = Number(operandos.precio1 ?? 0);
+    const cantidad2 = Number(operandos.cantidad2 ?? 0);
+    const cantidad1 = Number(operandos.cantidad1 ?? 1);
+    if (isNaN(precio1) || isNaN(cantidad2) || isNaN(cantidad1) || cantidad1 === 0) return 0;
+    return Math.round((precio1 * cantidad2) / cantidad1);
   }
   if (tipo === 'interes_simple') {
-    const { capital, tasa, meses } = operandos;
-    return Math.round(Number(capital) * (Number(tasa) / 100) * Number(meses));
+    const capital = Number(operandos.capital ?? 0);
+    const tasa = Number(operandos.tasa ?? 0);
+    const meses = Number(operandos.meses ?? 0);
+    if (isNaN(capital) || isNaN(tasa) || isNaN(meses)) return 0;
+    return Math.round(capital * (tasa / 100) * meses);
   }
   if (tipo === 'interes_simple_total') {
-    const { capital, tasa, meses } = operandos;
-    return capital + Math.round(Number(capital) * (Number(tasa) / 100) * Number(meses));
+    const capital = Number(operandos.capital ?? 0);
+    const tasa = Number(operandos.tasa ?? 0);
+    const meses = Number(operandos.meses ?? 0);
+    if (isNaN(capital) || isNaN(tasa) || isNaN(meses)) return 0;
+    return capital + Math.round(capital * (tasa / 100) * meses);
   }
   if (tipo === 'interes_compuesto') {
-    const { capital, tasa, periodos } = operandos;
-    return Math.round(Number(capital) * Math.pow(1 + Number(tasa) / 100, Number(periodos)));
+    const capital = Number(operandos.capital ?? 0);
+    const tasa = Number(operandos.tasa ?? 0);
+    const periodos = Number(operandos.periodos ?? 0);
+    if (isNaN(capital) || isNaN(tasa) || isNaN(periodos)) return 0;
+    return Math.round(capital * Math.pow(1 + tasa / 100, periodos));
   }
   if (tipo === 'presupuesto') {
-    return Math.round(Number(operandos.ingreso) * Number(operandos.porcentaje) / 100);
+    const ingreso = Number(operandos.ingreso ?? 0);
+    const porcentaje = Number(operandos.porcentaje ?? 0);
+    if (isNaN(ingreso) || isNaN(porcentaje)) return 0;
+    return Math.round(ingreso * porcentaje / 100);
   }
   if (tipo === 'presupuesto_disponible') {
-    return Number(operandos.ingreso) - Number(operandos.gastoFijo);
+    const ingreso = Number(operandos.ingreso ?? 0);
+    const gastoFijo = Number(operandos.gastoFijo ?? 0);
+    if (isNaN(ingreso) || isNaN(gastoFijo)) return 0;
+    return ingreso - gastoFijo;
   }
 
   return null;

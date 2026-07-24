@@ -40,7 +40,6 @@ export async function getProgress(uid) {
 export async function updateLessonProgress(uid, { moduleId, lessonId, completada, puntaje, tiempo_segundos }) {
   const ref = progresoRef(uid).doc(moduleId);
   let existing = { moduleId };
-
   try {
     const doc = await ref.get();
     if (doc.exists) existing = doc.data();
@@ -49,7 +48,7 @@ export async function updateLessonProgress(uid, { moduleId, lessonId, completada
   }
 
   const lecciones = { ...(existing.lecciones ?? existing.lessons ?? {}) };
-  
+
   // Guardamos el estado anterior para ver si realmente cambió a completada
   const eraCompletada = lecciones[lessonId]?.completada || lecciones[lessonId]?.completed || false;
 
@@ -78,7 +77,7 @@ export async function updateLessonProgress(uid, { moduleId, lessonId, completada
   if (lecciones[lessonId].completada && !eraCompletada) {
     const lessonData = findLesson(moduleId, lessonId);
     const dificultad = lessonData ? (lessonData.level.difficulty === 1 ? 'bajo' : lessonData.level.difficulty === 2 ? 'medio' : 'alto') : 'bajo';
-    
+
     // 1. Disparar leccion_completada en segundo plano
     trackEvent(uid, 'leccion_completada', {
       leccion_id: lessonId,
@@ -168,7 +167,7 @@ export async function getWeeklyActivity(uid, timezone = 'America/Argentina/Bueno
   try {
     const ref = db.collection(COLECCION_USUARIOS).doc(uid);
     const snap = await ref.get();
-    
+
     let existingData = {};
     if (snap.exists) {
       existingData = snap.data();
@@ -178,7 +177,7 @@ export async function getWeeklyActivity(uid, timezone = 'America/Argentina/Bueno
 
     // Actualización en Firestore
     if (snap.exists) {
-      ref.update({ logins_semana: updatedLogins }).catch(() => {});
+      ref.update({ logins_semana: updatedLogins }).catch(() => { });
     }
 
     return updatedLogins;

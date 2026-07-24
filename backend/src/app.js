@@ -5,6 +5,7 @@ import authRoutes from './routes/auth.routes.js';
 import progressRoutes from './routes/progress.routes.js';
 import exerciseRoutes from './routes/exercise.routes.js';
 import modulesRoutes from './routes/modules.routes.js';
+import trackingRoutes from './routes/tracking.routes.js';
 import logrosRoutes from './routes/logros.routes.js';
 import aiRoutes from './routes/ai.routes.js';
 import { applySecurity } from './middleware/security.js';
@@ -40,6 +41,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/modules', modulesRoutes);
 app.use('/api/progress', progressRoutes);
 app.use('/api/exercises', exerciseRoutes);
+app.use('/api/tracking', trackingRoutes);
 app.use('/api/logros', logrosRoutes);
 app.use('/api/ai', aiRoutes);
 

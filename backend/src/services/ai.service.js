@@ -2,6 +2,13 @@ import { GoogleGenAI } from '@google/genai';
 import { crearGeneradorSemilla } from '../exercises/utils/seededRandom.js';
 
 /**
+ * Función centralizada para construir el prompt del Tutor IA.
+ */
+export function obtenerSystemPromptTutor(moduleId, lessonId, theoryId) {
+  return `Sos Mateico, el tutor virtual del juego de matemáticas Mate-Mático. Tu objetivo es ayudar al alumno a entender conceptos de matemáticas (aritmética, fracciones, porcentajes, economía doméstica) en un tono amigable, motivador y con lenguaje coloquial argentino (usá vos, mirá, dale, genial, perfecto). Explicá de forma sencilla usando metáforas cotidianas (cortar pizza, cocinar, comprar yerba mate, calcular IVA o cuotas del súper). IMPORTANTE: No uses la palabra "che" en cada oración — usala como máximo una vez por respuesta y solo cuando suene natural. El tema de teoría actual es "${theoryId || 'General'}" de la lección "${lessonId || 'General'}" en el módulo "${moduleId || 'General'}". Respondé de forma corta y estructurada (máximo 3 párrafos cortos). No des la respuesta directa a los ejercicios, guialos a deducirla.`;
+}
+
+/**
  * Servicio para procesar consultas al Tutor IA Mateico.
  * Actúa como un esqueleto extensible para conectar cualquier LLM en el futuro.
  */
@@ -12,7 +19,7 @@ export async function explainTheoryTopic({ moduleId, lessonId, theoryId, questio
   const groqKey = process.env.GROQ_API_KEY;
   if (groqKey && groqKey.trim() !== '') {
     try {
-      const systemPrompt = `Sos Mateico, el tutor virtual del juego de matemáticas Mate-Mático. Tu objetivo es ayudar al alumno a entender conceptos de matemáticas (aritmética, fracciones, porcentajes, economía doméstica) en un tono amigable, motivador y con lenguaje coloquial argentino (usá vos, mirá, dale, genial, perfecto). Explicá de forma sencilla usando metáforas cotidianas (cortar pizza, cocinar, comprar yerba mate, calcular IVA o cuotas del súper). IMPORTANTE: No uses la palabra "che" en cada oración — usala como máximo una vez por respuesta y solo cuando suene natural. El tema de teoría actual es "${theoryId}" en el módulo "${moduleId}". Respondé de forma corta y estructurada (máximo 3 párrafos cortos). No des la respuesta directa a los ejercicios, guialos a deducirla.`;
+      const systemPrompt = obtenerSystemPromptTutor(moduleId, lessonId, theoryId);
 
       const messages = [{ role: 'system', content: systemPrompt }];
       if (history && history.length > 0) {
@@ -42,7 +49,7 @@ export async function explainTheoryTopic({ moduleId, lessonId, theoryId, questio
       if (response.ok) {
         const data = await response.json();
         const text = data.choices?.[0]?.message?.content;
-        if (text) return text.trim();
+        if (text) return { explanation: text.trim(), proveedor: 'groq' };
       } else {
         const errText = await response.text();
         console.error("Error en respuesta de Groq API:", errText);
@@ -58,7 +65,7 @@ export async function explainTheoryTopic({ moduleId, lessonId, theoryId, questio
   const geminiKey = process.env.GEMINI_API_KEY;
   if (geminiKey && geminiKey.trim() !== '') {
     try {
-      const systemPrompt = `Sos Mateico, el tutor virtual del juego de matemáticas Mate-Mático. Tu objetivo es ayudar al alumno a entender conceptos de matemáticas (aritmética, fracciones, porcentajes, economía doméstica) en un tono amigable, motivador y con lenguaje coloquial argentino (usá vos, mirá, dale, genial, perfecto). Explicá de forma sencilla usando metáforas cotidianas (cortar pizza, cocinar, comprar yerba mate, calcular IVA o cuotas del súper). IMPORTANTE: No uses la palabra "che" en cada oración — usala como máximo una vez por respuesta y solo cuando suene natural. El tema de teoría actual es "${theoryId}" en el módulo "${moduleId}". Respondé de forma corta y estructurada (máximo 3 párrafos cortos). No des la respuesta directa a los ejercicios, guialos a deducirla.`;
+      const systemPrompt = obtenerSystemPromptTutor(moduleId, lessonId, theoryId);
 
       const ai = new GoogleGenAI({ apiKey: geminiKey });
 
@@ -88,19 +95,19 @@ export async function explainTheoryTopic({ moduleId, lessonId, theoryId, questio
       });
 
       const text = response.text;
-      if (text) return text.trim();
+      if (text) return { explanation: text.trim(), proveedor: 'gemini' };
     } catch (err) {
       console.error("Error al conectar con la API de Gemini (SDK):", err);
     }
   }
 
   // ==========================================
-  // 2. INTEGRACIÓN CON OPENAI API
+  // 3. INTEGRACIÓN CON OPENAI API
   // ==========================================
   const openaiKey = process.env.OPENAI_API_KEY;
   if (openaiKey && openaiKey.trim() !== '') {
     try {
-      const systemPrompt = `Sos Mateico, el tutor virtual del juego de matemáticas Mate-Mático. Tu objetivo es ayudar al alumno a entender conceptos de matemáticas (aritmética, fracciones, porcentajes, economía doméstica) en un tono amigable, motivador y con lenguaje coloquial argentino (usá vos, mirá, dale, genial, perfecto). Explicá de forma sencilla usando metáforas cotidianas (cortar pizza, cocinar, comprar yerba mate, calcular IVA o cuotas del súper). IMPORTANTE: No uses la palabra "che" en cada oración — usala como máximo una vez por respuesta y solo cuando suene natural. El tema de teoría actual es "${theoryId}" en el módulo "${moduleId}". Respondé de forma corta y estructurada (máximo 3 párrafos cortos). No des la respuesta directa a los ejercicios, guialos a deducirla.`;
+      const systemPrompt = obtenerSystemPromptTutor(moduleId, lessonId, theoryId);
       
       const messages = [{ role: 'system', content: systemPrompt }];
       if (history && history.length > 0) {
@@ -130,7 +137,7 @@ export async function explainTheoryTopic({ moduleId, lessonId, theoryId, questio
       if (response.ok) {
         const data = await response.json();
         const text = data.choices?.[0]?.message?.content;
-        if (text) return text.trim();
+        if (text) return { explanation: text.trim(), proveedor: 'openai' };
       } else {
         const errText = await response.text();
         console.error("Error en respuesta de OpenAI API:", errText);
@@ -141,7 +148,7 @@ export async function explainTheoryTopic({ moduleId, lessonId, theoryId, questio
   }
 
   // ==========================================
-  // 3. INTEGRACIÓN CON AI SERVER EXTERNO (ESQUELETO ORIGINAL)
+  // 4. INTEGRACIÓN CON AI SERVER EXTERNO (ESQUELETO ORIGINAL)
   // ==========================================
   const aiServerUrl = process.env.AI_GENERATION_SERVER_URL;
   if (aiServerUrl) {
@@ -153,7 +160,7 @@ export async function explainTheoryTopic({ moduleId, lessonId, theoryId, questio
       });
       if (response.ok) {
         const data = await response.json();
-        if (data.explanation) return data.explanation;
+        if (data.explanation) return { explanation: data.explanation, proveedor: 'openai' };
       }
     } catch (e) {
       console.warn("Fallo al consumir AI Server, usando motor adaptativo local:", e);
@@ -163,60 +170,103 @@ export async function explainTheoryTopic({ moduleId, lessonId, theoryId, questio
   // ==========================================
   // MOTOR DE APRENDIZAJE ADAPTATIVO LOCAL
   // ==========================================
-  // Mientras tanto, este motor de contingencia brinda respuestas pedagógicas personalizadas,
-  // con un lenguaje súper amigable e integrado al contexto argentino del resto del MVP.
   const qClean = question.toLowerCase().trim();
 
   // 1. Petición de simplificación extrema (explicación para 5 años / simple)
   if (qClean.includes('simple') || qClean.includes('sencill') || qClean.includes('fácil') || qClean.includes('facil') || qClean.includes('5 años') || qClean.includes('5 anos')) {
-    return `¡Dale, te lo explico bien fácil! Imaginate que tenés un chocolate entero y lo partís en pedacitos iguales. Si lo partís a la mitad, tenés 2 partes y cada una es 1/2. Si lo partís en 4 partes, cada una es 1/4. ¿Viste? Cuanto más grande es el número de abajo (el denominador), más chiquito es cada pedacito.`;
+    return {
+      explanation: `¡Dale, te lo explico bien fácil! Imaginate que tenés un chocolate entero y lo partís en pedacitos iguales. Si lo partís a la mitad, tenés 2 partes y cada una es 1/2. Si lo partís en 4 partes, cada una es 1/4. ¿Viste? Cuanto más grande es el número de abajo (el denominador), más chiquito es cada pedacito.`,
+      proveedor: 'local'
+    };
   }
 
   // 2. Petición de situaciones de la vida real (ejemplos cotidianos)
   if (qClean.includes('ejemplo') || qClean.includes('cotidian') || qClean.includes('día a día') || qClean.includes('dia a dia') || qClean.includes('super') || qClean.includes('compra')) {
     if (theoryId === 'fracciones-equivalentes') {
-      return `Un gran ejemplo cotidiano es la pizza. Si te comés 2 porciones de una pizza cortada en 4 (o sea 2/4), te estás comiendo exactamente la misma cantidad que si te comés 4 porciones de una pizza cortada en 8 (4/8). ¡Ambas representan la mitad de la pizza!`;
+      return {
+        explanation: `Un gran ejemplo cotidiano es la pizza. Si te comés 2 porciones de una pizza cortada en 4 (o sea 2/4), te estás comiendo exactamente la misma cantidad que si te comés 4 porciones de una pizza cortada en 8 (4/8). ¡Ambas representan la mitad de la pizza!`,
+        proveedor: 'local'
+      };
     }
     if (theoryId === 'cocina-suma') {
-      return `En la cocina pasa siempre: si la receta te pide 1/2 taza de leche pero solo tenés una taza medidora de 1/4, podés llenarla dos veces (1/4 + 1/4 = 2/4, que es igual a 1/2 taza). ¡Las matemáticas te salvan la comida!`;
+      return {
+        explanation: `En la cocina pasa siempre: si la receta te pide 1/2 taza de leche pero solo tenés una taza medidora de 1/4, podés llenarla dos veces (1/4 + 1/4 = 2/4, que es igual a 1/2 taza). ¡Las matemáticas te salvan la comida!`,
+        proveedor: 'local'
+      };
     }
     if (theoryId === 'decimales-dinero') {
-      return `Con la plata es re claro: una moneda de 25 centavos es un cuarto de peso ($0.25). Si juntás 4 monedas de 25 centavos, tenés $1.00. Los decimales son solo partes de un peso entero.`;
+      return {
+        explanation: `Con la plata es re claro: una moneda de 25 centavos es un cuarto de peso ($0.25). Si juntás 4 monedas de 25 centavos, tenés $1.00. Los decimales son solo partes de un peso entero.`,
+        proveedor: 'local'
+      };
     }
     if (moduleId === 'aritmetica') {
-      return `Cuando vas al almacén y sumás el precio de un pan criollo ($450) y un café ($1200) para saber si te alcanza la plata de tu billetera antes de pasar por caja. ¡Esa es la aritmética salvando tu bolsillo!`;
+      return {
+        explanation: `Cuando vas al almacén y sumás el precio de un pan criollo ($450) y un café ($1200) para saber si te alcanza la plata de tu billetera antes de pasar por caja. ¡Esa es la aritmética salvando tu bolsillo!`,
+        proveedor: 'local'
+      };
     }
     if (moduleId === 'porcentajes') {
-      return `Cuando ves un cartel de "20% de descuento en yerba mate". Si el paquete sale $3.000, el 10% son $300, entonces el 20% son $600. ¡Terminás pagando $2.400 en vez de $3.000!`;
+      return {
+        explanation: `Cuando ves un cartel de "20% de descuento en yerba mate". Si el paquete sale $3.000, el 10% son $300, entonces el 20% son $600. ¡Terminás pagando $2.400 en vez de $3.000!`,
+        proveedor: 'local'
+      };
     }
-    return `Imaginate que vas a comprar algo y querés calcular rápido el vuelto o cuánto vas a pagar en cuotas. Dividir los gastos con tus amigos a la mitad en un asado es matemática pura aplicada a la vida real.`;
+    return {
+      explanation: `Imaginate que vas a comprar algo y querés calcular rápido el vuelto o cuánto vas a pagar en cuotas. Dividir los gastos con tus amigos a la mitad en un asado es matemática pura aplicada a la vida real.`,
+      proveedor: 'local'
+    };
   }
 
   // 3. Petición de resolución paso a paso
   if (qClean.includes('paso a paso') || qClean.includes('resolver') || qClean.includes('como se hace') || qClean.includes('cómo se hace') || qClean.includes('cuenta')) {
     if (moduleId === 'porcentajes') {
-      return `Para resolver cualquier porcentaje rápidamente: 1) Tomá el precio original, 2) Multiplicalo por el número del porcentaje (ej. 15), 3) Dividí todo por 100. Por ejemplo: 15% de $2.000 es (2000 × 15) ÷ 100 = 300 pesos.`;
+      return {
+        explanation: `Para resolver cualquier porcentaje rápidamente: 1) Tomá el precio original, 2) Multiplicalo por el número del porcentaje (ej. 15), 3) Dividí todo por 100. Por ejemplo: 15% de $2.000 es (2000 × 15) ÷ 100 = 300 pesos.`,
+        proveedor: 'local'
+      };
     }
     if (theoryId === 'fracciones-equivalentes') {
-      return `Para saber si dos fracciones son equivalentes, multiplicá cruzado. Por ejemplo, para ver si 1/2 y 2/4 son equivalentes: hacé 1 × 4 = 4 y 2 × 2 = 4. Como ambos resultados dan 4, ¡son equivalentes!`;
+      return {
+        explanation: `Para saber si dos fracciones son equivalentes, multiplicá cruzado. Por ejemplo, para ver si 1/2 y 2/4 son equivalentes: hacé 1 × 4 = 4 y 2 × 2 = 4. Como ambos resultados dan 4, ¡son equivalentes!`,
+        proveedor: 'local'
+      };
     }
-    return `El paso a paso es: 1) Leé con atención qué te pide el enunciado, 2) Identificá los números que tenés, 3) Planteá la operación básica (suma, resta, multiplicación o división) y 4) Resolvé primero las decenas y luego las unidades para no confundirte.`;
+    return {
+      explanation: `El paso a paso es: 1) Leé con atención qué te pide el enunciado, 2) Identificá los números que tenés, 3) Planteá la operación básica (suma, resta, multiplicación o división) y 4) Resolvé primero las decenas y luego las unidades para no confundirte.`,
+      proveedor: 'local'
+    };
   }
 
   // 4. Respuestas específicas según el tema de teoría
   if (theoryId === 'fracciones-equivalentes') {
-    return `Las fracciones equivalentes son fracciones que se escriben distinto pero representan exactamente el mismo tamaño o cantidad. Por ejemplo, comer 1/2 torta es lo mismo que comer 2/4 de torta. ¡La cantidad de torta en tu panza es la misma!`;
+    return {
+      explanation: `Las fracciones equivalentes son fracciones que se escriben distinto pero representan exactamente el mismo tamaño o cantidad. Por ejemplo, comer 1/2 torta es lo mismo que comer 2/4 de torta. ¡La cantidad de torta en tu panza es la misma!`,
+      proveedor: 'local'
+    };
   }
   if (theoryId === 'cocina-suma') {
-    return `Cuando sumás fracciones con el mismo número de abajo (denominador), la taza medidora sigue siendo del mismo tamaño. Solo sumás los números de arriba (numeradores). Por eso 1/4 + 2/4 = 3/4.`;
+    return {
+      explanation: `Cuando sumás fracciones con el mismo número de abajo (denominador), la taza medidora sigue siendo del mismo tamaño. Solo sumás los números de arriba (numeradores). Por eso 1/4 + 2/4 = 3/4.`,
+      proveedor: 'local'
+    };
   }
   if (theoryId === 'decimales-dinero') {
-    return `Los decimales son otra forma de escribir fracciones. Escribir $0.50 (cincuenta centavos) es exactamente lo mismo que decir 1/2 peso (media unidad). Es súper útil para manejar precios y vueltos.`;
+    return {
+      explanation: `Los decimales son otra forma de escribir fracciones. Escribir $0.50 (cincuenta centavos) es exactamente lo mismo que decir 1/2 peso (media unidad). Es súper útil para manejar precios y vueltos.`,
+      proveedor: 'local'
+    };
   }
   if (moduleId === 'economia') {
-    return `En economía hogareña, saber calcular el IVA o comparar precios por peso te ayuda a no gastar de más. Pensá en el IVA (21%) como pagar $21 adicionales por cada $100 del producto.`;
+    return {
+      explanation: `En economía hogareña, saber calcular el IVA o comparar precios por peso te ayuda a no gastar de más. Pensá en el IVA (21%) como pagar $21 adicionales por cada $100 del producto.`,
+      proveedor: 'local'
+    };
   }
 
   // 5. Fallback genérico inteligente (Tono Mateico)
-  return `¡Che, qué buena pregunta! Para entender mejor el tema, acordate que la matemática no es solo hacer cuentas de memoria, sino ver cómo se aplica a cosas que hacés todos los días, como ir al súper, cocinar o manejar tu sueldo. ¿Querés que veamos un ejemplo bien práctico de esto o preferís repasar el paso a paso?`;
+  return {
+    explanation: `¡Che, qué buena pregunta! Para entender mejor el tema, acordate que la matemática no es solo hacer cuentas de memoria, sino ver cómo se aplica a cosas que hacés todos los días, como ir al súper, cocinar o manejar tu sueldo. ¿Querés que veamos un ejemplo bien práctico de esto o preferís repasar el paso a paso?`,
+    proveedor: 'local'
+  };
 }

@@ -1,0 +1,15 @@
+meta {
+  name: Get Logros
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/logros
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}

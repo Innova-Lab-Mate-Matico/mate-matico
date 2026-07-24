@@ -1,3 +1,8 @@
+// Asegurar uso de emulador antes de cualquier import de Firebase/App
+process.env.NODE_ENV = 'test';
+process.env.FIRESTORE_EMULATOR_HOST = 'localhost:8080';
+process.env.FIREBASE_AUTH_EMULATOR_HOST = 'localhost:9099';
+
 import { test, describe, it, before, after } from 'node:test';
 import assert from 'node:assert';
 import request from 'supertest';
@@ -5,10 +10,6 @@ import app from '../src/app.js';
 import { db, auth } from '../src/config/firebase.js';
 import { trackEvent } from '../src/services/tracking.service.js';
 import { resolverRespuestaPorcentajes } from '../src/exercises/modules/porcentajes.js';
-
-// Asegurar uso de emulador
-process.env.NODE_ENV = 'test';
-process.env.FIRESTORE_EMULATOR_HOST = 'localhost:8080';
 
 const TEST_UID = 'test-usuario-telemetria';
 const originalVerifyIdToken = auth.verifyIdToken;
@@ -29,6 +30,13 @@ describe('Telemetría y Tracking de Eventos (Hito 2)', () => {
   });
 
   before(async () => {
+    // Limpiar progreso huérfano de corridas previas en el emulador
+    try {
+      await db.collection('usuarios').doc(TEST_UID).collection('progreso').doc('porcentajes').delete();
+    } catch (err) {
+      // Ignorar si no existe
+    }
+
     // Crear usuario inicial en Firestore Emulator
     await db.collection('usuarios').doc(TEST_UID).set({
       uid: TEST_UID,
@@ -45,6 +53,7 @@ describe('Telemetría y Tracking de Eventos (Hito 2)', () => {
   after(async () => {
     // Limpiar base de datos
     try {
+      await db.collection('usuarios').doc(TEST_UID).collection('progreso').doc('porcentajes').delete();
       await db.collection('usuarios').doc(TEST_UID).delete();
       // Eliminar documentos en eventos
       const snap = await db.collection('eventos').where('usuario_id', '==', TEST_UID).get();
@@ -186,4 +195,72 @@ describe('Telemetría y Tracking de Eventos (Hito 2)', () => {
 
     assert.strictEqual(query.size, 0);
   });
+
+  describe('6. Endpoint /api/tracking (Cliente Whitelist)', () => {
+    it('Debe registrar con éxito logro_desbloqueado', async () => {
+      const res = await request(app)
+        .post('/api/tracking')
+        .set('Authorization', 'Bearer token-valido-telemetria')
+        .send({
+          tipo_evento: 'logro_desbloqueado',
+          metadata: {
+            sesion_id: 'sesion-123',
+            logro_id: 'primer_ejercicio',
+            nombre_logro: '¡Primer paso!',
+            categoria: 'progreso'
+          }
+        });
+
+      assert.strictEqual(res.status, 200);
+      assert.strictEqual(res.body.success, true);
+    });
+
+    it('Debe rechazar con 400 si el evento no está en whitelist', async () => {
+      const res = await request(app)
+        .post('/api/tracking')
+        .set('Authorization', 'Bearer token-valido-telemetria')
+        .send({
+          tipo_evento: 'evento_prohibido_hack',
+          metadata: {
+            sesion_id: 'sesion-123'
+          }
+        });
+
+      assert.strictEqual(res.status, 400);
+      assert.match(res.body.error, /whitelist/);
+    });
+
+    it('Debe rechazar con 400 si falta sesion_id', async () => {
+      const res = await request(app)
+        .post('/api/tracking')
+        .set('Authorization', 'Bearer token-valido-telemetria')
+        .send({
+          tipo_evento: 'logro_desbloqueado',
+          metadata: {
+            logro_id: 'primer_ejercicio'
+          }
+        });
+
+      assert.strictEqual(res.status, 400);
+      assert.match(res.body.error, /sesion_id/);
+    });
+
+    it('Debe rechazar con 413 si supera el límite de 2KB', async () => {
+      const largeComment = 'A'.repeat(3000);
+      const res = await request(app)
+        .post('/api/tracking')
+        .set('Authorization', 'Bearer token-valido-telemetria')
+        .send({
+          tipo_evento: 'feedback_enviado',
+          metadata: {
+            sesion_id: 'sesion-123',
+            comentario: largeComment
+          }
+        });
+
+      assert.strictEqual(res.status, 413);
+      assert.match(res.body.error, /Too Large/);
+    });
+  });
 });
+
