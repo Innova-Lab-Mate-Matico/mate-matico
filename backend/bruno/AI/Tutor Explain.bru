@@ -1,0 +1,39 @@
+meta {
+  name: Tutor Explain
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/ai/explain
+  body: json
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "moduleId": "aritmetica",
+    "lessonId": "leccion-1",
+    "theoryId": "teoria-1",
+    "question": "No entiendo cómo sumar fracciones con distinto denominador.",
+    "sesion_id": "sesion-ai-prueba-123",
+    "history": [
+      {
+        "role": "user",
+        "text": "Hola, ¿me podés explicar la teoría de suma?"
+      },
+      {
+        "role": "model",
+        "text": "¡Hola! Sí, por supuesto. ¿Qué parte te genera dudas?"
+      }
+    ]
+  }
+}
