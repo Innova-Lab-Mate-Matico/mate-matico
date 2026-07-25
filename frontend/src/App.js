@@ -9,6 +9,7 @@ import Profile from './components/Profile';
 import Modules from './components/Modules';
 import Progress from './components/Progress';
 import RachaRotaModal from './components/RachaRotaModal';
+import AdminAnalyticsView from './components/AdminAnalyticsView';
 
 // NUEVOS COMPONENTES: Control de flujo inicial de captación
 import OnboardingWizard from './components/OnboardingWizard';
@@ -745,6 +746,10 @@ const apiCall = React.useCallback(async (path, options = {}, customToken = null)
               {activeTab === 'logros' && (
                 <Progress apiCall={apiCall} />
               )}
+
+              {activeTab === 'analitica' && (
+                <AdminAnalyticsView user={user} apiCall={apiCall} />
+              )}
             </div>
           </div>
 
@@ -799,6 +804,15 @@ const apiCall = React.useCallback(async (path, options = {}, customToken = null)
           >
             <img src={navProgresoSvg} alt="Progreso" />
             <span>Progreso</span>
+          </button>
+
+          <button
+            type="button"
+            className={`figma-nav-item ${activeTab === 'analitica' ? 'active' : ''}`}
+            onClick={() => setActiveTab('analitica')}
+          >
+            <span style={{ fontSize: '1.2rem', display: 'block', lineHeight: '1.2' }}>📊</span>
+            <span>Analítica</span>
           </button>
 
           <button
