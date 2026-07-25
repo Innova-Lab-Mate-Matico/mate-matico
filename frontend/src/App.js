@@ -25,6 +25,7 @@ import navPracticarSvg from './assets/cards_star.svg';
 import navInicioSvg from './assets/home.svg';
 import navProgresoSvg from './assets/diamond_shine.svg';
 import navPerfilSvg from './assets/account_circle.svg';
+import navAnaliticaImg from './assets/monitor.png';
 
 
 
@@ -811,7 +812,7 @@ const apiCall = React.useCallback(async (path, options = {}, customToken = null)
             className={`figma-nav-item ${activeTab === 'analitica' ? 'active' : ''}`}
             onClick={() => setActiveTab('analitica')}
           >
-            <span style={{ fontSize: '1.2rem', display: 'block', lineHeight: '1.2' }}>📊</span>
+            <img src={navAnaliticaImg} alt="Analítica" />
             <span>Analítica</span>
           </button>
 
