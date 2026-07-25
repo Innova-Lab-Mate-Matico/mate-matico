@@ -19,6 +19,7 @@ function AdminAnalyticsView({ user, apiCall }) {
   const [errorMsg, setErrorMsg] = useState('');
 
   const isAdmin = user?.rol === 'admin' || user?.esAdmin === true;
+  const canAccessAnalytics = isAdmin || user?.rol === 'viewer';
 
   const loadDashboards = async () => {
     setLoading(true);
@@ -38,8 +39,24 @@ function AdminAnalyticsView({ user, apiCall }) {
   };
 
   useEffect(() => {
-    loadDashboards();
-  }, []);
+    if (canAccessAnalytics) {
+      loadDashboards();
+    }
+  }, [canAccessAnalytics]);
+
+  if (!canAccessAnalytics) {
+    return (
+      <div className="admin-analytics-page" style={{ padding: '60px 20px', textAlign: 'center' }}>
+        <div className="analytics-empty-box">
+          <span className="empty-icon" style={{ fontSize: '3rem' }}>🔒</span>
+          <h3 style={{ marginTop: '12px', color: '#1e293b' }}>Acceso Restringido</h3>
+          <p style={{ color: '#64748b', fontSize: '0.92rem' }}>
+            Esta sección es exclusiva para el equipo de administración y analítica de Mate-Mático.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   const handleAddDashboard = async (e) => {
     e.preventDefault();
