@@ -17,7 +17,7 @@ function AdminAnalyticsView({ user, apiCall }) {
   const [saving, setSaving] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
-  const isAdmin = user?.rol === 'admin' || user?.esAdmin === true || true; // Permitir gestion a administradores y equipo
+  const isAdmin = user?.rol === 'admin' || user?.esAdmin === true || true;
 
   const loadDashboards = async () => {
     setLoading(true);
@@ -94,25 +94,38 @@ function AdminAnalyticsView({ user, apiCall }) {
 
   return (
     <div className="admin-analytics-page">
-      {/* Encabezado Principal con Logo.png y Título Solicitado */}
+      {/* Tarjeta de Encabezado Principal de Alta Estética */}
       <div className="analytics-header-card">
-        <div className="analytics-title-group">
-          <img src={logoImg} alt="Logo Mate-Mático" className="analytics-header-logo" />
-          <h1 className="analytics-main-title">Dashboard Analytics</h1>
+        <div className="analytics-header-top-row">
+          <div className="analytics-title-group">
+            <img src={logoImg} alt="Logo Mate-Mático" className="analytics-header-logo" />
+            <h1 className="analytics-main-title">Dashboard Analytics</h1>
+          </div>
+
+          {isAdmin && (
+            <button
+              type="button"
+              className="add-dashboard-btn"
+              onClick={() => setShowAddModal(true)}
+            >
+              ＋ Agregar Tablero
+            </button>
+          )}
         </div>
+
         <p className="analytics-subtitle">
           Tableros analíticos en tiempo real del equipo de Data (Looker Studio, Power BI, Tableau).
         </p>
 
-        {/* Selector de Tableros (Pestañas) */}
+        {/* Pestañas de Selección de Tablero */}
         {dashboards.length > 0 && (
-          <div className="analytics-tabs-wrapper">
-            <div className="analytics-tabs-list">
+          <div className="analytics-tabs-container">
+            <div className="analytics-tabs-scrollable">
               {dashboards.map((dash) => (
                 <button
                   key={dash.id}
                   type="button"
-                  className={`analytics-tab-btn ${activeDashId === dash.id ? 'active' : ''}`}
+                  className={`analytics-tab-pill ${activeDashId === dash.id ? 'active' : ''}`}
                   onClick={() => setActiveDashId(dash.id)}
                 >
                   <span className="tab-icon">
@@ -122,21 +135,11 @@ function AdminAnalyticsView({ user, apiCall }) {
                 </button>
               ))}
             </div>
-
-            {isAdmin && (
-              <button
-                type="button"
-                className="add-dashboard-btn"
-                onClick={() => setShowAddModal(true)}
-              >
-                ＋ Agregar Tablero
-              </button>
-            )}
           </div>
         )}
       </div>
 
-      {/* Cargando o Visualizador del Tablero Activo */}
+      {/* Contenido Principal: Reproductor del Tablero Activo */}
       {loading ? (
         <div className="analytics-loading-box">
           <div className="spinner"></div>
@@ -144,10 +147,14 @@ function AdminAnalyticsView({ user, apiCall }) {
         </div>
       ) : activeDashboard ? (
         <div className="analytics-content-box">
-          {/* Descripción del tablero activo */}
+          {/* Banner de descripción empático */}
           {activeDashboard.descripcion && (
             <div className="dashboard-description-banner">
-              <p>💡 {activeDashboard.descripcion}</p>
+              <div className="description-text">
+                <span className="description-icon">💡</span>
+                <p>{activeDashboard.descripcion}</p>
+              </div>
+
               {isAdmin && dashboards.length > 1 && (
                 <button
                   type="button"
@@ -161,7 +168,7 @@ function AdminAnalyticsView({ user, apiCall }) {
             </div>
           )}
 
-          {/* Reproductor de Embed Modular */}
+          {/* Reproductor Embebido de Alta Fidelidad */}
           <DashboardEmbed
             url={activeDashboard.url}
             title={activeDashboard.titulo}
@@ -170,7 +177,9 @@ function AdminAnalyticsView({ user, apiCall }) {
         </div>
       ) : (
         <div className="analytics-empty-box">
-          <p>No hay tableros configurados actualmente.</p>
+          <span className="empty-icon">📊</span>
+          <h3>No hay tableros configurados</h3>
+          <p>Los tableros agregados por el equipo de Data aparecerán aquí automáticamente.</p>
           {isAdmin && (
             <button
               type="button"
@@ -183,11 +192,20 @@ function AdminAnalyticsView({ user, apiCall }) {
         </div>
       )}
 
-      {/* Modal para Agregar Tablero Embebido (Solo Admin) */}
+      {/* Modal para Agregar Tablero (Solo Administradores / Equipo) */}
       {showAddModal && (
         <div className="modal-overlay">
           <div className="modal-card">
-            <h2>Agregar Nuevo Tablero Analítico</h2>
+            <div className="modal-header">
+              <h2>Agregar Nuevo Tablero Analítico</h2>
+              <button
+                type="button"
+                className="modal-close-icon"
+                onClick={() => setShowAddModal(false)}
+              >
+                ✕
+              </button>
+            </div>
             <p className="modal-subtitle">
               Pegá el enlace de inserción (embed URL) proporcionado por el equipo de Data.
             </p>

@@ -21,25 +21,34 @@ function DashboardEmbed({ url, title, provider = 'looker' }) {
     }
   };
 
+  const getProviderName = (p) => {
+    switch (p) {
+      case 'looker': return '📊 Looker Studio';
+      case 'powerbi': return '⚡ Power BI';
+      case 'tableau': return '📈 Tableau';
+      default: return '📌 Dashboard';
+    }
+  };
+
   return (
     <div className={`dashboard-embed-container ${isFullscreen ? 'fullscreen-mode' : ''}`}>
-      {/* Barra de herramientas superior del Embed */}
+      {/* Barra de herramientas del Embed */}
       <div className="dashboard-embed-toolbar">
-        <div className="toolbar-info">
+        <div className="toolbar-header-left">
           <span className={`provider-badge ${provider}`}>
-            {provider === 'looker' ? '📊 Looker Studio' : provider === 'powerbi' ? '⚡ Power BI' : provider === 'tableau' ? '📈 Tableau' : '📌 Dashboard'}
+            {getProviderName(provider)}
           </span>
-          <span className="toolbar-title">{title}</span>
+          <h2 className="toolbar-title">{title}</h2>
         </div>
 
         <div className="toolbar-actions">
           <button
             type="button"
-            className="toolbar-btn"
+            className="toolbar-btn secondary"
             onClick={reloadIframe}
             title="Recargar datos del tablero"
           >
-            🔄 Actualizar
+            <span className="btn-icon">🔄</span> Actualizar
           </button>
           <button
             type="button"
@@ -47,7 +56,7 @@ function DashboardEmbed({ url, title, provider = 'looker' }) {
             onClick={toggleFullscreen}
             title={isFullscreen ? "Salir de pantalla completa" : "Pantalla completa"}
           >
-            {isFullscreen ? '↙ Saliendo' : '⤢ Pantalla Completa'}
+            <span className="btn-icon">{isFullscreen ? '↙' : '⤢'}</span> {isFullscreen ? 'Salir' : 'Pantalla Completa'}
           </button>
         </div>
       </div>
@@ -57,7 +66,7 @@ function DashboardEmbed({ url, title, provider = 'looker' }) {
         {loading && (
           <div className="iframe-loader">
             <div className="spinner"></div>
-            <p>Cargando métricas de {title}...</p>
+            <p>Conectando con {title}...</p>
           </div>
         )}
         <iframe
