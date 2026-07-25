@@ -807,14 +807,16 @@ const apiCall = React.useCallback(async (path, options = {}, customToken = null)
             <span>Progreso</span>
           </button>
 
-          <button
-            type="button"
-            className={`figma-nav-item ${activeTab === 'analitica' ? 'active' : ''}`}
-            onClick={() => setActiveTab('analitica')}
-          >
-            <img src={navAnaliticaImg} alt="Analítica" />
-            <span>Analítica</span>
-          </button>
+          {(user?.rol === 'admin' || user?.rol === 'viewer' || user?.esAdmin === true) && (
+            <button
+              type="button"
+              className={`figma-nav-item ${activeTab === 'analitica' ? 'active' : ''}`}
+              onClick={() => setActiveTab('analitica')}
+            >
+              <img src={navAnaliticaImg} alt="Analítica" />
+              <span>Analítica</span>
+            </button>
+          )}
 
           <button
             type="button"
