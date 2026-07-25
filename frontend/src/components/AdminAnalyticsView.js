@@ -8,6 +8,7 @@ function AdminAnalyticsView({ user, apiCall }) {
   const [activeDashId, setActiveDashId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [isMobilePreview, setIsMobilePreview] = useState(false);
 
   // Campos para nuevo tablero
   const [newTitle, setNewTitle] = useState('');
@@ -93,7 +94,7 @@ function AdminAnalyticsView({ user, apiCall }) {
   const activeDashboard = dashboards.find(d => d.id === activeDashId) || dashboards[0];
 
   return (
-    <div className="admin-analytics-page">
+    <div className={`admin-analytics-page ${isMobilePreview ? 'mobile-preview-mode' : 'desktop-wide-mode'}`}>
       {/* Tarjeta de Encabezado Principal de Alta Estética */}
       <div className="analytics-header-card">
         <div className="analytics-header-top-row">
@@ -102,15 +103,27 @@ function AdminAnalyticsView({ user, apiCall }) {
             <h1 className="analytics-main-title">Dashboard Analytics</h1>
           </div>
 
-          {isAdmin && (
+          <div className="analytics-header-actions">
+            {/* Botón para cambiar entre vista Escritorio o Móvil */}
             <button
               type="button"
-              className="add-dashboard-btn"
-              onClick={() => setShowAddModal(true)}
+              className="view-mode-toggle-btn"
+              onClick={() => setIsMobilePreview(!isMobilePreview)}
+              title="Cambiar formato de visualización"
             >
-              ＋ Agregar Tablero
+              {isMobilePreview ? '🖥️ Ver en Escritorio' : '📱 Simular Celular'}
             </button>
-          )}
+
+            {isAdmin && (
+              <button
+                type="button"
+                className="add-dashboard-btn"
+                onClick={() => setShowAddModal(true)}
+              >
+                ＋ Agregar Tablero
+              </button>
+            )}
+          </div>
         </div>
 
         <p className="analytics-subtitle">

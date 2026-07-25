@@ -672,8 +672,8 @@ const apiCall = React.useCallback(async (path, options = {}, customToken = null)
       {renderServerErrorBanner()}
       <img src={olaSuperior} alt="" className="global-wave ola-superior" />
       <img src={olaInferior} alt="" className="global-wave ola-inferior" />
-      <div className="app-container" id="arriba" style={{ minHeight: '100vh' }}>
-        <header className="dashboard-header">
+      <div className={`app-container ${activeTab === 'analitica' ? 'analytics-mode' : ''}`} id="arriba" style={{ minHeight: '100vh' }}>
+        <header className={`dashboard-header ${activeTab === 'analitica' ? 'analytics-mode-header' : ''}`}>
           <div className="dashboard-header-left" style={{ display: 'flex', alignItems: 'center' }}>
             <img src={logoPrincipal} alt="Mate-Mático" className="dashboard-logo" style={{ height: '62px', objectFit: 'contain' }} />
           </div>
