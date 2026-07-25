@@ -4,6 +4,19 @@ import { db } from '../config/firebase.js';
 
 const router = Router();
 
+// Middleware para verificar que el usuario autenticado sea Administrador
+const requireAdmin = (req, res, next) => {
+  const role = req.user?.rol;
+  const esAdmin = req.user?.esAdmin;
+  if (role === 'admin' || esAdmin === true) {
+    return next();
+  }
+  return res.status(403).json({
+    success: false,
+    error: 'Acceso denegado: Se requieren permisos de Administrador para gestionar tableros.'
+  });
+};
+
 // Fallback por defecto si no existen tableros aún en Firestore
 const DEFAULT_DASHBOARDS = [
   {
@@ -28,7 +41,7 @@ const DEFAULT_DASHBOARDS = [
   }
 ];
 
-// 1. Obtener lista de tableros de analítica
+// 1. Obtener lista de tableros (Accesible por admin y viewer)
 router.get('/dashboards', requireAuth, async (req, res) => {
   try {
     const snapshot = await db.collection('dashboards').get();
@@ -42,7 +55,7 @@ router.get('/dashboards', requireAuth, async (req, res) => {
       dashboards.push({ id: doc.id, ...doc.data() });
     });
 
-    // Ordenar por campo 'orden' o fecha
+    // Ordenar por campo 'orden'
     dashboards.sort((a, b) => (a.orden ?? 99) - (b.orden ?? 99));
 
     return res.json({ success: true, dashboards });
@@ -52,8 +65,8 @@ router.get('/dashboards', requireAuth, async (req, res) => {
   }
 });
 
-// 2. Agregar un nuevo tablero (Guardar en Firestore)
-router.post('/dashboards', requireAuth, async (req, res) => {
+// 2. Agregar un nuevo tablero (Solo Administrador)
+router.post('/dashboards', requireAuth, requireAdmin, async (req, res) => {
   try {
     const { titulo, descripcion, url, proveedor } = req.body ?? {};
 
@@ -90,8 +103,8 @@ router.post('/dashboards', requireAuth, async (req, res) => {
   }
 });
 
-// 3. Eliminar / Desactivar un tablero
-router.delete('/dashboards/:id', requireAuth, async (req, res) => {
+// 3. Eliminar un tablero (Solo Administrador)
+router.delete('/dashboards/:id', requireAuth, requireAdmin, async (req, res) => {
   try {
     const { id } = req.params;
     if (!id) {

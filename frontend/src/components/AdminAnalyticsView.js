@@ -18,7 +18,7 @@ function AdminAnalyticsView({ user, apiCall }) {
   const [saving, setSaving] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
-  const isAdmin = user?.rol === 'admin' || user?.esAdmin === true || true;
+  const isAdmin = user?.rol === 'admin' || user?.esAdmin === true;
 
   const loadDashboards = async () => {
     setLoading(true);
