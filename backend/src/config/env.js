@@ -76,6 +76,7 @@ export const env = {
   supabase: {
     url: optional('SUPABASE_URL'),
     anonKey: optional('SUPABASE_ANON_KEY'),
+    dbUrl: optional('SUPABASE_DB_URL'),
   },
 };
 
