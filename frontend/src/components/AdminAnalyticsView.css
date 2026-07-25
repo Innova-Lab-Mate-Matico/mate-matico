@@ -61,7 +61,7 @@
   background-color: #f5f3ff;
   border: 1.5px solid #c4b5fd;
   color: #6d28d9;
-  padding: 9px 16px;
+  padding: 10px 18px;
   border-radius: 14px;
   font-weight: 700;
   font-size: 0.85rem;
@@ -376,37 +376,68 @@
   background-color: #7b2cbf;
 }
 
-/* Adaptación Responsiva */
+/* =========================================================
+   ADAPTACIÓN RESPONSIVA Y MODO SIMULAR CELULAR (STACK VERTICAL)
+   ========================================================= */
+
+.mobile-preview-mode .analytics-header-top-row,
 @media (max-width: 640px) {
-  .analytics-header-card {
-    padding: 18px 16px;
+  .analytics-header-top-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
   }
-  .analytics-main-title {
-    font-size: 1.35rem;
+
+  .analytics-title-group {
+    width: 100%;
+    justify-content: flex-start;
   }
-  .analytics-header-logo {
-    height: 36px;
-  }
+
   .analytics-header-actions {
     width: 100%;
-    flex-direction: column;
+    flex-direction: column; /* Un botón sobre el otro en celular */
+    gap: 8px;
   }
+
   .view-mode-toggle-btn,
   .add-dashboard-btn {
     width: 100%;
     text-align: center;
     justify-content: center;
-    padding: 12px;
+    padding: 12px 14px;
+    box-sizing: border-box;
   }
-  .analytics-header-top-row {
-    flex-direction: column;
-    align-items: flex-start;
+}
+
+.mobile-preview-mode .analytics-tabs-scrollable,
+@media (max-width: 640px) {
+  .analytics-tabs-scrollable {
+    flex-direction: column; /* Apilar pestañas verticalmente en celular */
+    align-items: stretch;
+    width: 100%;
+    gap: 8px;
   }
+
+  .analytics-tab-pill {
+    width: 100%;
+    justify-content: flex-start;
+    padding: 12px 16px;
+    font-size: 0.88rem;
+    white-space: normal; /* Permite saltos de línea sin encimarse */
+  }
+}
+
+.mobile-preview-mode .dashboard-description-banner,
+@media (max-width: 640px) {
   .dashboard-description-banner {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch;
+    gap: 12px;
   }
+
   .delete-dash-btn {
-    align-self: flex-end;
+    width: 100%;
+    text-align: center;
+    justify-content: center;
   }
 }
