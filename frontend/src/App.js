@@ -72,6 +72,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('inicio');
 
   const [networkError, setNetworkError] = useState(false);
+  const [serverError, setServerError] = useState(null);
 
   /*
     Escuchar cambios y renovación automática de token de Firebase
@@ -120,8 +121,9 @@ export default function App() {
     setStatusMsg(msg);
     setIsStatusOk(ok);
   };
+
 /*
-  Wrapper estándar para llamadas HTTP al backend con auto-refresh y reintento inteligente de token expirado.
+  Wrapper estándar para llamadas HTTP al backend con auto-refresh, manejo de 401 y cartel empático de red/servidor.
 */
 const apiCall = React.useCallback(async (path, options = {}, customToken = null) => {
   const headers = {
@@ -146,10 +148,20 @@ const apiCall = React.useCallback(async (path, options = {}, customToken = null)
     headers.Authorization = `Bearer ${activeToken}`;
   }
 
-  let res = await fetch(`${API_BASE}${path}`, {
-    ...options,
-    headers,
-  });
+  let res;
+  try {
+    res = await fetch(`${API_BASE}${path}`, {
+      ...options,
+      headers,
+    });
+  } catch (netErr) {
+    console.error("Error de red al conectar con la API:", netErr);
+    setServerError({
+      active: true,
+      retry: () => apiCall(path, options, customToken)
+    });
+    throw netErr;
+  }
 
   // Interceptor de 401 Unauthorized: renovar forzosamente y reintentar la petición automáticamente
   if (res.status === 401 && firebaseAuth && firebaseAuth.currentUser) {
@@ -172,11 +184,26 @@ const apiCall = React.useCallback(async (path, options = {}, customToken = null)
   const data = await res.json().catch(() => ({}));
 
   if (!res.ok) {
+    if (res.status === 401) {
+      console.warn("⚠️ Sesión expirada o no autorizada (401). Cerrando sesión de forma limpia...");
+      localStorage.removeItem('idToken');
+      setToken(null);
+      setUser(null);
+    } else if (res.status >= 500) {
+      setServerError({
+        active: true,
+        retry: () => apiCall(path, options, customToken)
+      });
+    }
+
     const err = new Error(data.error || res.statusText || "Error inesperado en la API");
     err.status = res.status;
     err.raw = data;
     throw err;
   }
+
+  // Limpiar el aviso de error de servidor si la llamada fue exitosa
+  setServerError(null);
 
   return data;
 }, [token]);
@@ -518,10 +545,63 @@ const apiCall = React.useCallback(async (path, options = {}, customToken = null)
     }
   };
 
+  const renderServerErrorBanner = () => {
+    if (!serverError?.active) return null;
+    return (
+      <div style={{
+        position: 'fixed',
+        top: '16px',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        zIndex: 999999,
+        backgroundColor: '#FFF3CD',
+        border: '1px solid #FFEBAA',
+        borderRadius: '12px',
+        padding: '12px 20px',
+        boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '14px',
+        maxWidth: '90%',
+        width: '480px'
+      }}>
+        <span style={{ fontSize: '1.5rem' }}>🧉</span>
+        <div style={{ flex: 1 }}>
+          <p style={{ margin: 0, fontSize: '0.88rem', color: '#856404', fontWeight: 'bold' }}>
+            Tuvimos un problema al comunicarnos con la pizarra de Mate-Mático.
+          </p>
+          <p style={{ margin: '2px 0 0 0', fontSize: '0.78rem', color: '#856404' }}>
+            Comprobá tu conexión a internet o reintentá en unos segundos.
+          </p>
+        </div>
+        <button
+          onClick={() => {
+            const retryFn = serverError.retry;
+            setServerError(null);
+            if (retryFn) retryFn();
+          }}
+          style={{
+            backgroundColor: '#9747FF',
+            color: '#ffffff',
+            border: 'none',
+            padding: '8px 14px',
+            borderRadius: '8px',
+            fontWeight: 'bold',
+            cursor: 'pointer',
+            fontSize: '0.82rem'
+          }}
+        >
+          Reintentar
+        </button>
+      </div>
+    );
+  };
+
   if (!user) {
     /* PÁGINA DE INGRESO: Login centrado con leyenda discreta al pie, todo dentro de 100vh */
     return (
       <div className="app-main-layout" style={{ height: '100vh', overflow: 'hidden', display: 'flex', flexDirection: 'column', position: 'relative' }}>
+        {renderServerErrorBanner()}
         <img src={olaSuperior} alt="" className="global-wave ola-superior" />
         <img src={olaInferior} alt="" className="global-wave ola-inferior" />
 
@@ -563,6 +643,7 @@ const apiCall = React.useCallback(async (path, options = {}, customToken = null)
     /* FLUJO DE ONBOARDING: Pantalla completa limpia para el asistente de onboarding */
     return (
       <div className="app-main-layout">
+        {renderServerErrorBanner()}
         <img src={olaSuperior} alt="" className="global-wave ola-superior" />
         <img src={olaInferior} alt="" className="global-wave ola-inferior" />
         <div className="app-container" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
@@ -587,6 +668,7 @@ const apiCall = React.useCallback(async (path, options = {}, customToken = null)
   /* PANEL PRINCIPAL: Usuario logueado con onboarding completado, cabecera compacta con estadísticas */
   return (
     <div className="app-main-layout">
+      {renderServerErrorBanner()}
       <img src={olaSuperior} alt="" className="global-wave ola-superior" />
       <img src={olaInferior} alt="" className="global-wave ola-inferior" />
       <div className="app-container" id="arriba" style={{ minHeight: '100vh' }}>
