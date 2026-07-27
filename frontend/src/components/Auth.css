@@ -2,23 +2,17 @@
  CONTENEDOR GENERAL (AUTH)
 ========================= */
 .auth-container {
- min-height: 100vh;
- width: 100%;
- display: flex;
- flex-direction: column;
- justify-content: space-between;
- align-items: center;
- position: relative;
- isolation: isolate;
- padding: 0;
- background: linear-gradient(
- 135deg,
- #ffffff 0%,
- #f7f2ff 50%,
- #e8dbff 100%
- );
- overflow-x: hidden;
- overflow-y: auto;
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  isolation: isolate;
+  padding: 0;
+  background: transparent;
+  overflow: hidden;
 }
 /* =========================
  CARD (LOGIN / REGISTER / RECOVER)
