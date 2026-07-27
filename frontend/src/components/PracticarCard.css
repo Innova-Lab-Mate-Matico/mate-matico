@@ -1,0 +1,364 @@
+
+/* ===================================
+   CONTENEDOR
+=================================== */
+.practicar-card{
+    display:flex;
+    flex-direction:column;
+    background:#F8FAFC;
+    height:100%;
+    padding:0;
+}
+
+/* ===================================
+   HEADER
+=================================== */
+.practicar-card .card-content{
+    flex:1;
+
+    padding:8px 24px 16px;
+}
+
+.practicar-card .back-button{
+    background:none;
+    border:none;
+    cursor:pointer;
+    color:#737373;
+    font-family:Poppins,sans-serif;
+    font-size:16px;
+    font-weight:500;
+}
+
+/* ===================================
+   CONTENIDO
+=================================== */
+
+
+
+.practicar-title{
+    text-align:center;
+    margin:0 0 18px;
+    font-family:Poppins,sans-serif;
+    font-size:28px;
+    font-weight:700;
+    color:#1A1A1A;
+}
+
+/* ===================================
+   HERO
+=================================== */
+
+/* ===================================
+   HERO
+=================================== */
+.hero-section{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    margin-bottom:12px;
+}
+
+.hero-text{
+    flex:1;
+    max-width:190px;
+    position:relative;
+    z-index:2;
+}
+
+.hero-text h2{
+    margin:0;
+    font-family:Poppins,sans-serif;
+    font-size:16px;
+    font-weight:700;
+    color:#1A1A1A;
+}
+
+.hero-text p{
+    margin-top:6px;
+    margin-bottom:0;
+    font-family:Poppins,sans-serif;
+    font-size:14px;
+    font-weight:400;
+    line-height:15px;
+    color:#000;
+}
+
+.hero-decoration{
+    position:relative;
+    width:170px;
+    height:150px;
+    flex-shrink:0;
+}
+
+.wave-image{
+    position:absolute;
+    top:-100px;
+    right:-28px;
+    width:215px;
+    z-index:1;
+}
+
+.hero-image{
+    position:absolute;
+    top:8px;
+    right:8px;
+    width:118px;
+    z-index:2;
+}
+
+/* ===================================
+   FILTROS
+=================================== */
+
+.filter-group{
+    margin-bottom:10px;
+}
+
+.filter-group label{
+    display:block;
+    margin-bottom:8px;
+    font-family:Poppins,sans-serif;
+    font-size:16px;
+    font-weight:600;
+    color:#1A1A1A;
+}
+
+.filter-row{
+    display:flex;
+    align-items:center;
+    gap:14px;
+}
+
+.circle-icon{
+    width:46px;
+    height:46px;
+    min-width:46px;
+
+    border-radius:50%;
+    background:#D6E9FA;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    flex-shrink:0;
+}
+
+.filter-select{
+    width:250px;      /* todos iguales */
+    max-width:100%;   /* para que no se salga en pantallas chicas */
+    height:46px;
+    box-sizing:border-box;
+
+    border:1px solid #B8B8B8;
+    border-radius:8px;
+    background:#fff;
+    padding:0 14px;
+
+    font-family:Poppins,sans-serif;
+    font-size:16px;
+    font-weight:500;
+    color:#737373;
+}
+
+/* ===================================
+   TARJETAS INFORMATIVAS
+=================================== */
+.info-card{
+    width:100%;
+    height:76px;
+    border-radius:18px;
+    border:1px solid #B8B8B8;
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:10px 14px;
+    margin-top:8px;
+    box-sizing:border-box;
+    overflow:hidden;
+}
+
+.ia-card{
+    background:#F2F0FD;
+}
+
+.mate-card{
+    background:#FAF8F2;
+}
+
+.ia-icon{
+    width:34px;
+    height:31px;
+    flex-shrink:0;
+}
+
+.mate-info{
+    width:84px;
+    height:84px;
+    object-fit:contain;
+    flex-shrink:0;
+}
+
+.info-card p{
+    flex:1;
+    margin:0;
+    color:#1A1A1A;
+    font-family:Poppins,sans-serif;
+    font-size:14px;
+    font-weight:500;
+    line-height:16px;
+}
+
+/* ===================================
+   FOOTER
+=================================== */
+.practicar-card .card-footer{
+    padding:16px 24px;
+    flex-shrink:0;
+}
+
+.generar-button{
+    width:100%;
+    height:52px;
+    background:#9747FF;
+    border:none;
+    border-radius:12px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:12px;
+    cursor:pointer;
+    transition:.2s;
+}
+
+.generar-button:hover{
+    background:#8657F6;
+}
+
+.generar-button span{
+    color:#FFF;
+    font-family:Inter,sans-serif;
+    font-size:20px;
+    font-weight:600;
+}
+
+.button-icon{
+    width:22px;
+    height:22px;
+}
+/* ===================================
+   BARRA INFERIOR
+=================================== */
+.bottom-nav{
+    height:55px;
+    background:#FFFFFF;
+    border-top:1px solid #E5E7EB;
+
+    display:flex;
+    justify-content:space-around;
+    align-items:center;
+
+    padding:4px 0;
+
+    flex-shrink:0;
+}
+
+.nav-item{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:3px;
+    text-decoration:none;
+}
+
+.nav-icon{
+    width:22px;
+    height:22px;
+    object-fit:contain;
+}
+
+.nav-item span{
+    font-family:Poppins,sans-serif;
+    font-size:11px;
+    font-weight:600;
+    line-height:15px;
+    color:#000000;
+}
+
+.nav-item.active span{
+    color:#9747FF;
+}
+
+/* Si el SVG del ícono activo es negro, podés dejarlo así.
+   Si tenés una versión violeta, reemplazá el archivo directamente. */
+
+.nav-item.active .nav-icon{
+    transform:scale(1.05);
+}
+
+/* ===================================
+   SELECT
+=================================== */
+
+.filter-select{
+    appearance:none;
+    -webkit-appearance:none;
+    -moz-appearance:none;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='8' viewBox='0 0 14 8'%3E%3Cpath d='M1 1L7 7L13 1' stroke='%23737373' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;
+    background-position:right 16px center;
+    padding-right:42px;
+    cursor:pointer;
+}
+
+/* ===================================
+   RESPONSIVE
+=================================== */
+
+
+
+
+/* ===================================
+   PEQUEÑOS AJUSTES
+=================================== */
+
+.practicar-title{
+    letter-spacing:-0.3px;
+}
+
+
+
+
+.filter-group:last-of-type{
+    margin-bottom:20px;
+}
+
+.generar-button:active{
+    transform:scale(.98);
+}
+.circle-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.circle-icon img {
+  width: 22px;
+  height: 22px;
+  display: block;
+}
+
+/* Ajuste individual de cada ícono */
+img[src*="android_cell_4_bar"] {
+  transform: translateY(1px);
+}
+
+img[src*="book_ribbon"] {
+  transform: translateY(1px);
+}
+
+img[src*="format_list_bulleted"] {
+  transform: translateY(1px);
+}
