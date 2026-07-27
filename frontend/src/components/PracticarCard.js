@@ -19,6 +19,9 @@ function PracticarCard({ onBack, onComplete, onNavigate }) {
   return (
     <div className="app-card practicar-card">
 
+      {/* OLA DECORATIVA SUPERIOR DERECHA */}
+      <img src={image2} alt="" className="card-top-wave" />
+
       {/* HEADER */}
 
       <div className="card-header">
@@ -58,12 +61,6 @@ function PracticarCard({ onBack, onComplete, onNavigate }) {
   </div>
 
   <div className="hero-decoration">
-
-    <img
-      src={image2}
-      alt=""
-      className="wave-image"
-    />
 
     <img
       src={matecitoTech1}
