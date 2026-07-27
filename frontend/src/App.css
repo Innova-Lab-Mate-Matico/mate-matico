@@ -20,7 +20,7 @@
 
 :root {
   --card-width-mobile: 390px;
-  --card-width-desktop: 430px;
+  --card-width-desktop: 540px;
 
   --card-min-height-mobile: 700px;
   --card-min-height-desktop: 760px;
@@ -67,10 +67,10 @@
    DESKTOP
 ========================= */
 
-@media (min-width:1024px){
-  .app-card{
-    width:min(92vw, var(--card-width-desktop));
-    height:var(--card-min-height-desktop);
+@media (min-width: 768px){
+  .app-card {
+    width: min(92vw, var(--card-width-desktop));
+    min-height: var(--card-min-height-desktop);
   }
 }
 

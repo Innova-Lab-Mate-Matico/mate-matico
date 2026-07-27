@@ -96,30 +96,36 @@
     color:#000;
 }
 
-.hero-decoration{
-    position:relative;
-    width:170px;
-    height:150px;
-    flex-shrink:0;
-}
-
-.wave-image{
-    position:absolute;
-    top:-64px;
-    right:-24px;
-    width:215px;
-    z-index:1;
+.practicar-card .card-top-wave {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 220px;
+    height: auto;
+    z-index: 1;
     border-top-right-radius: 24px;
     clip-path: inset(0 0 0 0 round 0 24px 0 0);
     pointer-events: none;
 }
 
+.hero-decoration{
+    position:relative;
+    width:140px;
+    height:120px;
+    flex-shrink:0;
+    display:flex;
+    justify-content:flex-end;
+    align-items:center;
+}
+
 .hero-image{
-    position:absolute;
-    top:8px;
-    right:8px;
-    width:118px;
-    z-index:2;
+    position:relative;
+    top:0;
+    right:0;
+    width:110px;
+    height:auto;
+    z-index:3;
+    filter: drop-shadow(0 6px 12px rgba(151, 71, 255, 0.2));
 }
 
 /* ===================================
