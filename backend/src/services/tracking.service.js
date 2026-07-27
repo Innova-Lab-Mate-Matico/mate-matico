@@ -1,68 +1,66 @@
-import { db } from '../config/firebase.js';
 import { supabase } from '../config/supabase.js';
 import crypto from 'crypto';
 
 /**
- * Registra un evento de telemetría de manera asíncrona en la colección 'eventos' de Firestore (local)
- * o directamente en la tabla 'eventos' de Supabase (producción).
- * Diseñado con manejo interno de errores para evitar interrumpir la usabilidad de la app.
+ * Mapea un objeto de evento individual a la estructura de columnas relacional de Supabase
+ */
+function mapEventToRow(userId, item) {
+  const eventId = item.evento_id || crypto.randomUUID();
+  const fechaHora = item.fecha || item.fecha_hora || new Date().toISOString();
+  const meta = item.metadata || item;
+
+  return {
+    evento_id: eventId,
+    usuario_id: userId || item.usuario_id || null,
+    tipo_evento: item.tipo_evento || item.tipo || 'evento_generico',
+    modulo: meta.tema || meta.moduleId || item.modulo || null,
+    leccion: meta.subtema || meta.leccion_id || item.leccion || null,
+    ejercicio: meta.ejercicio_id || item.ejercicio || null,
+    tiempo_segundos: meta.tiempo_segundos !== undefined && meta.tiempo_segundos !== null ? Number(meta.tiempo_segundos) : null,
+    resultado: meta.resultado || item.resultado || null,
+    intentos: meta.intentos !== undefined && meta.intentos !== null ? Number(meta.intentos) : null,
+    puntaje: meta.puntaje !== undefined && meta.puntaje !== null ? Number(meta.puntaje) : null,
+    metadata: meta, // Columna JSONB para atributos auxiliares
+    fecha: fechaHora // Timestamp con zona horaria
+  };
+}
+
+/**
+ * Ingesta masiva (Bulk Insert) de un lote de eventos hacia Supabase PostgreSQL.
+ * Diseñado de forma asíncrona y no bloqueante con cero impacto en cuotas de Firestore.
  *
  * @param {string} userId - ID del usuario autenticado
- * @param {string} eventType - Nombre del evento en snake_case
- * @param {Object} metadata - Datos específicos del evento
+ * @param {Array<Object>} eventsArray - Arreglo de eventos en lote
  */
-export async function trackEvent(userId, eventType, metadata = {}) {
-  const eventId = crypto.randomUUID();
-  const fechaHora = new Date().toISOString();
+export async function trackEventsBatch(userId, eventsArray = []) {
+  if (!Array.isArray(eventsArray) || eventsArray.length === 0) {
+    return;
+  }
 
-  // 1. Entorno de Desarrollo/Test/Emuladores: Escribir en Firestore Local
-  if (process.env.NODE_ENV !== 'production' || process.env.FIRESTORE_EMULATOR_HOST) {
-    try {
-      await db.collection('eventos').doc(eventId).set({
-        usuario_id: userId ?? null,
-        tipo_evento: eventType,
-        fecha_hora: fechaHora,
-        metadata: metadata ?? {},
-      });
-    } catch (error) {
-      if (error && (error.code === 8 || error.message?.includes('Quota exceeded'))) {
-        console.warn(`[Tracking Warning] Cuota de Firestore alcanzada en local. Omitiendo.`);
-      } else {
-        console.error(`[Tracking Error] Falló el registro del evento '${eventType}' en Firestore para usuario '${userId}':`, error.message);
-      }
+  const rows = eventsArray.map(item => mapEventToRow(userId, item));
+
+  // Inserción en lote (Bulk Insert) directa en Supabase PostgreSQL
+  if (!supabase) {
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`[Tracking Dev] Simulando inserción en lote de ${rows.length} eventos (Supabase desactivo).`);
     }
     return;
   }
 
-  // 2. Entorno de Producción: Inserción directa en la tabla 'eventos' de Supabase
-  if (!supabase) {
-    console.warn('[Supabase Warning] Cliente Supabase no inicializado en producción. Evento de telemetría omitido.');
-    return;
-  }
-
-  // Mapeo de parámetros alineado con schema.sql
-  const dbParams = {
-    evento_id: eventId,
-    usuario_id: userId ?? null,
-    tipo_evento: eventType,
-    modulo: metadata.tema || metadata.moduleId || null,
-    leccion: metadata.subtema || metadata.leccion_id || null,
-    ejercicio: metadata.ejercicio_id || null,
-    tiempo_segundos: metadata.tiempo_segundos !== undefined ? Number(metadata.tiempo_segundos) : null,
-    resultado: metadata.resultado || null,
-    intentos: metadata.intentos !== undefined ? Number(metadata.intentos) : null,
-    puntaje: metadata.puntaje !== undefined ? Number(metadata.puntaje) : null,
-    metadata: metadata, // JSONB
-    fecha: fechaHora // Timestamp con zona horaria
-  };
-
   try {
     const { error } = await supabase
       .from('eventos')
-      .insert([dbParams]);
+      .insert(rows);
 
     if (error) throw error;
   } catch (supabaseError) {
-    console.error(`[Supabase Tracking Error] Falló el registro del evento '${eventType}':`, supabaseError.message);
+    console.error(`[Supabase Batch Tracking Error] Falló la inserción en lote de ${rows.length} eventos:`, supabaseError.message);
   }
+}
+
+/**
+ * Mantiene compatibilidad con llamadas unitarias individuales redirigiéndolas al loteador
+ */
+export async function trackEvent(userId, eventType, metadata = {}) {
+  return trackEventsBatch(userId, [{ tipo_evento: eventType, metadata }]);
 }

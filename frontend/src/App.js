@@ -14,6 +14,7 @@ import AdminAnalyticsView from './components/AdminAnalyticsView';
 
 // NUEVOS COMPONENTES: Control de flujo inicial de captación
 import OnboardingWizard from './components/OnboardingWizard';
+import telemetry from './services/TelemetryService';
 
 import olaSuperior from './assets/image 2.png';
 import olaInferior from './assets/image 10 (1).png';
@@ -223,6 +224,7 @@ const apiCall = React.useCallback(async (path, options = {}, customToken = null)
       );
 
       handleSetUser(data.usuario);
+      telemetry.init(apiCall);
     } catch (err) {
       console.error('Error al cargar perfil:', err);
       logout();
