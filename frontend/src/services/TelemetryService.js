@@ -11,6 +11,7 @@ class TelemetryService {
     this.flushIntervalMs = 30000; // Trigger por tiempo (30 segundos)
     this.timer = null;
     this.apiCallRef = null;
+    this.sessionStartTime = Date.now();
     this.sessionId = typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `ses_${Date.now()}`;
     this.initialized = false;
   }
@@ -105,6 +106,17 @@ class TelemetryService {
       // Reinsertar eventos fallidos al principio de la cola para no perder datos
       this.queue = [...eventsToSend, ...this.queue];
     }
+  }
+
+  /**
+   * Finaliza la sesión actual emitiendo 'sesion_finalizada' con la duración en segundos
+   */
+  endSession() {
+    const elapsedSeconds = Math.max(1, Math.round((Date.now() - this.sessionStartTime) / 1000));
+    this.track('sesion_finalizada', {
+      tiempo_segundos: elapsedSeconds
+    });
+    this.flush();
   }
 
   /**

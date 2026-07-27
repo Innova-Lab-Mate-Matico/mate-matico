@@ -66,6 +66,13 @@ export default function App() {
     setUser(userData);
     if (userData?.rachaRota) {
       setShowRachaRota(true);
+      telemetry.track('racha_perdida', {
+        racha_dias: userData.rachaDias || 0
+      });
+    } else if (userData?.rachaDias > 0) {
+      telemetry.track('racha_actualizada', {
+        racha_dias: userData.rachaDias
+      });
     }
   };
 
@@ -262,6 +269,7 @@ const apiCall = React.useCallback(async (path, options = {}, customToken = null)
     Cerrar sesión.
   */
   const logout = () => {
+    telemetry.endSession();
     setToken('');
     setUser(null);
     setProgress(null);
