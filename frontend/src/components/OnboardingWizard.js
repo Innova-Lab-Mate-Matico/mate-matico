@@ -3,6 +3,7 @@ import EdadSelector from './EdadSelector';
 import NivelSelector from './NivelSelector';
 import InteresesSeleccion from './InteresesSeleccion';
 import RecomendacionModulo from './RecomendacionModulo';
+import telemetry from '../services/TelemetryService';
 import './OnboardingWizard.css';
 
 export default function OnboardingWizard({ apiCall, onComplete }) {
@@ -68,6 +69,13 @@ export default function OnboardingWizard({ apiCall, onComplete }) {
         setSavedUsuario(res.usuario);
         const rec = res.usuario.onboarding?.moduloRecomendado || 'porcentajes';
         setModuloRecomendado(rec);
+        telemetry.track('onboarding_finalizado', {
+          modulo_recomendado: rec,
+          edad: payload.edad,
+          objetivo: payload.objetivo,
+          confianza_math: payload.confianzaMath,
+          nivel_educativo: payload.nivelEducativo
+        });
         setStep(6); // Ir al paso de recomendación estilizada
       } else {
         setErrorMsg('Error al guardar el onboarding. Intente de nuevo.');

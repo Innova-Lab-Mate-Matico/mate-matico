@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import "./NumericExercise.css";
 import Calculadora from './Calculadora';
 import { EfectosService } from '../services/EfectosService';
+import telemetry from '../services/TelemetryService';
 import Microleccion1 from './microleccion1';
 import Microleccion2 from './microleccion2';
 import DynamicTheoryCard from './DynamicTheoryCard';
@@ -159,6 +160,16 @@ function NumericExercise({ ejercicio, index, moduleId, lessonId, teoria, apiCall
           semilla: ejercicio.semilla,
           operandos: ejercicio.operandos
         })
+      });
+
+      telemetry.track('ejercicio_completado', {
+        modulo: moduleId,
+        leccion: lessonId,
+        ejercicio: ejercicio?.id || 'num-ex-1',
+        resultado: result.correcto ? 'correcto' : 'incorrecto',
+        intentos: 1,
+        puntaje: result.correcto ? (result.puntosGanados ?? 15) : 0,
+        tiempo_segundos: 45
       });
 
       if (result.correcto) {

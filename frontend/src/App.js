@@ -343,6 +343,7 @@ const apiCall = React.useCallback(async (path, options = {}, customToken = null)
       );
 
       handleSetUser(data.usuario);
+      telemetry.track('usuario_registrado', { proveedor: 'password' });
       setActiveTab('inicio');
     } catch (err) {
       setStatus(err.message, false);
@@ -379,6 +380,7 @@ const apiCall = React.useCallback(async (path, options = {}, customToken = null)
       );
 
       handleSetUser(data.usuario);
+      telemetry.track('usuario_inicio_sesion', { proveedor: 'password' });
       setActiveTab('inicio');
     } catch (err) {
       setStatus(err.message, false);
@@ -461,6 +463,7 @@ const apiCall = React.useCallback(async (path, options = {}, customToken = null)
       );
 
       handleSetUser(data.usuario);
+      telemetry.track(data.esNuevo ? 'usuario_registrado' : 'usuario_inicio_sesion', { proveedor: 'google.com' });
       setActiveTab('inicio');
     } catch (err) {
       const friendlyMsg =
