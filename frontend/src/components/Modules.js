@@ -4,6 +4,7 @@ import LessonFlow from './LessonFlow';
 import Microleccion1 from './microleccion1';
 import Microleccion2 from './microleccion2';
 import DynamicTheoryCard from './DynamicTheoryCard';
+import telemetry from '../services/TelemetryService';
 
 /**
  * ============================================================================
@@ -230,6 +231,10 @@ export default function Modules({
           data.lesson ??
           lesson
       );
+      telemetry.track('leccion_iniciada', {
+        modulo: selectedModuleId,
+        leccion: lesson.id
+      });
     } catch (err) {
       console.error(
         'Error al cargar lección del backend:',

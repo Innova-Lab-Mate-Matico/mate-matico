@@ -9,6 +9,7 @@ import NumericExercise from "./NumericExercise";
 import ExitosCard from "./ExitosCard";
 import FinalizacionCard from "./FinalizacionCard";
 import TarjetaProgreso from "./TarjetaProgreso";
+import telemetry from "../services/TelemetryService";
 
 function LessonFlow({
   leccion,
@@ -61,6 +62,17 @@ function LessonFlow({
             completada: true,
             puntaje: sessionPoints
           })
+        });
+
+        telemetry.track('leccion_completada', {
+          modulo: moduleId,
+          leccion: leccion?.id,
+          tiempo_segundos: 180
+        });
+
+        telemetry.track('progreso_actualizado', {
+          modulo: moduleId,
+          puntaje: Math.round((completedCount / totalLessons) * 100)
         });
       } catch (err) {
         console.error("Error al guardar progreso de lección:", err);

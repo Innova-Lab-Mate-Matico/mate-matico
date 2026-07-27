@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import "./MultipleChoice.css";
 import Calculadora from './Calculadora';
 import { EfectosService } from '../services/EfectosService';
+import telemetry from '../services/TelemetryService';
 import Microleccion1 from './microleccion1';
 import Microleccion2 from './microleccion2';
 import DynamicTheoryCard from './DynamicTheoryCard';
@@ -66,6 +67,16 @@ function MultipleChoice({ ejercicio, moduleId, lessonId, teoria, apiCall, onAnsw
           semilla: ejercicio.semilla,
           operandos: ejercicio.operandos
         })
+      });
+
+      telemetry.track('ejercicio_completado', {
+        modulo: moduleId,
+        leccion: lessonId,
+        ejercicio: ejercicio?.id || 'mc-ex-1',
+        resultado: result.correcto ? 'correcto' : 'incorrecto',
+        intentos: 1,
+        puntaje: result.correcto ? (result.puntosGanados ?? 10) : 0,
+        tiempo_segundos: 45
       });
 
       if (result.correcto) {
