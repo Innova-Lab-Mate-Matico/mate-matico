@@ -8,6 +8,7 @@ import Home from './components/Home';
 import Profile from './components/Profile';
 import Modules from './components/Modules';
 import Progress from './components/Progress';
+import PracticarCard from './components/PracticarCard';
 import RachaRotaModal from './components/RachaRotaModal';
 import AdminAnalyticsView from './components/AdminAnalyticsView';
 
@@ -717,32 +718,18 @@ const apiCall = React.useCallback(async (path, options = {}, customToken = null)
               )}
 
               {activeTab === 'progreso' && (
-                <Progress apiCall={apiCall} />
-              )}
+               <Progress apiCall={apiCall} />
+    )}
 
-              {activeTab === 'practicar' && (
-                <div
-                  className="card"
-                  style={{
-                    textAlign: 'center',
-                    padding: '50px 24px',
-                    borderRadius: '24px',
-                    backgroundColor: '#ffffff',
-                    margin: '20px auto',
-                    maxWidth: '600px',
-                    boxShadow: '0 8px 30px rgba(0,0,0,0.04)',
-                    border: '1.5px solid #e2e8f0'
-                  }}
-                >
-                  <div style={{ fontSize: '3.5rem', marginBottom: '16px' }}>🎯</div>
-                  <h2 style={{ color: '#163b74', margin: '0 0 10px 0', fontFamily: 'Poppins, sans-serif', fontSize: '1.5rem', fontWeight: 700 }}>
-                    Sección Practicar
-                  </h2>
-                  <p style={{ color: '#64748b', fontSize: '0.95rem', lineHeight: '1.6', margin: 0, maxWidth: '420px', marginLeft: 'auto', marginRight: 'auto' }}>
-                    Esta pestaña está reservada para los nuevos modos de práctica guiada. ¡Próximamente disponible!
-                  </p>
-                </div>
-              )}
+          {activeTab === 'practicar' && (
+          <PracticarCard
+         onBack={() => setActiveTab('inicio')}
+         onComplete={() => {
+         console.log('Generar ejercicio');
+         }}
+          onNavigate={(tab) => setActiveTab(tab)}
+  />
+)}
 
               {activeTab === 'logros' && (
                 <Progress apiCall={apiCall} />

@@ -291,32 +291,24 @@ ol {
 /* =========================
    RECOMENDACION - MATECITO
 ========================= */
+.global-wave{
+  position: fixed;
+  z-index: 0;
+  pointer-events: none;
+}
 
-.ola-superior {
 
-  position: absolute;
-
+.ola-superior{
   top: 0;
   right: 0;
-
   width: 320px;
-
-  z-index: 1;
 }
 
-
-.ola-inferior {
-
-  position: absolute;
-
+.ola-inferior{
   bottom: 0;
   left: 0;
-
   width: 320px;
-
-  z-index: 1;
 }
-
 
 
 .mate-mascot-container {
