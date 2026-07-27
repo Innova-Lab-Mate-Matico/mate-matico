@@ -15,12 +15,6 @@ import formatListBulleted from "../assets/format_list_bulleted.svg";
 import frame11 from "../assets/Frame 11.svg";
 import group52 from "../assets/Group 52.svg";
 
-import twoPager from "../assets/two_pager.svg";
-import cardsStar from "../assets/cards_star.svg";
-import home from "../assets/home.svg";
-import diamondShine from "../assets/diamond_shine.svg";
-import accountCircle from "../assets/account_circle.png";
-
 function PracticarCard({ onBack, onComplete, onNavigate }) {
   return (
     <div className="app-card practicar-card">
@@ -235,74 +229,6 @@ function PracticarCard({ onBack, onComplete, onNavigate }) {
           />
 
         </button>
-
-      </div>
-
-      {/* =========================
-          BARRA INFERIOR
-      ========================= */}
-
-      <div className="bottom-nav">
-
-        <div
-          className="nav-item"
-          onClick={() => onNavigate("lecciones")}
-        >
-          <img
-            src={twoPager}
-            alt="Lecciones"
-            className="nav-icon"
-          />
-          <span>Lecciones</span>
-        </div>
-
-        <div
-          className="nav-item active"
-          onClick={() => onNavigate("practicar")}
-        >
-          <img
-            src={cardsStar}
-            alt="Practicar"
-            className="nav-icon"
-          />
-          <span>Practicar</span>
-        </div>
-
-        <div
-          className="nav-item"
-          onClick={() => onNavigate("inicio")}
-        >
-          <img
-            src={home}
-            alt="Inicio"
-            className="nav-icon"
-          />
-          <span>Inicio</span>
-        </div>
-
-        <div
-          className="nav-item"
-          onClick={() => onNavigate("progreso")}
-        >
-          <img
-            src={diamondShine}
-            alt="Progreso"
-            className="nav-icon"
-          />
-          <span>Progreso</span>
-        </div>
-
-        <div
-          className="nav-item"
-          onClick={() => onNavigate("perfil")}
-        >
-          <img
-            src={accountCircle}
-            alt="Perfil"
-            className="nav-icon"
-          />
-          <span>Perfil</span>
-        </div>
 
       </div>
 
