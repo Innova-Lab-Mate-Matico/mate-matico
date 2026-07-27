@@ -19,13 +19,20 @@ const sizeLimitMiddleware = (req, res, next) => {
 
 // Whitelist de eventos permitidos para emisión directa de cliente
 const whitelist = [
+  'usuario_registrado',
+  'usuario_inicio_sesion',
   'ejercicio_iniciado',
   'ejercicio_completado',
   'feedback_enviado',
   'logro_desbloqueado',
   'leccion_iniciada',
   'leccion_completada',
-  'tutor_consultado'
+  'progreso_actualizado',
+  'onboarding_finalizado',
+  'tutor_consultado',
+  'racha_perdida',
+  'racha_actualizada',
+  'sesion_finalizada'
 ];
 
 /**
