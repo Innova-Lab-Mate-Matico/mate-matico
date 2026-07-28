@@ -26,7 +26,7 @@ export function applySecurity(app) {
         if (env.corsOrigins.includes(origin)) return callback(null, true);
         callback(null, false);
       },
-      methods: ['GET', 'POST', 'PATCH', 'OPTIONS'],
+      methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
       allowedHeaders: ['Content-Type', 'Authorization', 'x-client-timezone'],
       credentials: true,
     })
