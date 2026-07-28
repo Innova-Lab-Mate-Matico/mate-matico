@@ -20,6 +20,21 @@ export default function OnboardingWizard({ apiCall, onComplete }) {
   const [moduloRecomendado, setModuloRecomendado] = useState('porcentajes');
   const [savedUsuario, setSavedUsuario] = useState(null);
 
+  const stepRef = React.useRef(step);
+  stepRef.current = step;
+
+  React.useEffect(() => {
+    telemetry.track('onboarding_iniciado');
+
+    return () => {
+      if (stepRef.current < 6) {
+        telemetry.track('onboarding_abandonado', {
+          paso_al_abandonar: stepRef.current
+        });
+      }
+    };
+  }, []);
+
   const handleSelectEdadRango = (rango) => {
     setEdadRango(rango);
     let numericAge = 20;

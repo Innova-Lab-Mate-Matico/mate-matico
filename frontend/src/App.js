@@ -82,6 +82,14 @@ export default function App() {
   // Pestaña activa
   const [activeTab, setActiveTab] = useState('inicio');
 
+  React.useEffect(() => {
+    if (activeTab) {
+      telemetry.track('pantalla_visitada', {
+        nombre_pantalla: activeTab
+      });
+    }
+  }, [activeTab]);
+
   const [networkError, setNetworkError] = useState(false);
   const [serverError, setServerError] = useState(null);
 
@@ -210,6 +218,13 @@ const apiCall = React.useCallback(async (path, options = {}, customToken = null)
     const err = new Error(data.error || res.statusText || "Error inesperado en la API");
     err.status = res.status;
     err.raw = data;
+
+    telemetry.track('error_aplicacion', {
+      codigo_error: res.status,
+      mensaje: err.message,
+      contexto: path
+    });
+
     throw err;
   }
 
