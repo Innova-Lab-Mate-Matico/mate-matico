@@ -460,14 +460,16 @@ function MultipleChoice({ ejercicio, moduleId, lessonId, teoria, apiCall, onAnsw
       {showTheory && (
         <div className="theory-overlay-backdrop" onClick={() => setShowTheory(false)}>
           <div className="theory-modal-wrapper" onClick={(e) => e.stopPropagation()}>
-            <button 
-              type="button" 
-              className="theory-modal-close" 
-              onClick={() => setShowTheory(false)}
-              aria-label="Cerrar teoría"
-            >
-              ×
-            </button>
+            <div className="theory-modal-header">
+              <button 
+                type="button" 
+                className="theory-modal-close" 
+                onClick={() => setShowTheory(false)}
+                aria-label="Cerrar teoría"
+              >
+                ×
+              </button>
+            </div>
             <div className="theory-modal-content">
               {lessonId === 'multiplicacion' ? (
                 currentTheoryIndex === 0 ? (
