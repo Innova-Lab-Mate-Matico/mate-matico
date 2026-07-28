@@ -18,7 +18,7 @@ Mate-Mático es una plataforma educativa de matemáticas gamificada con soporte 
                                                     │
 ┌──────────────────────────┐   REST API + Bearer   ┌──────────────────────────┐   Admin SDK   ┌──────────────────────────┐
 │     Frontend (React)     │ ────────────────────► │     Backend (Express)    │ ────────────► │  Firebase Auth & Cloud   │
-│   Puerto 3000 / Vercel   │                       │   Puerto 3000 / Render   │               │        Firestore         │
+│   Puerto 3001 / Vercel   │                       │   Puerto 3000 / Render   │               │        Firestore         │
 └──────────────────────────┘                       └──────────────────────────┘               └──────────────────────────┘
              │                                                  │
              └─────── Telemetría por Lotes (Batching) ──────────┴───────────────────────────► ┌──────────────────────────┐

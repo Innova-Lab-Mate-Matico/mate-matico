@@ -102,7 +102,7 @@ npm run dev
 cd frontend
 npm start
 ```
-*App iniciada en: `http://localhost:3000`*
+*App iniciada en: `http://localhost:3001`*
 
 ---
 
