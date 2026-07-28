@@ -612,14 +612,16 @@ export default function Modules({
         {theoryOnlyLesson && (
           <div className="theory-overlay-backdrop" onClick={() => setTheoryOnlyLesson(null)}>
             <div className="theory-modal-wrapper" onClick={(e) => e.stopPropagation()}>
-              <button 
-                type="button" 
-                className="theory-modal-close" 
-                onClick={() => setTheoryOnlyLesson(null)}
-                aria-label="Cerrar teoría"
-              >
-                ×
-              </button>
+              <div className="theory-modal-header">
+                <button 
+                  type="button" 
+                  className="theory-modal-close" 
+                  onClick={() => setTheoryOnlyLesson(null)}
+                  aria-label="Cerrar teoría"
+                >
+                  ×
+                </button>
+              </div>
               <div className="theory-modal-content">
                 {theoryOnlyLesson.id === 'multiplicacion' ? (
                   currentTheoryIndex === 0 ? (
