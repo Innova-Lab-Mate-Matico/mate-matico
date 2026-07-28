@@ -282,9 +282,9 @@ export function TutorMateicoChat({ moduleId, lessonId, theoryId, apiCall, defaul
       const res = await apiCall('/ai/explain', {
         method: 'POST',
         body: JSON.stringify({
-          moduleId,
-          lessonId,
-          theoryId,
+          moduleId: moduleId || 'general',
+          lessonId: lessonId || 'general',
+          theoryId: theoryId || 'general',
           question: textToSend,
           history: chatHistory
         })

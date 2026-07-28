@@ -155,17 +155,17 @@ export function validateOnboardingBody(req, res, next) {
 
 // 6. Consultas al Tutor IA
 export function validateExplainBody(req, res, next) {
-  const { moduleId, lessonId, theoryId, question, history } = req.body ?? {};
+  if (!req.body || typeof req.body !== 'object') {
+    req.body = {};
+  }
 
-  if (!moduleId || typeof moduleId !== 'string' || !moduleId.trim()) {
-    return res.status(400).json({ success: false, error: 'El campo moduleId es obligatorio y debe ser un texto.' });
-  }
-  if (!lessonId || typeof lessonId !== 'string' || !lessonId.trim()) {
-    return res.status(400).json({ success: false, error: 'El campo lessonId es obligatorio y debe ser un texto.' });
-  }
-  if (!theoryId || typeof theoryId !== 'string' || !theoryId.trim()) {
-    return res.status(400).json({ success: false, error: 'El campo theoryId es obligatorio y debe ser un texto.' });
-  }
+  // Asignar valores por defecto para los identificadores si vienen vacíos o no se especifican
+  req.body.moduleId = (req.body.moduleId && typeof req.body.moduleId === 'string' && req.body.moduleId.trim()) ? req.body.moduleId.trim() : 'general';
+  req.body.lessonId = (req.body.lessonId && typeof req.body.lessonId === 'string' && req.body.lessonId.trim()) ? req.body.lessonId.trim() : 'general';
+  req.body.theoryId = (req.body.theoryId && typeof req.body.theoryId === 'string' && req.body.theoryId.trim()) ? req.body.theoryId.trim() : 'general';
+
+  const { question, history } = req.body;
+
   if (!question || typeof question !== 'string' || !question.trim()) {
     return res.status(400).json({ success: false, error: 'El campo question es obligatorio y debe ser un texto.' });
   }
@@ -190,9 +190,9 @@ export function validateExplainBody(req, res, next) {
   }
 
   const explainSchema = z.object({
-    moduleId: z.string().trim().min(1),
-    lessonId: z.string().trim().min(1),
-    theoryId: z.string().trim().min(1),
+    moduleId: z.string().optional(),
+    lessonId: z.string().optional(),
+    theoryId: z.string().optional(),
     question: z.string().trim().min(1),
     history: z.array(z.any()).optional(),
     sesion_id: z.string().optional(),
