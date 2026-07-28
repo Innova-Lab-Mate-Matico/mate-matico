@@ -1,4 +1,4 @@
-# 🧉 Mate-Mático — Monorepo (Producción & MVP)
+# 🧉 Mate Mático — Monorepo (Producción & MVP)
 
 Plataforma educativa de matemáticas adaptativa y gamificada orientada a finanzas personales y uso cotidiano, construida con React, Node.js/Express, Firebase Auth, Supabase PostgreSQL y Google Tag Manager / GA4.
 
@@ -81,4 +81,4 @@ npm run build
 ---
 
 ## 👥 Créditos y Autores
-Desarrollado con ❤️ por **Innova Lab — Mate-Mático** (2026).
+Desarrollado con ❤️ por **Innova Lab — Mate Mático** (2026).

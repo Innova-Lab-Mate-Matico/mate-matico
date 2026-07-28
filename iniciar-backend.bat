@@ -1,5 +1,5 @@
 @echo off
-title Mate-Matico - Backend API
+title Mate Mático - Backend API
 set "PATH=C:\Program Files\nodejs;%PATH%"
 
 cd /d "%~dp0backend"

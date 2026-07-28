@@ -1,12 +1,12 @@
-# 🏛️ Arquitectura del Sistema — Mate-Mático mate-a-mate 🧉
+# 🏛️ Arquitectura del Sistema — Mate Mático mate-a-mate 🧉
 
-Documento de diseño arquitectónico y flujo de datos del proyecto Mate-Mático.
+Documento de diseño arquitectónico y flujo de datos del proyecto Mate Mático.
 
 ---
 
 ## 1. 📐 Visión General del Sistema
 
-Mate-Mático es una plataforma educativa de matemáticas gamificada con soporte para IA pedagógica, telemetría por lotes y analítica avanzada. Su arquitectura desacoplada opera bajo el siguiente esquema de componentes:
+Mate Mático es una plataforma educativa de matemáticas gamificada con soporte para IA pedagógica, telemetría por lotes y analítica avanzada. Su arquitectura desacoplada opera bajo el siguiente esquema de componentes:
 
 ```
                                ┌─────────────────────────────────────────┐

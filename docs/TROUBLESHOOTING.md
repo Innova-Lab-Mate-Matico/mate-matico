@@ -1,4 +1,4 @@
-# 🛠️ Guía de Troubleshooting & Resolución de Incidencias — Mate-Mático 🧉
+# 🛠️ Guía de Troubleshooting & Resolución de Incidencias — Mate Mático 🧉
 
 Guía rápida de diagnóstico ordenada por **Síntoma ➔ Causa Raíz ➔ Solución Práctica**.
 

@@ -1,6 +1,6 @@
-# 🚀 Runbook de Operación — Mate-Mático 🧉
+# 🚀 Runbook de Operación — Mate Mático 🧉
 
-Guía exhaustiva para **instalar, configurar, arrancar, verificar, probar y mantener** el entorno de desarrollo y producción del proyecto Mate-Mático.
+Guía exhaustiva para **instalar, configurar, arrancar, verificar, probar y mantener** el entorno de desarrollo y producción del proyecto Mate Mático.
 
 ---
 

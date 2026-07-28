@@ -15,7 +15,7 @@ export default function Login({
         <img
           src={logoPrincipal}
           className="auth-logo"
-          alt="Mate-Mático"
+          alt="Mate Mático"
         />
         <p className="auth-subtitle">
           Aprendé matemáticas mate a mate

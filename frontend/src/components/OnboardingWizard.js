@@ -209,7 +209,7 @@ export default function OnboardingWizard({ apiCall, onComplete }) {
       {step === 5 && (
         <div className="edad-container" style={{ textAlign: 'left' }}>
           <h2 style={{ textAlign: 'center' }}>¿Cuál es tu objetivo?</h2>
-          <p style={{ textAlign: 'center', color: '#666' }}>Contanos brevemente qué te gustaría lograr en Mate-Mático.</p>
+          <p style={{ textAlign: 'center', color: '#666' }}>Contanos brevemente qué te gustaría lograr en Mate Mático.</p>
           
           <div style={{ marginTop: '20px' }}>
             <textarea
