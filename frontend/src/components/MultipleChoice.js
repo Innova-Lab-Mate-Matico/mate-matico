@@ -481,6 +481,9 @@ function MultipleChoice({ ejercicio, moduleId, lessonId, teoria, apiCall, onAnsw
                 teoria && teoria.length > 0 && (
                   <DynamicTheoryCard 
                     theory={teoria[currentTheoryIndex]} 
+                    moduleId={moduleId}
+                    lessonId={lessonId}
+                    apiCall={apiCall}
                     onContinuar={() => {
                       if (currentTheoryIndex < teoria.length - 1) {
                         setCurrentTheoryIndex(prev => prev + 1);

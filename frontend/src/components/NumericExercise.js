@@ -675,6 +675,9 @@ function NumericExercise({ ejercicio, index, moduleId, lessonId, teoria, apiCall
                 teoria && teoria.length > 0 && (
                   <DynamicTheoryCard 
                     theory={teoria[currentTheoryIndex]} 
+                    moduleId={moduleId}
+                    lessonId={lessonId}
+                    apiCall={apiCall}
                     onContinuar={() => {
                       if (currentTheoryIndex < teoria.length - 1) {
                         setCurrentTheoryIndex(prev => prev + 1);
@@ -692,16 +695,18 @@ function NumericExercise({ ejercicio, index, moduleId, lessonId, teoria, apiCall
 
       {showMateico && (
         <div className="theory-overlay-backdrop" onClick={() => setShowMateico(false)}>
-          <div className="theory-modal-wrapper" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '500px', width: '90%' }}>
-            <button
-              type="button"
-              className="theory-modal-close"
-              onClick={() => setShowMateico(false)}
-              aria-label="Cerrar chat Mateico"
-            >
-              ×
-            </button>
-            <div className="theory-modal-content" style={{ padding: '10px' }}>
+          <div className="theory-modal-wrapper" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '520px', width: '90%' }}>
+            <div className="theory-modal-header">
+              <button
+                type="button"
+                className="theory-modal-close"
+                onClick={() => setShowMateico(false)}
+                aria-label="Cerrar chat Mateico"
+              >
+                ×
+              </button>
+            </div>
+            <div className="theory-modal-content" style={{ padding: '0 10px 10px 10px' }}>
               <TutorMateicoChat
                 moduleId={moduleId}
                 lessonId={lessonId}
