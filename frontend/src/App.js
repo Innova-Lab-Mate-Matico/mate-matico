@@ -361,7 +361,7 @@ const apiCall = React.useCallback(async (path, options = {}, customToken = null)
       loadUserProgress(data.idToken);
 
       setStatus(
-        '¡Registro correcto! Bienvenido a Mate-Mático',
+        '¡Registro correcto! Bienvenido a Mate Mático',
         true
       );
 
@@ -599,7 +599,7 @@ const apiCall = React.useCallback(async (path, options = {}, customToken = null)
         <span style={{ fontSize: '1.5rem' }}>🧉</span>
         <div style={{ flex: 1 }}>
           <p style={{ margin: 0, fontSize: '0.88rem', color: '#856404', fontWeight: 'bold' }}>
-            Tuvimos un problema al comunicarnos con la pizarra de Mate-Mático.
+            Tuvimos un problema al comunicarnos con la pizarra de Mate Mático.
           </p>
           <p style={{ margin: '2px 0 0 0', fontSize: '0.78rem', color: '#856404' }}>
             Comprobá tu conexión a internet o reintentá en unos segundos.
@@ -660,7 +660,7 @@ const apiCall = React.useCallback(async (path, options = {}, customToken = null)
           lineHeight: 1.5,
           flexShrink: 0,
         }}>
-          <span style={{ fontWeight: '600', color: '#7b61ff' }}>Mate-Mático — Innova Lab</span>
+          <span style={{ fontWeight: '600', color: '#7b61ff' }}>Mate Mático — Innova Lab</span>
           {'  ·  '}
           <span>Plataforma educativa con IA y gamificación</span>
           {'  ·  '}
@@ -688,7 +688,7 @@ const apiCall = React.useCallback(async (path, options = {}, customToken = null)
           </main>
           <footer className="auth-footer-fixed">
             <p className="auth-footer-text">
-              Innova Lab — Innovación Educativa © 2026 Mate-Matico
+              Innova Lab — Innovación Educativa © 2026 Mate Mático
             </p>
           </footer>
         </div>
@@ -705,7 +705,7 @@ const apiCall = React.useCallback(async (path, options = {}, customToken = null)
       <div className={`app-container ${activeTab === 'analitica' ? 'analytics-mode' : ''}`} id="arriba" style={{ minHeight: '100vh' }}>
         <header className={`dashboard-header ${activeTab === 'analitica' ? 'analytics-mode-header' : ''}`}>
           <div className="dashboard-header-left" style={{ display: 'flex', alignItems: 'center' }}>
-            <img src={logoPrincipal} alt="Mate-Mático" className="dashboard-logo" style={{ height: '62px', objectFit: 'contain' }} />
+            <img src={logoPrincipal} alt="Mate Mático" className="dashboard-logo" style={{ height: '62px', objectFit: 'contain' }} />
           </div>
           <div className="dashboard-header-right">
             <span>🔥 {user.rachaDias ?? 0} {user.rachaDias === 1 ? 'día' : 'días'}</span>
@@ -772,7 +772,7 @@ const apiCall = React.useCallback(async (path, options = {}, customToken = null)
           {/* Footer Profesional Innova Lab */}
           <footer className="figma-pro-footer">
             <div className="footer-content">
-              <h3 className="footer-brand">Mate-Mático — Innova Lab</h3>
+              <h3 className="footer-brand">Mate Mático — Innova Lab</h3>
               <p className="footer-tagline">
                 Plataforma Educativa Adaptativa con Gamificación e Inteligencia Artificial
               </p>
@@ -885,7 +885,7 @@ const apiCall = React.useCallback(async (path, options = {}, customToken = null)
               style={{ width: '120px', marginBottom: '20px' }}
             />
             <h2 style={{ fontFamily: 'Poppins, sans-serif', color: '#163b74', fontWeight: 800, fontSize: '1.4rem', margin: '0 0 10px 0' }}>
-              ¡Ups! No pudimos conectar con Mate-Matico
+              ¡Ups! No pudimos conectar con Mate Mático
             </h2>
             <p style={{ color: '#64748b', fontSize: '0.92rem', lineHeight: '1.5', margin: '0 0 24px 0' }}>
               Parece que hay un problema temporal con tu conexión a internet o la pizarra de la aplicación está en mantenimiento.

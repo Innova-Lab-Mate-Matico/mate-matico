@@ -51,7 +51,7 @@ function AdminAnalyticsView({ user, apiCall }) {
           <span className="empty-icon" style={{ fontSize: '3rem' }}>🔒</span>
           <h3 style={{ marginTop: '12px', color: '#1e293b' }}>Acceso Restringido</h3>
           <p style={{ color: '#64748b', fontSize: '0.92rem' }}>
-            Esta sección es exclusiva para el equipo de administración y analítica de Mate-Mático.
+            Esta sección es exclusiva para el equipo de administración y analítica de Mate Mático.
           </p>
         </div>
       </div>
@@ -116,7 +116,7 @@ function AdminAnalyticsView({ user, apiCall }) {
       <div className="analytics-header-card">
         <div className="analytics-header-top-row">
           <div className="analytics-title-group">
-            <img src={logoImg} alt="Logo Mate-Mático" className="analytics-header-logo" />
+            <img src={logoImg} alt="Logo Mate Mático" className="analytics-header-logo" />
             <h1 className="analytics-main-title">Dashboard Analytics</h1>
           </div>
 

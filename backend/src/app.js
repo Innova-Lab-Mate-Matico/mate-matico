@@ -30,7 +30,7 @@ app.use(express.json({ limit: '32kb' }));
 app.get('/api/health', (_req, res) => {
   res.json({
     success: true,
-    service: 'Mate-Mático API',
+    service: 'Mate Mático API',
     status: 'ok',
     version: '1.0.0',
     timestamp: new Date().toISOString(),

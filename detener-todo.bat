@@ -1,5 +1,5 @@
 @echo off
-title Mate-Matico - Detener servidores
+title Mate Mático - Detener servidores
 cd /d "%~dp0"
 
 echo Liberando puertos 3000, 3001, 5173 y 5174...

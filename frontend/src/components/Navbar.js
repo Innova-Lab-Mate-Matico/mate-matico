@@ -8,7 +8,7 @@ export default function Navbar({ onNavigate, currentTab, loggedIn }) {
     return (
         <nav className="visitor-navbar">
             <div className="nav-brand" onClick={() => onNavigate('login')} style={{ cursor: 'pointer' }}>
-                🧉 Mate-Mático
+                🧉 Mate Mático
             </div>
             <ul>
                 <li>

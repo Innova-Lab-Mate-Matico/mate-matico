@@ -1,5 +1,5 @@
 @echo off
-title Mate-Matico - Frontend prueba
+title Mate Mático - Frontend React
 set "PATH=C:\Program Files\nodejs;%PATH%"
 
 cd /d "%~dp0frontend"

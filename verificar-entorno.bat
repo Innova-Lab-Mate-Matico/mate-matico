@@ -1,7 +1,7 @@
 @echo off
 set "PATH=C:\Program Files\nodejs;%PATH%"
 
-echo === Verificacion Mate-Matico ===
+echo === Verificacion Mate Mático ===
 echo.
 
 where node >nul 2>&1

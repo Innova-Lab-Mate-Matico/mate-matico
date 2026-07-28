@@ -7,7 +7,7 @@ import mateAcademico from '../assets/mate_academico.webp';
   MATE-MÁTICO — COMPONENTE MASCOTA (REACT CLÁSICO)
   Este componente representa la mascota visual del usuario
   según el nivel académico alcanzado, usando las ilustraciones
-  del personaje oficial de Mate-Mático.
+  del personaje oficial de Mate Mático.
 */
 
 export default function Mascota({ rol }) {

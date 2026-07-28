@@ -126,7 +126,7 @@ function NumericExercise({ ejercicio, index, moduleId, lessonId, teoria, apiCall
       return `Pista: Primero calculá el ${pct}% de $${precio} y luego sumale ese resultado al valor original.`;
     }
 
-    return "Pista de Mate-Mático: Leé detenidamente el enunciado y resolvé los pasos uno a uno.";
+    return "Pista de Mate Mático: Leé detenidamente el enunciado y resolvé los pasos uno a uno.";
   };
 
   const currentHint = getAdaptiveHint();
@@ -474,7 +474,7 @@ function NumericExercise({ ejercicio, index, moduleId, lessonId, teoria, apiCall
                   >
                     ✕
                   </div>
-                  <strong style={{ display: 'block', marginBottom: '4px', fontSize: '0.9rem' }}>💡 Pista de Mate-Mático</strong>
+                  <strong style={{ display: 'block', marginBottom: '4px', fontSize: '0.9rem' }}>💡 Pista de Mate Mático</strong>
                   {currentHint}
                 </div>
               )}
@@ -518,7 +518,7 @@ function NumericExercise({ ejercicio, index, moduleId, lessonId, teoria, apiCall
 
       <div className="explanation-box" style={{ width: '100%', boxSizing: 'border-box' }}>
 
-        <h3 style={{ fontSize: '1.1rem', fontWeight: '800', color: '#7b61ff', marginBottom: '8px', fontFamily: "'Poppins', sans-serif" }}>Pista de Mate-Mático</h3>
+        <h3 style={{ fontSize: '1.1rem', fontWeight: '800', color: '#7b61ff', marginBottom: '8px', fontFamily: "'Poppins', sans-serif" }}>Pista de Mate Mático</h3>
         <p style={{ fontSize: '0.92rem', color: '#334155', lineHeight: '1.4', fontWeight: '500', margin: '0 0 12px 0' }}>
           {getAdaptiveHint()}
         </p>
