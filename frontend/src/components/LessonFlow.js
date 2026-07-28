@@ -26,6 +26,21 @@ function LessonFlow({
   const [step, setStep] = useState(1);
   const [sessionPoints, setSessionPoints] = useState(0);
 
+  const stepRef = React.useRef(step);
+  stepRef.current = step;
+
+  React.useEffect(() => {
+    return () => {
+      if (stepRef.current > 0 && stepRef.current < 5) {
+        telemetry.track('leccion_abandonada', {
+          modulo: moduleId,
+          leccion: leccion?.id,
+          paso_al_abandonar: stepRef.current
+        });
+      }
+    };
+  }, [moduleId, leccion?.id]);
+
   // Calcular estadísticas de progreso para el módulo actual
   let totalLessons = 6;
   if (moduleDetail && moduleDetail.levels) {

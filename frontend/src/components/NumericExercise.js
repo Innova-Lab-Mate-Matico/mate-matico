@@ -43,6 +43,27 @@ function NumericExercise({ ejercicio, index, moduleId, lessonId, teoria, apiCall
   const num2 = ejercicio ? (ejercicio.operandos?.num2 ?? 23) : 23;
   const isFigmaExercise = false;
 
+  const isCompletedRef = React.useRef(false);
+
+  useEffect(() => {
+    isCompletedRef.current = false;
+    telemetry.track('ejercicio_iniciado', {
+      modulo: moduleId,
+      leccion: lessonId,
+      ejercicio: ejercicio?.id || 'num-ex-1'
+    });
+
+    return () => {
+      if (!isCompletedRef.current) {
+        telemetry.track('ejercicio_abandonado', {
+          modulo: moduleId,
+          leccion: lessonId,
+          ejercicio: ejercicio?.id || 'num-ex-1'
+        });
+      }
+    };
+  }, [moduleId, lessonId, ejercicio?.id]);
+
   const getAdaptiveHint = () => {
     // Si la API nos devolvió un comodín real y específico (no genérico), lo usamos prioritariamente
     if (hintText && hintText !== "Pista: Revisa la operación paso a paso.") {
@@ -173,6 +194,7 @@ function NumericExercise({ ejercicio, index, moduleId, lessonId, teoria, apiCall
       });
 
       if (result.correcto) {
+        isCompletedRef.current = true;
         setPointsAwarded(result.puntosGanados ?? 15);
         if (onAnswerSuccess) {
           onAnswerSuccess(result.puntosGanados ?? 15);

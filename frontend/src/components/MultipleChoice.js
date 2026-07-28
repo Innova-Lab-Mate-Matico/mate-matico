@@ -32,7 +32,29 @@ function MultipleChoice({ ejercicio, moduleId, lessonId, teoria, apiCall, onAnsw
   const [showCalc, setShowCalc] = useState(false);
   const [isMuted, setIsMuted] = useState(EfectosService.isMuted());
 
+  const isCompletedRef = React.useRef(false);
+
+  React.useEffect(() => {
+    isCompletedRef.current = false;
+    telemetry.track('ejercicio_iniciado', {
+      modulo: moduleId,
+      leccion: lessonId,
+      ejercicio: ejercicio?.id || 'mc-ex-1'
+    });
+
+    return () => {
+      if (!isCompletedRef.current) {
+        telemetry.track('ejercicio_abandonado', {
+          modulo: moduleId,
+          leccion: lessonId,
+          ejercicio: ejercicio?.id || 'mc-ex-1'
+        });
+      }
+    };
+  }, [moduleId, lessonId, ejercicio?.id]);
+
   const question = ejercicio ? (ejercicio.enunciado ?? ejercicio.prompt) : "Comprás 8 camisetas de fútbol a $73 cada una. Usando la propiedad distributiva, ¿cuánto pagás en total?";
+
   const options = ejercicio ? (ejercicio.opciones ?? []) : [
     "$582",
     "$574",
@@ -80,6 +102,7 @@ function MultipleChoice({ ejercicio, moduleId, lessonId, teoria, apiCall, onAnsw
       });
 
       if (result.correcto) {
+        isCompletedRef.current = true;
         setPointsAwarded(result.puntosGanados ?? 10);
         if (onAnswerSuccess) {
           onAnswerSuccess(result.puntosGanados ?? 10);
