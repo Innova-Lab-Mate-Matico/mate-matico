@@ -134,20 +134,18 @@ class TelemetryService {
     const payload = JSON.stringify({ eventos: eventsToSend });
 
     try {
-      if (navigator.sendBeacon) {
-        const blob = new Blob([payload], { type: 'application/json' });
-        navigator.sendBeacon(targetUrl, blob);
-      } else {
-        fetch(targetUrl, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            ...(token && { 'Authorization': `Bearer ${token}` })
-          },
-          body: payload,
-          keepalive: true
-        }).catch(() => {});
-      }
+      // Usamos fetch keepalive para garantizar el envío de cabeceras de autorización Bearer en cierres de pestaña
+      fetch(targetUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token && { 'Authorization': `Bearer ${token}` })
+        },
+        body: payload,
+        keepalive: true
+      }).catch((err) => {
+        console.warn('[TelemetryService] Falló el flush de emergencia:', err.message);
+      });
     } catch (e) {
       // Ignorar errores en cierre de navegador
     }
