@@ -9,7 +9,6 @@ frontend/.env
 /config/
 pdf/
 firebase.json
-firestore.rules
 KANBAN.md
 docs/CONVENCION_VARIABLES.md
 docs/ESPECIFICACION_EJERCICIOS.md
