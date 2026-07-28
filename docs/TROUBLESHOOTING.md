@@ -1,258 +1,97 @@
-# Troubleshooting — Mate-Mático
+# 🛠️ Guía de Troubleshooting & Resolución de Incidencias — Mate-Mático 🧉
 
-**Síntoma → causa → solución.** Complementa el [RUNBOOK.md](./RUNBOOK.md).
-
----
-
-## Diagnóstico en 3 pasos
-
-1. Ejecutar **`verificar-entorno.bat`**
-2. Revisar la **consola del backend** al reproducir el error
-3. Navegador **F12 → Network** → request fallido → `{ "error": "..." }`
+Guía rápida de diagnóstico ordenada por **Síntoma ➔ Causa Raíz ➔ Solución Práctica**.
 
 ---
 
-## 1. Entorno y puertos
+## 🔍 Matriz de Diagnóstico en 3 Pasos
 
-### Node / npm no encontrado
-
-| | |
-|-|-|
-| **Síntoma** | `'node' no se reconoce...` |
-| **Solución** | Instalar Node LTS; usar los `.bat` del proyecto o agregar Node al PATH |
-
-### Puerto 3000 o 5173 en uso
-
-| | |
-|-|-|
-| **Síntoma** | `EADDRINUSE`, API no arranca, Vite en otro puerto |
-| **Solución** | **`detener-todo.bat`** → **`iniciar-todo.bat`** |
-
-### Falta `backend/.env`
-
-| | |
-|-|-|
-| **Síntoma** | `iniciar-backend.bat` se detiene con error |
-| **Solución** | `copy backend\.env.example backend\.env` y completar credenciales |
-
-### API no responde en `/api/health`
-
-| | |
-|-|-|
-| **Causas** | Backend no corriendo; `.env` inválido (private key mal escapada); firewall |
-| **Solución** | Ver log al iniciar `npm run dev` en `backend/` |
+1. Ejecutar **`verificar-entorno.bat`** en la raíz del proyecto.
+2. Inspeccionar la consola de la terminal del **Backend** para ver logs estructurados en JSON.
+3. Abrir la consola del navegador (**F12 ➔ Network / Console**) para verificar respuestas HTTP y eventos en `window.dataLayer`.
 
 ---
 
-## 2. Firebase Authentication
+## 1. Incidencias de Entorno, Red y Puertos
 
-### `auth/configuration-not-found`
-
-| | |
-|-|-|
-| **Síntoma** | Error Firebase en el panel al usar Google o Auth |
-| **Causa** | Authentication **no activado** en el proyecto |
-| **Solución** | [Firebase Console](https://console.firebase.google.com/project/talento14bd/authentication) → **Comenzar** → habilitar Email y/o Google → reiniciar frontend |
-
-**Prueba rápida (PowerShell):**
-
-```powershell
-$key = "TU_VITE_FIREBASE_API_KEY"
-$body = '{"email":"test@test.com","password":"testpass123","returnSecureToken":true}'
-(Invoke-WebRequest -Uri "https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=$key" -Method POST -ContentType "application/json" -Body $body).Content
-```
-
-- Si aparece `CONFIGURATION_NOT_FOUND` → Auth no activo.
-- Si devuelve token o `EMAIL_EXISTS` → Auth OK.
-
-### Google: "The requested action is invalid" / puerto 5174
-
-| | |
-|-|-|
-| **Causa** | Front en puerto distinto al registrado en OAuth |
-| **Solución** | Solo **http://localhost:5173**; `detener-todo.bat`; en Google Cloud OAuth agregar origen `http://localhost:5173` |
-
-### `auth/unauthorized-domain`
-
-| | |
-|-|-|
-| **Solución** | Authentication → Settings → Authorized domains → **`localhost`** |
-
-### `auth/operation-not-allowed`
-
-| | |
-|-|-|
-| **Solución** | Sign-in method → activar **Google** o **Email/Password** |
-
-### Popup cerrado o bloqueado
-
-| | |
-|-|-|
-| **Síntoma** | `auth/popup-closed-by-user`, `auth/popup-blocked` |
-| **Solución** | Permitir popups; o usar **login por email** |
-
-### "No se pudo completar Google"
-
-| | |
-|-|-|
-| **Causas** | Google deshabilitado; dominio; `VITE_FIREBASE_*` vacías o incorrectas |
-| **Solución** | Checklist Firebase arriba; probar email/contraseña para aislar el problema |
+### 🔴 Error `EADDRINUSE: address already in use :::3000`
+- **Síntoma:** El backend o el frontend no inician porque el puerto 3000 está ocupado por un proceso previo colgado.
+- **Causa:** Quedó una instancia previa de Node.js en ejecución en segundo plano.
+- **Solución:**
+  Ejecutar el script de limpieza en Windows:
+  ```cmd
+  detener-todo.bat
+  ```
+  O liberar manualmente en PowerShell:
+  ```powershell
+  Stop-Process -Id (Get-NetTCPConnection -LocalPort 3000).OwningProcess -Force
+  ```
 
 ---
 
-## 3. Backend API
-
-### 503 — Login email no disponible
-
-| | |
-|-|-|
-| **Causa** | Falta `FIREBASE_WEB_API_KEY` en `backend/.env` |
-| **Solución** | Copiar la `apiKey` de Firebase Console → reiniciar backend |
-
-### 401 — Email o contraseña incorrectos
-
-| | |
-|-|-|
-| **Solución** | **Registrarse** primero; o resetear password en Console → Authentication → Users |
-
-### 401 — Token inválido o expirado
-
-| | |
-|-|-|
-| **Solución** | Volver a iniciar sesión; borrar `localStorage` → clave `idToken` |
-
-### 500 — Error interno del servidor
-
-| | |
-|-|-|
-| **Causas frecuentes** | Firestore no creado; cuenta de servicio inválida; error al escribir en Firestore |
-| **Diagnóstico** | Log en ventana del backend; en desarrollo el JSON puede traer mensaje detallado |
-| **Solución** | Crear base Firestore; revisar `FIREBASE_PRIVATE_KEY` con `\n` correctos |
-
-### 404 — Usuario no encontrado (`/auth/me`)
-
-| | |
-|-|-|
-| **Causa** | Token válido pero sin documento en colección `usuarios` |
-| **Solución** | Registrarse de nuevo o `POST /api/auth/google` |
-
-### 429 — Demasiados intentos
-
-| | |
-|-|-|
-| **Causa** | Rate limit en `/api/auth` (100 req / 15 min en dev) |
-| **Solución** | Esperar o reiniciar backend |
-
-### CORS blocked
-
-| | |
-|-|-|
-| **Causa** | Front llama a `:3000` sin estar en `CORS_ORIGINS` |
-| **Solución** | `VITE_API_BASE_URL=/api` y proxy Vite; o agregar origen exacto en `CORS_ORIGINS` |
+### 🔴 Error de CORS: `Access to fetch at ... has been blocked by CORS policy`
+- **Síntoma:** Las peticiones `POST` o `DELETE` desde React hacia la API fallan en el navegador.
+- **Causa:** El origen del frontend (ej. `https://mate-matico.vercel.app`) no está incluido en la variable `CORS_ORIGINS` del backend.
+- **Solución:**
+  En `backend/.env`, agregar el dominio exacto separado por comas:
+  ```env
+  CORS_ORIGINS=http://localhost:3000,https://mate-matico.vercel.app
+  ```
+  *(El backend ya incluye soporte nativo para los métodos `GET, POST, PATCH, DELETE, OPTIONS`).*
 
 ---
 
-## 4. Frontend / panel
+## 2. Autenticación (Firebase Auth)
 
-### `VITE_FIREBASE_API_KEY` vacía
-
-| | |
-|-|-|
-| **Solución** | Completar `frontend/.env` → reiniciar `npm run dev` |
-
-### Cambios en `.env` no aplican
-
-| | |
-|-|-|
-| **Solución** | Detener y volver a iniciar Vite (`detener-todo.bat` + `iniciar-frontend.bat`) |
-
-### API base incorrecta
-
-| | |
-|-|-|
-| **Desarrollo** | `VITE_API_BASE_URL=/api` |
-| **Sin Vite** | `http://localhost:3000/api` |
+### 🔴 Error 401 `Unauthorized` al cerrar pestaña o navegar (`flushBeacon`)
+- **Síntoma:** Al cerrar la pestaña del navegador, la consola registra un error 401 en la petición de telemetría.
+- **Causa:** Uso de `navigator.sendBeacon`, el cual no permite incluir cabeceras HTTP personalizadas como `Authorization: Bearer <token>`.
+- **Solución:** *(Ya corregido en `TelemetryService.js`)*. El cliente utiliza `fetch(url, { method: 'POST', keepalive: true, headers: { Authorization: ... } })` garantizando autenticación limpia durante el desmonte de pestaña.
 
 ---
 
-## 5. Ejercicios
-
-### 400 — semilla y operandos obligatorios
-
-| | |
-|-|-|
-| **Solución** | Enviar en validate los mismos `semilla` y `operandos` que devolvió la lección |
-
-### Siempre incorrecto
-
-| | |
-|-|-|
-| **Causas** | Tipo distinto (string vs número); semilla u operandos modificados |
-| **Solución** | No cambiar datos entre cargar lección y enviar respuesta |
-
-### No aparece comodín
-
-| | |
-|-|-|
-| **Regla** | Tras **2 errores seguidos** en el mismo ejercicio |
-
-### Puntos / racha no suben
-
-| | |
-|-|-|
-| **Regla** | Solo al **acertar**; racha según ventana de 48 h |
+### 🔴 Error `auth/configuration-not-found` o `auth/unauthorized-domain`
+- **Síntoma:** El login con Google o Email arroja error de configuración en la consola.
+- **Causa:** El servicio de Auth no está habilitado en Firebase Console o el dominio `localhost` / `vercel.app` no está autorizado.
+- **Solución:**
+  1. Ir a [Firebase Console](https://console.firebase.google.com/) ➔ **Authentication** ➔ **Sign-in method** ➔ Activar **Email/Password** y **Google**.
+  2. Ir a **Settings** ➔ **Authorized domains** ➔ Agregar `localhost` y tu dominio de Vercel.
 
 ---
 
-## 6. Tabla HTTP rápida
+## 3. Telemetría y Supabase Batching
 
-| HTTP | Acción típica |
-|------|----------------|
-| 400 | Revisar body ([API.md](../backend/API.md)) |
-| 401 | Re-login |
-| 404 | Registrar usuario / ID incorrecto |
-| 409 | Email ya existe → login |
-| 429 | Esperar rate limit |
-| 500 | Log backend + Firestore |
-| 503 | `FIREBASE_WEB_API_KEY` en backend |
+### 🟡 Advertencia: `[Supabase Warning] Node.js detected without native WebSocket support`
+- **Síntoma:** Durante la ejecución de tests unitarios (`npm test`) aparece una advertencia de WebSocket de Supabase.
+- **Causa:** Supabase Realtime advierte sobre la ausencia de WebSocket nativo en entornos de test puramente HTTP.
+- **Impacto:** **Ninguno (Inofensivo)**. Las inserciones masivas de telemetría en la tabla `eventos` utilizan peticiones HTTP REST POST, por lo que la ingesta funciona al 100%.
 
 ---
 
-## 7. Comandos útiles
-
-```powershell
-Invoke-RestMethod http://localhost:3000/api/health
-Invoke-RestMethod http://localhost:5173/api/health
-
-Invoke-RestMethod http://localhost:3000/api/auth/login -Method POST `
-  -ContentType "application/json" `
-  -Body '{"email":"tu@mail.com","password":"tu_pass"}'
-```
-
-```bash
-cd backend && npm run seed
-node -v && npm -v
-```
+### 🔴 Error 400 `tipo_evento inválido o no permitido en la whitelist`
+- **Síntoma:** La API rechaza una petición de tracking con estado 400.
+- **Causa:** El cliente intentó emitir un evento fuera de los 17 eventos permitidos en la lista blanca (`whitelist`) de `tracking.routes.js`.
+- **Solución:** Asegurarse de utilizar únicamente los eventos oficiales definidos en la taxonomía (`onboarding_iniciado`, `leccion_abandonada`, `pantalla_visitada`, etc.).
 
 ---
 
-## 8. Reportar un bug
+## 4. Validaciones de Datos (Zod Schemas)
 
-Incluir:
-
-1. Mensaje exacto (captura o texto)
-2. ¿Email, Google o ambos?
-3. Salida de `verificar-entorno.bat`
-4. Log del backend (sin private keys)
-5. Network: URL, status, body `error`
+### 🔴 Error 400 en respuestas de Ejercicios u Onboarding
+- **Síntoma:** La API devuelve `{ "success": false, "error": "..." }`.
+- **Causa:** El payload enviado no cumple con la estructura Zod definida en `validate.js` (ej. enviar `confianzaMath` como string en lugar de número, o falta de campos obligatorios).
+- **Solución:** El backend sanitiza e intenta coercionar tipos automáticamente. Revisa que el cliente envíe los tipos esperados (`number`, `string`, `array`).
 
 ---
 
-## 9. Incidentes conocidos (MVP)
+## 5. Matriz de Códigos HTTP de Respuesta
 
-| Incidente | Solución |
-|-----------|----------|
-| `CONFIGURATION_NOT_FOUND` | Activar Authentication en Console |
-| Google en puerto 5174 | `detener-todo.bat` + solo :5173 |
-| 500 tras login Google | Firestore activo; no escribir campos undefined |
-| 503 login email | `FIREBASE_WEB_API_KEY` en backend |
+| HTTP | Significado | Solución Recomendada |
+| :--- | :--- | :--- |
+| **400** | Petición Malformada (Zod Error) | Verificar campos enviados en el body JSON. |
+| **401** | Sesión Expirada / Token Inválido | Renovar token de Firebase Auth o re-iniciar sesión. |
+| **403** | Sin Permisos Suficientes | Requiere rol `admin` para acceder al recurso. |
+| **404** | Recurso o Usuario No Encontrado | Verificar IDs o registrar el perfil previamente. |
+| **413** | Payload Demasiado Grande | El lote de eventos supera los 32KB configurados en el middleware. |
+| **429** | Límite de Peticiones Excedido | Esperar la ventana de rate limiting (15 minutos). |
+| **500** | Error Interno de Servidor | Revisar logs estructurados en la consola del backend. |
