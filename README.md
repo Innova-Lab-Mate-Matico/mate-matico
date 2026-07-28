@@ -58,7 +58,7 @@ verificar-entorno.bat
 
 | Servicio | Entorno Local | Descripción |
 | :--- | :--- | :--- |
-| **Frontend App** | `http://localhost:3000` | Interfaz React de usuario / estudiante. |
+| **Frontend App** | `http://localhost:3001` | Interfaz React de usuario / estudiante. |
 | **Backend API** | `http://localhost:3000/api` | Servidor Express REST. |
 | **Health Check** | `http://localhost:3000/api/health` | Estado del servidor y bases de datos. |
 

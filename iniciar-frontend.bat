@@ -24,7 +24,7 @@ if not exist ".env" (
 
 echo.
 echo ========================================
-echo   Panel: http://localhost:5173
+echo   Panel: http://localhost:3001
 echo   (El backend debe estar en :3000)
 echo ========================================
 echo.
