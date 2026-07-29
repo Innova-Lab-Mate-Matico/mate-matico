@@ -115,8 +115,12 @@ export default function App() {
 
   /*
     Intentar recuperar sesión automáticamente al iniciar la aplicación.
+    También realiza un silencioso calentamiento en segundo plano del servidor (Render).
   */
   React.useEffect(() => {
+    // Calentamiento silencioso para despertar el backend de Render en segundo plano
+    fetch(`${API_BASE}/health`).catch(() => {});
+
     const savedToken = localStorage.getItem('idToken');
     if (savedToken) {
       loadProfile(savedToken);
@@ -142,7 +146,7 @@ export default function App() {
   };
 
 /*
-  Wrapper estándar para llamadas HTTP al backend con auto-refresh, manejo de 401 y cartel empático de red/servidor.
+  Wrapper estándar para llamadas HTTP al backend con auto-refresh, manejo de 401, reintentos automáticos y cartel empático de red/servidor.
 */
 const apiCall = React.useCallback(async (path, options = {}, customToken = null) => {
   const headers = {
@@ -168,18 +172,30 @@ const apiCall = React.useCallback(async (path, options = {}, customToken = null)
   }
 
   let res;
-  try {
-    res = await fetch(`${API_BASE}${path}`, {
-      ...options,
-      headers,
-    });
-  } catch (netErr) {
-    console.error("Error de red al conectar con la API:", netErr);
-    setServerError({
-      active: true,
-      retry: () => apiCall(path, options, customToken)
-    });
-    throw netErr;
+  let attempts = 0;
+  const maxAttempts = 3;
+
+  while (attempts < maxAttempts) {
+    try {
+      res = await fetch(`${API_BASE}${path}`, {
+        ...options,
+        headers,
+      });
+      break;
+    } catch (netErr) {
+      attempts += 1;
+      console.warn(`⚠️ Intento ${attempts}/${maxAttempts} para ${path} falló por red/cold-start. Reintentando automáticamente en breve...`);
+      if (attempts >= maxAttempts) {
+        console.error("Error de red persistente al conectar con la API:", netErr);
+        setServerError({
+          active: true,
+          retry: () => apiCall(path, options, customToken)
+        });
+        throw netErr;
+      }
+      const waitTime = 1200 * attempts;
+      await new Promise((r) => setTimeout(r, waitTime));
+    }
   }
 
   // Interceptor de 401 Unauthorized: renovar forzosamente y reintentar la petición automáticamente
