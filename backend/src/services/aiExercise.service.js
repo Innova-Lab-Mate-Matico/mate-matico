@@ -339,6 +339,23 @@ export async function generateAiExercise(uid, input) {
   return { exercise, source };
 }
 
+function isAnswerMatch(userAns, targetAns) {
+  const normUser = normalizeAnswer(userAns);
+  const normTarget = normalizeAnswer(targetAns);
+
+  if (normUser === normTarget) return true;
+
+  // Comparación por número extraído (ej. "6" vs "6 platos" o "6" vs "6.0")
+  const userNum = (normUser.match(/-?\d+(\.\d+)?/) || [])[0];
+  const targetNum = (normTarget.match(/-?\d+(\.\d+)?/) || [])[0];
+
+  if (userNum && targetNum && userNum === targetNum) {
+    return true;
+  }
+
+  return false;
+}
+
 export async function validateAiExercise(uid, { exerciseId, answer, validationToken, attempt = 1 }) {
   if (!exerciseId || answer === undefined || answer === null || String(answer).trim() === '') throw httpError('exerciseId y answer son obligatorios');
   const validation = readValidationToken(validationToken, uid, exerciseId);
@@ -350,7 +367,7 @@ export async function validateAiExercise(uid, { exerciseId, answer, validationTo
     console.log('💡 registrarActividadEmpatica offline:', err.message);
   }
 
-  if (normalizeAnswer(answer) !== validation.correctAnswer) {
+  if (!isAnswerMatch(answer, validation.correctAnswer)) {
     let rolActual = 'principiante';
     try {
       const user = await obtenerUsuario(uid);
