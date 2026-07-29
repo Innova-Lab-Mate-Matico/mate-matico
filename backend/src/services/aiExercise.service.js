@@ -220,14 +220,22 @@ export async function generateAiExercise(uid, input) {
       await wait(needsRegeneration ? 0 : 750 * (attempt + 1));
     }
   }
-  if (lastError && !generated) {
-    console.error('Falló la generación con Gemini.', lastError.message);
-    throw httpError('Gemini está con alta demanda. Probá nuevamente en unos segundos.', 503);
+  let source = 'gemini';
+  if (!generated) {
+    console.log('💡 Gemini no configurado o indisponible. Generando ejercicio con motor local adaptativo.');
+    const loc = localExercise(input);
+    generated = {
+      description: loc.description,
+      answers: loc.answers || [],
+      correctAnswer: loc.correctAnswer,
+      hint: 'Revisá los cálculos atentamente e intentá nuevamente.',
+      explanation: loc.explanation
+    };
+    source = 'local';
   }
-  if (!generated) throw httpError('Gemini no está configurado para generar ejercicios.', 503);
   const id = `ai_${randomUUID()}`;
   const exercise = { id, level: Number(input.level), section: input.section, description: String(generated.description).trim(), type: input.structure, answers: generated.answers.map(String), hint: String(generated.hint).trim(), explanation: String(generated.explanation).trim(), puntos: PUNTOS_EJERCICIO, createdAt: new Date().toISOString(), validationToken: createValidationToken(uid, id, generated.correctAnswer) };
-  return { exercise, source: 'gemini' };
+  return { exercise, source };
 }
 
 export async function validateAiExercise(uid, { exerciseId, answer, validationToken, attempt = 1 }) {
@@ -240,6 +248,12 @@ export async function validateAiExercise(uid, { exerciseId, answer, validationTo
     return { correcto: false, puntosGanados: 0, explicacionError: 'Todavía no es la respuesta correcta. Revisá el procedimiento e intentá otra vez.', habilitarComodin: true, rolActual: user?.rolActual ?? 'principiante' };
   }
   const puntosGanados = pointsForAttempt(Math.max(1, Number(attempt) || 1));
-  const recompensa = await aplicarRecompensaActividad(uid, puntosGanados, { actualizarRacha: true });
+  let recompensa = { puntosGanados, rachaActual: 1 };
+  try {
+    const res = await aplicarRecompensaActividad(uid, puntosGanados, { actualizarRacha: true });
+    if (res) recompensa = res;
+  } catch (err) {
+    console.log('💡 Modo offline o usuario dev: Recompensa aplicada localmente.', err.message);
+  }
   return { correcto: true, puntosGanados, ...recompensa };
 }

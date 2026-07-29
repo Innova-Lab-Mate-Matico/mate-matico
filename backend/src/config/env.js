@@ -78,6 +78,11 @@ export const env = {
     anonKey: optional('SUPABASE_ANON_KEY'),
     dbUrl: optional('SUPABASE_DB_URL'),
   },
+
+  gemini: {
+    apiKey: optional('GEMINI_API_KEY') || optional('GROQ_API_KEY'),
+    model: optional('GEMINI_MODEL', 'gemini-1.5-flash'),
+  },
 };
 
 export function getFirebaseServiceAccount() {
