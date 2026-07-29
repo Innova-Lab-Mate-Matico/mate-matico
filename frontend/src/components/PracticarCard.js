@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import telemetry from "../services/TelemetryService";
 import "./PracticarCard.css";
 
 // ============================
@@ -52,6 +53,12 @@ function PracticarCard({ apiCall, onBack, onNavigate }) {
 
       if (data && data.exercise) {
         setAiExercise(data);
+        telemetry.track("practica_ia_ejercicio_generado", {
+          nivel: level,
+          apartado: section,
+          estructura: structure,
+          fuente: data.source || "groq"
+        });
       } else {
         throw new Error("No se pudo generar el ejercicio.");
       }
@@ -84,8 +91,18 @@ function PracticarCard({ apiCall, onBack, onNavigate }) {
 
       setValidationResult(res);
 
-      if (!res.correcto) {
+      if (res.correcto) {
+        telemetry.track("practica_ia_ejercicio_resuelto", {
+          ejercicioId: exercise.id,
+          intentos: attempt,
+          puntosGanados: res.puntosGanados ?? 10
+        });
+      } else {
         setAttempt((prev) => prev + 1);
+        telemetry.track("practica_ia_ejercicio_fallado", {
+          ejercicioId: exercise.id,
+          intentoActual: attempt
+        });
       }
     } catch (err) {
       console.error("Error al validar respuesta:", err);
@@ -107,6 +124,23 @@ function PracticarCard({ apiCall, onBack, onNavigate }) {
     setAttempt(1);
   };
 
+  // Finalizar práctica y salir al menú principal
+  const handleFinishPractice = () => {
+    telemetry.track("practica_ia_finalizada", {
+      nivel: level,
+      apartado: section,
+      estructura: structure
+    });
+    setAiExercise(null);
+    setValidationResult(null);
+    setSelectedAnswer("");
+    setErrorMsg(null);
+    setAttempt(1);
+    if (onBack) {
+      onBack();
+    }
+  };
+
   // -------------------------------------------------------------
   // VISTA 1: EJERCICIO GENERADO POR IA (EN CURSO O COMPLETADO)
   // -------------------------------------------------------------
@@ -122,9 +156,13 @@ function PracticarCard({ apiCall, onBack, onNavigate }) {
           <button className="back-button" onClick={handleResetFilters}>
             ← Ajustar filtros
           </button>
-          <span style={{ fontSize: '0.78rem', fontWeight: '700', color: '#7b61ff', background: 'rgba(123, 97, 255, 0.1)', padding: '4px 12px', borderRadius: '12px' }}>
-            {source === 'gemini' ? '✨ Gemini MathGen' : '🎲 Motor Adaptativo'}
-          </span>
+          <button 
+            type="button" 
+            onClick={handleFinishPractice}
+            style={{ background: 'none', border: 'none', color: '#64748b', fontSize: '0.82rem', fontWeight: '600', cursor: 'pointer', textDecoration: 'underline' }}
+          >
+            Finalizar práctica 🏁
+          </button>
         </div>
 
         <div className="card-content" style={{ padding: '10px 0 20px 0' }}>
@@ -135,7 +173,7 @@ function PracticarCard({ apiCall, onBack, onNavigate }) {
                 Ejercicio Práctico ({section})
               </h2>
               <span style={{ fontSize: '0.8rem', color: '#64748b' }}>
-                Nivel {level === 0 ? '0 (Principiante)' : level === 1 ? '1 (Intermedio)' : '2 (Avanzado)'}
+                Nivel {level === 0 ? '0 (Principiante)' : level === 1 ? '1 (Intermedio)' : '2 (Avanzado)'} • {source === 'gemini' ? '✨ Gemini' : '⚡ Groq Llama 3.3'}
               </span>
             </div>
           </div>
@@ -234,14 +272,34 @@ function PracticarCard({ apiCall, onBack, onNavigate }) {
               <p style={{ color: '#047857', fontSize: '0.9rem', margin: '0 0 16px 0' }}>
                 Ganaste <strong>+{validationResult.puntosGanados ?? 10} puntos</strong>. ¡Seguí así!
               </p>
-              <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
+              <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}>
                 <button
                   type="button"
                   className="primary-button generar-button"
                   onClick={handleGenerate}
-                  style={{ width: 'auto', padding: '12px 24px' }}
+                  style={{ flex: '1', minWidth: '170px', padding: '12px 18px', fontSize: '0.9rem' }}
                 >
                   Generar otro ejercicio ✨
+                </button>
+                <button
+                  type="button"
+                  onClick={handleFinishPractice}
+                  style={{
+                    flex: '1',
+                    minWidth: '150px',
+                    padding: '12px 18px',
+                    borderRadius: '14px',
+                    border: '1.5px solid #cbd5e1',
+                    background: '#ffffff',
+                    color: '#475569',
+                    fontSize: '0.9rem',
+                    fontWeight: '700',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                    boxShadow: '0 2px 4px rgba(0,0,0,0.03)'
+                  }}
+                >
+                  Finalizar práctica 🏁
                 </button>
               </div>
             </div>
