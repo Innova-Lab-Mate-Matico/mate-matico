@@ -770,6 +770,10 @@ const apiCall = React.useCallback(async (path, options = {}, customToken = null)
               apiCall={apiCall}
               onBack={() => setActiveTab('inicio')}
               onNavigate={(tab) => setActiveTab(tab)}
+              onRefreshProfile={() => {
+                loadProfile();
+                loadUserProgress();
+              }}
             />
           )}
 

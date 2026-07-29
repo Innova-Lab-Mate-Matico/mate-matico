@@ -17,7 +17,7 @@ import frame11 from "../assets/Frame 11.svg";
 import group52 from "../assets/Group 52.svg";
 import mateicoImg from "../assets/Mateico.png";
 
-function PracticarCard({ apiCall, onBack, onNavigate }) {
+function PracticarCard({ apiCall, onBack, onNavigate, onRefreshProfile }) {
   // Filtros del formulario
   const [level, setLevel] = useState(1); // 0: Principiante, 1: Intermedio, 2: Avanzado
   const [section, setSection] = useState("Suma y Resta");
@@ -97,6 +97,9 @@ function PracticarCard({ apiCall, onBack, onNavigate }) {
           intentos: attempt,
           puntosGanados: res.puntosGanados ?? 10
         });
+        if (onRefreshProfile) {
+          onRefreshProfile();
+        }
       } else {
         setAttempt((prev) => prev + 1);
         telemetry.track("practica_ia_ejercicio_fallado", {
