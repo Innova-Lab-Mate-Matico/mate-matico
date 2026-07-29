@@ -750,14 +750,12 @@ const apiCall = React.useCallback(async (path, options = {}, customToken = null)
     )}
 
           {activeTab === 'practicar' && (
-          <PracticarCard
-         onBack={() => setActiveTab('inicio')}
-         onComplete={() => {
-         console.log('Generar ejercicio');
-         }}
-          onNavigate={(tab) => setActiveTab(tab)}
-  />
-)}
+            <PracticarCard
+              apiCall={apiCall}
+              onBack={() => setActiveTab('inicio')}
+              onNavigate={(tab) => setActiveTab(tab)}
+            />
+          )}
 
               {activeTab === 'logros' && (
                 <Progress apiCall={apiCall} />
