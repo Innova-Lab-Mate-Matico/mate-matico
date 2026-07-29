@@ -204,25 +204,120 @@ Usá vocabulario apropiado para estudiantes en Argentina: no uses las palabras "
   return { ...generated, answers: input.structure === 'multiple_choice' ? shuffle(generated.answers) : [] };
 }
 
+async function generateWithGroq(input) {
+  const groqKey = process.env.GROQ_API_KEY;
+  if (!groqKey || !groqKey.trim()) return null;
+
+  const category = `${input.level}:${input.section}`;
+  const previousDescriptions = recentDescriptions.get(category) ?? [];
+
+  const systemInstruction = `Eres un talentoso profesor de matemáticas que crea ejercicios ingeniosos y educativos para alumnos en Argentina.
+Diseñas un único problema de matemáticas en español rioplatense (usando vos, comprás, tenés) inventando valores numéricos lógicos, realistas y creativos.
+Tema del ejercicio: ${input.section}
+Nivel de dificultad: Nivel ${input.level} (0 = principiantes, 1 = intermedio, 2 = avanzado).
+Tipo de respuesta: ${input.structure === 'multiple_choice' ? 'Opción Múltiple (4 respuestas posibles)' : 'Entrada libre de texto o número'}.
+
+REGLA DE UNICIDAD CRÍTICA:
+El ejercicio NO debe ser igual ni similar a estos problemas ya realizados:
+${previousDescriptions.length ? JSON.stringify(previousDescriptions) : 'Ninguno todavía.'}
+
+Devuelve EXCLUSIVAMENTE un objeto JSON válido con este formato:
+{
+  "description": "enunciado breve del problema",
+  "type": "${input.structure}",
+  "answers": ${input.structure === 'multiple_choice' ? '["opcion1", "opcion2", "opcion3", "opcion4"]' : '[]'},
+  "correctAnswer": "respuesta_correcta",
+  "hint": "pista sutil para el primer error (sin revelar la respuesta)",
+  "explanation": "explicación del procedimiento paso a paso para el segundo error"
+}`;
+
+  const userPrompt = `Generá un nuevo problema matemático de nivel ${input.level} sobre "${input.section}". Formato "${input.structure}".`;
+
+  const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${groqKey.trim()}`
+    },
+    body: JSON.stringify({
+      model: 'llama-3.3-70b-versatile',
+      messages: [
+        { role: 'system', content: systemInstruction },
+        { role: 'user', content: userPrompt }
+      ],
+      response_format: { type: 'json_object' },
+      temperature: 0.8
+    })
+  });
+
+  if (!response.ok) {
+    throw new Error(`Groq respondió ${response.status}`);
+  }
+
+  const data = await response.json();
+  const text = data.choices?.[0]?.message?.content;
+  if (!text) throw new Error('Respuesta vacía de Groq');
+
+  const generated = JSON.parse(text.trim());
+  if (!generated.description || !generated.correctAnswer || !generated.hint || !generated.explanation) {
+    throw new Error('Respuesta incompleta de Groq');
+  }
+
+  if (input.structure === 'multiple_choice') {
+    if (!Array.isArray(generated.answers) || generated.answers.length !== 4 || !generated.answers.includes(String(generated.correctAnswer))) {
+      const set = new Set([String(generated.correctAnswer), ...(generated.answers || []).map(String)]);
+      while (set.size < 4) {
+        const baseNum = Number(generated.correctAnswer);
+        if (!isNaN(baseNum)) {
+          set.add(String(baseNum + randomInt(1, 10)));
+        } else {
+          set.add(`Opción ${set.size + 1}`);
+        }
+      }
+      generated.answers = Array.from(set).slice(0, 4);
+    }
+    generated.answers = shuffle(generated.answers);
+  } else {
+    generated.answers = [];
+  }
+
+  recentDescriptions.set(category, [...previousDescriptions, String(generated.description)].slice(-MAX_RECENT_EXERCISES));
+  return generated;
+}
+
 export async function generateAiExercise(uid, input) {
   validateRequest(input);
   let generated;
-  let lastError;
-  for (let attempt = 0; attempt < 3; attempt += 1) {
+  let source = 'groq';
+
+  // 1. Intentar con Groq API (Llama 3.3) si GROQ_API_KEY está configurada
+  if (process.env.GROQ_API_KEY && process.env.GROQ_API_KEY.trim()) {
     try {
-      generated = await generateWithMathGen(input);
-      break;
-    } catch (error) {
-      lastError = error;
-      const isTemporaryOverload = String(error?.message ?? error).includes('503');
-      const needsRegeneration = error?.code === 'CONTENT_FILTER';
-      if ((!isTemporaryOverload && !needsRegeneration) || attempt === 2) break;
-      await wait(needsRegeneration ? 0 : 750 * (attempt + 1));
+      generated = await generateWithGroq(input);
+    } catch (err) {
+      console.error('Error al generar con Groq API:', err.message);
     }
   }
-  let source = 'gemini';
+
+  // 2. Intentar con Gemini API (GoogleGenAI) si GEMINI_API_KEY está configurada
+  if (!generated && process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY.trim()) {
+    source = 'gemini';
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      try {
+        generated = await generateWithMathGen(input);
+        break;
+      } catch (error) {
+        const isTemporaryOverload = String(error?.message ?? error).includes('503');
+        const needsRegeneration = error?.code === 'CONTENT_FILTER';
+        if ((!isTemporaryOverload && !needsRegeneration) || attempt === 2) break;
+        await wait(needsRegeneration ? 0 : 750 * (attempt + 1));
+      }
+    }
+  }
+
+  // 3. Fallback a Motor Local Adaptativo
   if (!generated) {
-    console.log('💡 Gemini no configurado o indisponible. Generando ejercicio con motor local adaptativo.');
+    console.log('💡 APIs externas no configuradas o indisponibles. Generando ejercicio con motor local adaptativo.');
     const loc = localExercise(input);
     generated = {
       description: loc.description,
@@ -233,6 +328,7 @@ export async function generateAiExercise(uid, input) {
     };
     source = 'local';
   }
+
   const id = `ai_${randomUUID()}`;
   const exercise = { id, level: Number(input.level), section: input.section, description: String(generated.description).trim(), type: input.structure, answers: generated.answers.map(String), hint: String(generated.hint).trim(), explanation: String(generated.explanation).trim(), puntos: PUNTOS_EJERCICIO, createdAt: new Date().toISOString(), validationToken: createValidationToken(uid, id, generated.correctAnswer) };
   return { exercise, source };
