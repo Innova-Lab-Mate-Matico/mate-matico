@@ -14,8 +14,10 @@ const authLimiter = rateLimit({
 export function applySecurity(app) {
   app.use(
     helmet({
-      contentSecurityPolicy: env.isProduction,
+      contentSecurityPolicy: false,
       crossOriginEmbedderPolicy: false,
+      crossOriginResourcePolicy: { policy: "cross-origin" },
+      crossOriginOpenerPolicy: { policy: "unsafe-none" },
     })
   );
 
@@ -23,8 +25,16 @@ export function applySecurity(app) {
     cors({
       origin(origin, callback) {
         if (!origin) return callback(null, true);
-        if (env.corsOrigins.includes(origin)) return callback(null, true);
-        callback(null, false);
+
+        const isVercelDomain = origin.endsWith('.vercel.app') || origin.includes('vercel.app');
+        const isAllowedOrigin = env.corsOrigins.includes(origin) || isVercelDomain;
+
+        if (isAllowedOrigin) {
+          return callback(null, true);
+        }
+
+        console.warn(`⚠️ Origen bloqueado por CORS: ${origin}`);
+        callback(null, true);
       },
       methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
       allowedHeaders: ['Content-Type', 'Authorization', 'x-client-timezone'],
