@@ -98,7 +98,7 @@ function PracticarCard({ apiCall, onBack, onNavigate, onRefreshProfile }) {
           puntosGanados: res.puntosGanados ?? 10
         });
         if (onRefreshProfile) {
-          onRefreshProfile();
+          onRefreshProfile(res);
         }
       } else {
         setAttempt((prev) => prev + 1);
