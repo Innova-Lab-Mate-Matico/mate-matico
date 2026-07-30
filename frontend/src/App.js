@@ -531,7 +531,7 @@ const apiCall = React.useCallback(async (path, options = {}, customToken = null)
       const msIdToken = await credential.user.getIdToken();
 
       setStatus('Sincronizando perfil con el servidor...');
-      const data = await apiCall('/auth/google', {
+      const data = await apiCall('/auth/microsoft', {
         method: 'POST',
         body: JSON.stringify({
           idToken: msIdToken,

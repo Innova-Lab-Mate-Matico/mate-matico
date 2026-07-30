@@ -169,6 +169,9 @@ export function validateExplainBody(req, res, next) {
   if (!question || typeof question !== 'string' || !question.trim()) {
     return res.status(400).json({ success: false, error: 'El campo question es obligatorio y debe ser un texto.' });
   }
+  if (question.length > 1500) {
+    return res.status(400).json({ success: false, error: 'La pregunta no puede superar los 1500 caracteres.' });
+  }
 
   if (history !== undefined) {
     if (!Array.isArray(history)) {
@@ -186,16 +189,19 @@ export function validateExplainBody(req, res, next) {
       if (!msg.text || typeof msg.text !== 'string' || !msg.text.trim()) {
         return res.status(400).json({ success: false, error: `El campo text en el índice ${i} debe ser un texto no vacío.` });
       }
+      if (msg.text.length > 2000) {
+        return res.status(400).json({ success: false, error: `El mensaje en el índice ${i} del historial no puede superar los 2000 caracteres.` });
+      }
     }
   }
 
   const explainSchema = z.object({
-    moduleId: z.string().optional(),
-    lessonId: z.string().optional(),
-    theoryId: z.string().optional(),
-    question: z.string().trim().min(1),
+    moduleId: z.string().max(100).optional(),
+    lessonId: z.string().max(100).optional(),
+    theoryId: z.string().max(100).optional(),
+    question: z.string().trim().min(1).max(1500),
     history: z.array(z.any()).optional(),
-    sesion_id: z.string().optional(),
+    sesion_id: z.string().max(100).optional(),
   });
 
   return validate(explainSchema)(req, res, next);

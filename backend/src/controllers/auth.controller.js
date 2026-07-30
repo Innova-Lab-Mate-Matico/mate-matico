@@ -121,6 +121,22 @@ export async function googleAuth(req, res, next) {
   }
 }
 
+export async function microsoftAuth(req, res, next) {
+  try {
+    const { idToken } = req.body;
+    const session = await loginWithGoogle(idToken); // Reutiliza validacion de idToken de Firebase para OAuth Microsoft
+
+    if (session.usuario) {
+      session.usuario = attachRachaRota(session.usuario);
+    }
+
+    res.json({ success: true, ...session });
+  } catch (err) {
+    console.error('Error en microsoftAuth:', err);
+    next(err);
+  }
+}
+
 export async function me(req, res, next) {
   try {
     const profile = await getUserProfile(req.user.uid);
