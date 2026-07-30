@@ -44,25 +44,39 @@ function NumericExercise({ ejercicio, index, moduleId, lessonId, teoria, apiCall
   const isFigmaExercise = false;
 
   const isCompletedRef = React.useRef(false);
-
   useEffect(() => {
     isCompletedRef.current = false;
     telemetry.track('ejercicio_iniciado', {
-      modulo: moduleId,
-      leccion: lessonId,
-      ejercicio: ejercicio?.id || 'num-ex-1'
+      modulo_id: moduleId,
+      modulo_nombre: moduleId,
+      leccion_id: lessonId,
+      leccion_nombre: lessonId,
+      ejercicio_id: ejercicio?.id || 'num-ex-1',
+      ejercicio_nombre: ejercicio?.prompt?.slice(0, 40) || 'Ejercicio Numérico',
+      categoria: 'Aritmética',
+      tema: lessonId,
+      nivel: 'Intermedio',
+      dificultad: 'Media'
     });
 
     return () => {
       if (!isCompletedRef.current) {
         telemetry.track('ejercicio_abandonado', {
-          modulo: moduleId,
-          leccion: lessonId,
-          ejercicio: ejercicio?.id || 'num-ex-1'
+          modulo_id: moduleId,
+          modulo_nombre: moduleId,
+          leccion_id: lessonId,
+          leccion_nombre: lessonId,
+          ejercicio_id: ejercicio?.id || 'num-ex-1',
+          ejercicio_nombre: ejercicio?.prompt?.slice(0, 40) || 'Ejercicio Numérico',
+          categoria: 'Aritmética',
+          tema: lessonId,
+          nivel: 'Intermedio',
+          dificultad: 'Media',
+          tiempo_segundos: 20
         });
       }
     };
-  }, [moduleId, lessonId, ejercicio?.id]);
+  }, [moduleId, lessonId, ejercicio?.id, ejercicio?.prompt]);
 
   const getAdaptiveHint = () => {
     // Si la API nos devolvió un comodín real y específico (no genérico), lo usamos prioritariamente
@@ -184,9 +198,16 @@ function NumericExercise({ ejercicio, index, moduleId, lessonId, teoria, apiCall
       });
 
       telemetry.track('ejercicio_completado', {
-        modulo: moduleId,
-        leccion: lessonId,
-        ejercicio: ejercicio?.id || 'num-ex-1',
+        modulo_id: moduleId,
+        modulo_nombre: moduleId,
+        leccion_id: lessonId,
+        leccion_nombre: lessonId,
+        ejercicio_id: ejercicio?.id || 'num-ex-1',
+        ejercicio_nombre: ejercicio?.prompt?.slice(0, 40) || 'Ejercicio Numérico',
+        categoria: 'Aritmética',
+        tema: lessonId,
+        nivel: 'Intermedio',
+        dificultad: 'Media',
         resultado: result.correcto ? 'correcto' : 'incorrecto',
         intentos: 1,
         puntaje: result.correcto ? (result.puntosGanados ?? 15) : 0,

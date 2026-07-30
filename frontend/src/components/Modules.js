@@ -232,8 +232,13 @@ export default function Modules({
           lesson
       );
       telemetry.track('leccion_iniciada', {
-        modulo: selectedModuleId,
-        leccion: lesson.id
+        modulo_id: selectedModuleId,
+        modulo_nombre: moduleDetail?.title || selectedModuleId,
+        leccion_id: lesson.id,
+        leccion_nombre: lesson.title || lesson.id,
+        categoria: moduleDetail?.category || 'Aritmética',
+        tema: lesson.tema || selectedModuleId,
+        nivel: lesson.nivel || 'Principiante'
       });
     } catch (err) {
       console.error(

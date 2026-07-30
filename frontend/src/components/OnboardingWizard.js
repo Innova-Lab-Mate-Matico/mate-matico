@@ -24,12 +24,13 @@ export default function OnboardingWizard({ apiCall, onComplete }) {
   stepRef.current = step;
 
   React.useEffect(() => {
-    telemetry.track('onboarding_iniciado');
+    telemetry.track('onboarding_iniciado', { version_app: '1.0.0' });
 
     return () => {
       if (stepRef.current < 6) {
         telemetry.track('onboarding_abandonado', {
-          paso_al_abandonar: stepRef.current
+          paso: stepRef.current,
+          pantalla: `Paso ${stepRef.current}`
         });
       }
     };

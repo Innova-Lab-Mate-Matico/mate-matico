@@ -372,7 +372,6 @@ const apiCall = React.useCallback(async (path, options = {}, customToken = null)
 
         return;
       }
-
       saveToken(data.idToken);
       loadUserProgress(data.idToken);
 
@@ -382,7 +381,13 @@ const apiCall = React.useCallback(async (path, options = {}, customToken = null)
       );
 
       handleSetUser(data.usuario);
-      telemetry.track('usuario_registrado', { proveedor: 'password' });
+      telemetry.track('usuario_registrado', {
+        usuario_id: data.usuario?.uid,
+        metodo_login: 'Email/Password',
+        proveedor: 'password',
+        edad: data.usuario?.edad ?? null,
+        nivel_educativo: data.usuario?.nivelEducativo ?? null
+      });
       setActiveTab('inicio');
     } catch (err) {
       setStatus(err.message, false);
@@ -419,7 +424,11 @@ const apiCall = React.useCallback(async (path, options = {}, customToken = null)
       );
 
       handleSetUser(data.usuario);
-      telemetry.track('usuario_inicio_sesion', { proveedor: 'password' });
+      telemetry.track('usuario_inicio_sesion', {
+        usuario_id: data.usuario?.uid,
+        metodo_login: 'Email/Password',
+        proveedor: 'password'
+      });
       setActiveTab('inicio');
     } catch (err) {
       setStatus(err.message, false);
@@ -432,14 +441,15 @@ const apiCall = React.useCallback(async (path, options = {}, customToken = null)
   const handleRecoverPassword = async (email) => {
     try {
       setStatus('Enviando correo de recuperación...');
-      const { auth } = await getFirebaseAuth();
+      const { auth, sendPasswordResetEmail } = await getFirebaseAuth();
       await sendPasswordResetEmail(auth, email);
-      setStatus(
-        'Te enviamos un correo electrónico con instrucciones para restablecer tu contraseña.',
-        true
-      );
+
+      setStatus('Te enviamos un correo para restablecer tu contraseña. Revisá tu casilla.', true);
     } catch (err) {
-      setStatus(err.message, false);
+      const friendlyMsg = err.code === 'auth/user-not-found'
+        ? 'No existe una cuenta registrada con este correo.'
+        : err.message;
+      setStatus(friendlyMsg, false);
     }
   };
 
@@ -455,17 +465,13 @@ const apiCall = React.useCallback(async (path, options = {}, customToken = null)
       const {
         auth,
         signInWithPopup,
-        provider,
+        googleProvider,
       } = await getFirebaseAuth();
-
-      provider.setCustomParameters({
-        prompt: 'select_account',
-      });
 
       const credential =
         await signInWithPopup(
           auth,
-          provider
+          googleProvider
         );
 
       const googleIdToken =
@@ -502,7 +508,16 @@ const apiCall = React.useCallback(async (path, options = {}, customToken = null)
       );
 
       handleSetUser(data.usuario);
-      telemetry.track(data.esNuevo ? 'usuario_registrado' : 'usuario_inicio_sesion', { proveedor: 'google.com' });
+      const evt = data.esNuevo ? 'usuario_registrado' : 'usuario_inicio_sesion';
+      telemetry.track(evt, {
+        usuario_id: data.usuario?.uid,
+        metodo_login: 'Google',
+        proveedor: 'google.com',
+        ...(data.esNuevo && {
+          edad: data.usuario?.edad ?? null,
+          nivel_educativo: data.usuario?.nivelEducativo ?? null
+        })
+      });
       setActiveTab('inicio');
     } catch (err) {
       const friendlyMsg =
@@ -521,7 +536,7 @@ const apiCall = React.useCallback(async (path, options = {}, customToken = null)
   const handleMicrosoftLogin = async () => {
     try {
       setStatus('Abriendo panel de Microsoft/Outlook...');
-      const { auth, signInWithPopup } = await getFirebaseAuth();
+      const { auth, signInWithPopup, OAuthProvider } = await getFirebaseAuth();
       const provider = new OAuthProvider('microsoft.com');
       provider.setCustomParameters({
         prompt: 'select_account',
@@ -549,6 +564,16 @@ const apiCall = React.useCallback(async (path, options = {}, customToken = null)
       );
 
       handleSetUser(data.usuario);
+      const msEvt = data.esNuevo ? 'usuario_registrado' : 'usuario_inicio_sesion';
+      telemetry.track(msEvt, {
+        usuario_id: data.usuario?.uid,
+        metodo_login: 'Microsoft',
+        proveedor: 'microsoft.com',
+        ...(data.esNuevo && {
+          edad: data.usuario?.edad ?? null,
+          nivel_educativo: data.usuario?.nivelEducativo ?? null
+        })
+      });
       setActiveTab('inicio');
     } catch (err) {
       const friendlyMsg =

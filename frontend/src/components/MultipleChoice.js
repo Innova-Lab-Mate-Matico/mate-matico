@@ -37,21 +37,36 @@ function MultipleChoice({ ejercicio, moduleId, lessonId, teoria, apiCall, onAnsw
   React.useEffect(() => {
     isCompletedRef.current = false;
     telemetry.track('ejercicio_iniciado', {
-      modulo: moduleId,
-      leccion: lessonId,
-      ejercicio: ejercicio?.id || 'mc-ex-1'
+      modulo_id: moduleId,
+      modulo_nombre: moduleId,
+      leccion_id: lessonId,
+      leccion_nombre: lessonId,
+      ejercicio_id: ejercicio?.id || 'mc-ex-1',
+      ejercicio_nombre: ejercicio?.enunciado?.slice(0, 40) || 'Opción Múltiple',
+      categoria: 'Aritmética',
+      tema: lessonId,
+      nivel: 'Intermedio',
+      dificultad: 'Media'
     });
 
     return () => {
       if (!isCompletedRef.current) {
         telemetry.track('ejercicio_abandonado', {
-          modulo: moduleId,
-          leccion: lessonId,
-          ejercicio: ejercicio?.id || 'mc-ex-1'
+          modulo_id: moduleId,
+          modulo_nombre: moduleId,
+          leccion_id: lessonId,
+          leccion_nombre: lessonId,
+          ejercicio_id: ejercicio?.id || 'mc-ex-1',
+          ejercicio_nombre: ejercicio?.enunciado?.slice(0, 40) || 'Opción Múltiple',
+          categoria: 'Aritmética',
+          tema: lessonId,
+          nivel: 'Intermedio',
+          dificultad: 'Media',
+          tiempo_segundos: 20
         });
       }
     };
-  }, [moduleId, lessonId, ejercicio?.id]);
+  }, [moduleId, lessonId, ejercicio?.id, ejercicio?.enunciado]);
 
   const question = ejercicio ? (ejercicio.enunciado ?? ejercicio.prompt) : "Comprás 8 camisetas de fútbol a $73 cada una. Usando la propiedad distributiva, ¿cuánto pagás en total?";
 
@@ -92,9 +107,16 @@ function MultipleChoice({ ejercicio, moduleId, lessonId, teoria, apiCall, onAnsw
       });
 
       telemetry.track('ejercicio_completado', {
-        modulo: moduleId,
-        leccion: lessonId,
-        ejercicio: ejercicio?.id || 'mc-ex-1',
+        modulo_id: moduleId,
+        modulo_nombre: moduleId,
+        leccion_id: lessonId,
+        leccion_nombre: lessonId,
+        ejercicio_id: ejercicio?.id || 'mc-ex-1',
+        ejercicio_nombre: ejercicio?.enunciado?.slice(0, 40) || 'Opción Múltiple',
+        categoria: 'Aritmética',
+        tema: lessonId,
+        nivel: 'Intermedio',
+        dificultad: 'Media',
         resultado: result.correcto ? 'correcto' : 'incorrecto',
         intentos: 1,
         puntaje: result.correcto ? (result.puntosGanados ?? 10) : 0,
