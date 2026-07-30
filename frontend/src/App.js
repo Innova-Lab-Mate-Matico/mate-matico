@@ -770,7 +770,10 @@ const apiCall = React.useCallback(async (path, options = {}, customToken = null)
               apiCall={apiCall}
               onBack={() => setActiveTab('inicio')}
               onNavigate={(tab) => setActiveTab(tab)}
-              onRefreshProfile={() => {
+              onRefreshProfile={(res) => {
+                if (res && res.puntosTotales !== undefined) {
+                  setUser((prev) => (prev ? { ...prev, puntosTotales: res.puntosTotales } : prev));
+                }
                 loadProfile();
                 loadUserProgress();
               }}
