@@ -3,6 +3,7 @@ import {
   register,
   login,
   googleAuth,
+  microsoftAuth,
   me,
 } from '../controllers/auth.controller.js';
 import { requireAuth } from '../middleware/auth.middleware.js';
@@ -17,6 +18,7 @@ const router = Router();
 router.post('/register', validateRegisterBody, register);
 router.post('/login', validateLoginBody, login);
 router.post('/google', validateGoogleBody, googleAuth);
+router.post('/microsoft', validateGoogleBody, microsoftAuth);
 router.get('/me', requireAuth, me);
 
 

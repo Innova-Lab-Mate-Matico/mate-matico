@@ -38,7 +38,11 @@ service cloud.firestore {
 
     // 3. Registro de Intentos de Ejercicios
     match /registroIntentos/{intentoId} {
-      allow read, write: if isAuthenticated() && (resource == null || resource.data.userId == request.auth.uid || isAdmin());
+      allow read, write: if isAuthenticated() && (
+        (resource == null && request.resource.data.userId == request.auth.uid) ||
+        (resource != null && resource.data.userId == request.auth.uid) ||
+        isAdmin()
+      );
     }
 
     // 4. Catálogos y Contenido Educativo (Lectura para alumnos autenticados, Escritura solo admins/backend)

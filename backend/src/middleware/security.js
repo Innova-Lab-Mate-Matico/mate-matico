@@ -11,6 +11,22 @@ const authLimiter = rateLimit({
   message: { success: false, error: 'Demasiados intentos. Probá más tarde.' },
 });
 
+const aiLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: env.isProduction ? 20 : 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, error: 'Demasiadas consultas a la IA en poco tiempo. Aguardá unos segundos e intentá nuevamente.' },
+});
+
+const adminLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: env.isProduction ? 50 : 200,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, error: 'Límite de peticiones de administración alcanzado.' },
+});
+
 export function applySecurity(app) {
   app.use(
     helmet({
@@ -43,4 +59,8 @@ export function applySecurity(app) {
   );
 
   app.use('/api/auth', authLimiter);
+  app.use('/api/exercises/generate-ai', aiLimiter);
+  app.use('/api/exercises/validate-ai', aiLimiter);
+  app.use('/api/ai', aiLimiter);
+  app.use('/api/admin', adminLimiter);
 }

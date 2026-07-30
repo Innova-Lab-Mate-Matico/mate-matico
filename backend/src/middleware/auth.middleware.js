@@ -1,4 +1,5 @@
 import { auth } from '../config/firebase.js';
+import { env } from '../config/env.js';
 
 export async function requireAuth(req, res, next) {
   try {
@@ -8,7 +9,7 @@ export async function requireAuth(req, res, next) {
     }
 
     const token = header.slice(7);
-    if (token === 'token-valido-telemetria') {
+    if (!env.isProduction && (token === 'token-valido-telemetria' || token.startsWith('mock-token-'))) {
       req.user = { uid: 'test-usuario-telemetria', email: 'test@example.com' };
       return next();
     }
