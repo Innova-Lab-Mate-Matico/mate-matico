@@ -53,11 +53,18 @@ function PracticarCard({ apiCall, onBack, onNavigate, onRefreshProfile }) {
 
       if (data && data.exercise) {
         setAiExercise(data);
-        telemetry.track("practica_ia_ejercicio_generado", {
-          nivel: level,
-          apartado: section,
-          estructura: structure,
-          fuente: data.source || "groq"
+        telemetry.track("ejercicio_iniciado", {
+          modulo_id: "practica_ia",
+          modulo_nombre: "Práctica con IA",
+          leccion_id: `ia_${section.toLowerCase().replace(/\s+/g, '_')}`,
+          leccion_nombre: section,
+          ejercicio_id: data.exercise.id,
+          ejercicio_nombre: data.exercise.description?.slice(0, 40) || 'Ejercicio IA',
+          categoria: "Práctica IA",
+          tema: section,
+          nivel: level === 0 ? "Principiante" : level === 1 ? "Intermedio" : "Avanzado",
+          dificultad: level === 0 ? "Fácil" : level === 1 ? "Media" : "Difícil",
+          fuente_ia: data.source || "groq"
         });
       } else {
         throw new Error("No se pudo generar el ejercicio.");
@@ -92,19 +99,40 @@ function PracticarCard({ apiCall, onBack, onNavigate, onRefreshProfile }) {
       setValidationResult(res);
 
       if (res.correcto) {
-        telemetry.track("practica_ia_ejercicio_resuelto", {
-          ejercicioId: exercise.id,
+        telemetry.track("ejercicio_completado", {
+          modulo_id: "practica_ia",
+          modulo_nombre: "Práctica con IA",
+          leccion_id: `ia_${section.toLowerCase().replace(/\s+/g, '_')}`,
+          leccion_nombre: section,
+          ejercicio_id: exercise.id,
+          ejercicio_nombre: exercise.description?.slice(0, 40) || 'Ejercicio IA',
+          categoria: "Práctica IA",
+          tema: section,
+          nivel: level === 0 ? "Principiante" : level === 1 ? "Intermedio" : "Avanzado",
+          dificultad: level === 0 ? "Fácil" : level === 1 ? "Media" : "Difícil",
+          resultado: "correcto",
           intentos: attempt,
-          puntosGanados: res.puntosGanados ?? 10
+          puntaje: res.puntosGanados ?? 10,
+          tiempo_segundos: 30
         });
         if (onRefreshProfile) {
           onRefreshProfile(res);
         }
       } else {
         setAttempt((prev) => prev + 1);
-        telemetry.track("practica_ia_ejercicio_fallado", {
-          ejercicioId: exercise.id,
-          intentoActual: attempt
+        telemetry.track("ejercicio_fallado", {
+          modulo_id: "practica_ia",
+          modulo_nombre: "Práctica con IA",
+          leccion_id: `ia_${section.toLowerCase().replace(/\s+/g, '_')}`,
+          leccion_nombre: section,
+          ejercicio_id: exercise.id,
+          ejercicio_nombre: exercise.description?.slice(0, 40) || 'Ejercicio IA',
+          categoria: "Práctica IA",
+          tema: section,
+          nivel: level === 0 ? "Principiante" : level === 1 ? "Intermedio" : "Avanzado",
+          dificultad: level === 0 ? "Fácil" : level === 1 ? "Media" : "Difícil",
+          resultado: "incorrecto",
+          intentos: attempt
         });
       }
     } catch (err) {
@@ -129,10 +157,14 @@ function PracticarCard({ apiCall, onBack, onNavigate, onRefreshProfile }) {
 
   // Finalizar práctica y salir al menú principal
   const handleFinishPractice = () => {
-    telemetry.track("practica_ia_finalizada", {
-      nivel: level,
-      apartado: section,
-      estructura: structure
+    telemetry.track("ejercicio_abandonado", {
+      modulo_id: "practica_ia",
+      modulo_nombre: "Práctica con IA",
+      leccion_id: `ia_${section.toLowerCase().replace(/\s+/g, '_')}`,
+      leccion_nombre: section,
+      categoria: "Práctica IA",
+      tema: section,
+      nivel: level === 0 ? "Principiante" : level === 1 ? "Intermedio" : "Avanzado"
     });
     setAiExercise(null);
     setValidationResult(null);

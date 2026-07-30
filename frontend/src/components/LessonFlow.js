@@ -33,13 +33,18 @@ function LessonFlow({
     return () => {
       if (stepRef.current > 0 && stepRef.current < 5) {
         telemetry.track('leccion_abandonada', {
-          modulo: moduleId,
-          leccion: leccion?.id,
-          paso_al_abandonar: stepRef.current
+          modulo_id: moduleId,
+          modulo_nombre: moduleDetail?.title || moduleId,
+          leccion_id: leccion?.id,
+          leccion_nombre: leccion?.title || leccion?.id,
+          categoria: moduleDetail?.category || 'Aritmética',
+          tema: leccion?.tema || moduleId,
+          nivel: leccion?.nivel || 'Principiante',
+          porcentaje_completado: Math.round((stepRef.current / 5) * 100)
         });
       }
     };
-  }, [moduleId, leccion?.id]);
+  }, [moduleId, leccion?.id, moduleDetail?.title, moduleDetail?.category, leccion?.title, leccion?.tema, leccion?.nivel]);
 
   // Calcular estadísticas de progreso para el módulo actual
   let totalLessons = 6;
@@ -79,15 +84,26 @@ function LessonFlow({
           })
         });
 
+        const pct = Math.round((completedCount / totalLessons) * 100);
+
         telemetry.track('leccion_completada', {
-          modulo: moduleId,
-          leccion: leccion?.id,
-          tiempo_segundos: 180
+          modulo_id: moduleId,
+          modulo_nombre: moduleDetail?.title || moduleId,
+          leccion_id: leccion?.id,
+          leccion_nombre: leccion?.title || leccion?.id,
+          categoria: moduleDetail?.category || 'Aritmética',
+          tema: leccion?.tema || moduleId,
+          nivel: leccion?.nivel || 'Principiante',
+          tiempo_segundos: 180,
+          porcentaje_completado: 100
         });
 
         telemetry.track('progreso_actualizado', {
-          modulo: moduleId,
-          puntaje: Math.round((completedCount / totalLessons) * 100)
+          modulo_id: moduleId,
+          modulo_nombre: moduleDetail?.title || moduleId,
+          categoria: moduleDetail?.category || 'Aritmética',
+          nivel: leccion?.nivel || 'Principiante',
+          porcentaje_completado: pct
         });
       } catch (err) {
         console.error("Error al guardar progreso de lección:", err);
