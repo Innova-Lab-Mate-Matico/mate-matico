@@ -331,13 +331,14 @@ const apiCall = React.useCallback(async (path, options = {}, customToken = null)
       firebaseAuth.languageCode = 'es';
     }
 
-    const provider = new GoogleAuthProvider();
+    const googleProvider = new GoogleAuthProvider();
 
     return {
       auth: firebaseAuth,
       GoogleAuthProvider,
+      OAuthProvider,
       signInWithPopup,
-      provider,
+      googleProvider,
     };
   };
 
