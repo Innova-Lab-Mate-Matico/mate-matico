@@ -5,7 +5,7 @@ import { env } from '../config/env.js';
 
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: env.isProduction ? 20 : 100,
+  max: env.isProduction ? 100 : 300,
   standardHeaders: true,
   legacyHeaders: false,
   message: { success: false, error: 'Demasiados intentos. Probá más tarde.' },
