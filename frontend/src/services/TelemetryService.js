@@ -54,13 +54,42 @@ class TelemetryService {
    * Notifica en paralelo a GTM (Google Tag Manager) para el compañero de Data.
    */
   track(tipoEvento, metadata = {}) {
+    const sanitizedMetadata = { ...metadata };
+
+    // Auto-completar y estandarizar parámetros para evitar "(not set)" en GA4/GTM
+    if (tipoEvento.startsWith('ejercicio_')) {
+      sanitizedMetadata.modulo_id = sanitizedMetadata.modulo_id || sanitizedMetadata.modulo || 'mod_general';
+      sanitizedMetadata.modulo_nombre = sanitizedMetadata.modulo_nombre || sanitizedMetadata.moduloTitle || sanitizedMetadata.modulo_id;
+      sanitizedMetadata.leccion_id = sanitizedMetadata.leccion_id || sanitizedMetadata.leccion || 'les_general';
+      sanitizedMetadata.leccion_nombre = sanitizedMetadata.leccion_nombre || sanitizedMetadata.lessonTitle || sanitizedMetadata.leccion_id;
+      sanitizedMetadata.ejercicio_id = sanitizedMetadata.ejercicio_id || sanitizedMetadata.ejercicio || 'ex_general';
+      sanitizedMetadata.ejercicio_nombre = sanitizedMetadata.ejercicio_nombre || sanitizedMetadata.ejercicio_id;
+      
+      // Aliases para máxima compatibilidad con cualquier variable en GTM
+      sanitizedMetadata.modulo = sanitizedMetadata.modulo || sanitizedMetadata.modulo_id;
+      sanitizedMetadata.leccion = sanitizedMetadata.leccion || sanitizedMetadata.leccion_id;
+      sanitizedMetadata.ejercicio = sanitizedMetadata.ejercicio || sanitizedMetadata.ejercicio_id;
+
+      if (tipoEvento === 'ejercicio_completado') {
+        sanitizedMetadata.resultado = sanitizedMetadata.resultado || 'correcto';
+      }
+    } else if (tipoEvento.startsWith('leccion_')) {
+      sanitizedMetadata.modulo_id = sanitizedMetadata.modulo_id || sanitizedMetadata.modulo || 'mod_general';
+      sanitizedMetadata.modulo_nombre = sanitizedMetadata.modulo_nombre || sanitizedMetadata.moduloTitle || sanitizedMetadata.modulo_id;
+      sanitizedMetadata.leccion_id = sanitizedMetadata.leccion_id || sanitizedMetadata.leccion || 'les_general';
+      sanitizedMetadata.leccion_nombre = sanitizedMetadata.leccion_nombre || sanitizedMetadata.lessonTitle || sanitizedMetadata.leccion_id;
+
+      sanitizedMetadata.modulo = sanitizedMetadata.modulo || sanitizedMetadata.modulo_id;
+      sanitizedMetadata.leccion = sanitizedMetadata.leccion || sanitizedMetadata.leccion_id;
+    }
+
     const eventPayload = {
       evento_id: typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `evt_${Date.now()}_${Math.random()}`,
       tipo_evento: tipoEvento,
       fecha: new Date().toISOString(),
       metadata: {
         sesion_id: this.sessionId,
-        ...metadata
+        ...sanitizedMetadata
       }
     };
 
@@ -72,7 +101,7 @@ class TelemetryService {
       try {
         window.dataLayer.push({
           event: tipoEvento,
-          ...metadata
+          ...sanitizedMetadata
         });
       } catch (gtmErr) {
         // Silencioso

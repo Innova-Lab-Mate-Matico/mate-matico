@@ -240,6 +240,8 @@ function LessonFlow({
           ejercicio={currentStep.exercise}
           moduleId={moduleId}
           lessonId={leccion?.id}
+          leccion={leccion}
+          moduleDetail={moduleDetail}
           teoria={leccion?.teoria}
           apiCall={apiCall}
           onAnswerSuccess={(pts) => {
@@ -257,6 +259,8 @@ function LessonFlow({
           index={currentStep.index}
           moduleId={moduleId}
           lessonId={leccion?.id}
+          leccion={leccion}
+          moduleDetail={moduleDetail}
           teoria={leccion?.teoria}
           apiCall={apiCall}
           onAnswerSuccess={(pts) => {

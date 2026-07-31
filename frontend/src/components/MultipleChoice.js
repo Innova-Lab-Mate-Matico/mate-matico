@@ -21,7 +21,7 @@ import frame5 from "../assets/Frame 5.png";
 import imagen16 from "../assets/image16.png";
 import mateLibreta from "../assets/aprendamosJuntos.png";
 
-function MultipleChoice({ ejercicio, moduleId, lessonId, teoria, apiCall, onAnswerSuccess, onComplete })  {
+function MultipleChoice({ ejercicio, moduleId, lessonId, leccion, moduleDetail, teoria, apiCall, onAnswerSuccess, onComplete })  {
   const [screen, setScreen] = useState("question");
   const [selectedOption, setSelectedOption] = useState(null);
   const [showTheory, setShowTheory] = useState(false);
@@ -32,41 +32,58 @@ function MultipleChoice({ ejercicio, moduleId, lessonId, teoria, apiCall, onAnsw
   const [showCalc, setShowCalc] = useState(false);
   const [isMuted, setIsMuted] = useState(EfectosService.isMuted());
 
+  const modId = moduleId || leccion?.moduleId || 'mod_general';
+  const modNombre = moduleDetail?.title || modId;
+  const lesId = lessonId || leccion?.id || 'les_general';
+  const lesNombre = leccion?.title || lesId;
+  const exId = ejercicio?.id || 'mc-ex-1';
+  const exNombre = (ejercicio?.enunciado || ejercicio?.prompt || ejercicio?.pregunta || 'Opción Múltiple').slice(0, 50);
+  const cat = moduleDetail?.category || 'Aritmética';
+  const tem = leccion?.tema || lesId;
+  const niv = leccion?.nivel || 'Intermedio';
+  const dif = ejercicio?.dificultad || 'Media';
+
   const isCompletedRef = React.useRef(false);
 
   React.useEffect(() => {
     isCompletedRef.current = false;
     telemetry.track('ejercicio_iniciado', {
-      modulo_id: moduleId,
-      modulo_nombre: moduleId,
-      leccion_id: lessonId,
-      leccion_nombre: lessonId,
-      ejercicio_id: ejercicio?.id || 'mc-ex-1',
-      ejercicio_nombre: ejercicio?.enunciado?.slice(0, 40) || 'Opción Múltiple',
-      categoria: 'Aritmética',
-      tema: lessonId,
-      nivel: 'Intermedio',
-      dificultad: 'Media'
+      modulo_id: modId,
+      modulo_nombre: modNombre,
+      leccion_id: lesId,
+      leccion_nombre: lesNombre,
+      ejercicio_id: exId,
+      ejercicio_nombre: exNombre,
+      categoria: cat,
+      tema: tem,
+      nivel: niv,
+      dificultad: dif,
+      modulo: modId,
+      leccion: lesId,
+      ejercicio: exId
     });
 
     return () => {
       if (!isCompletedRef.current) {
         telemetry.track('ejercicio_abandonado', {
-          modulo_id: moduleId,
-          modulo_nombre: moduleId,
-          leccion_id: lessonId,
-          leccion_nombre: lessonId,
-          ejercicio_id: ejercicio?.id || 'mc-ex-1',
-          ejercicio_nombre: ejercicio?.enunciado?.slice(0, 40) || 'Opción Múltiple',
-          categoria: 'Aritmética',
-          tema: lessonId,
-          nivel: 'Intermedio',
-          dificultad: 'Media',
-          tiempo_segundos: 20
+          modulo_id: modId,
+          modulo_nombre: modNombre,
+          leccion_id: lesId,
+          leccion_nombre: lesNombre,
+          ejercicio_id: exId,
+          ejercicio_nombre: exNombre,
+          categoria: cat,
+          tema: tem,
+          nivel: niv,
+          dificultad: dif,
+          tiempo_segundos: 20,
+          modulo: modId,
+          leccion: lesId,
+          ejercicio: exId
         });
       }
     };
-  }, [moduleId, lessonId, ejercicio?.id, ejercicio?.enunciado]);
+  }, [modId, modNombre, lesId, lesNombre, exId, exNombre, cat, tem, niv, dif]);
 
   const question = ejercicio ? (ejercicio.enunciado ?? ejercicio.prompt) : "Comprás 8 camisetas de fútbol a $73 cada una. Usando la propiedad distributiva, ¿cuánto pagás en total?";
 
@@ -84,10 +101,33 @@ function MultipleChoice({ ejercicio, moduleId, lessonId, teoria, apiCall, onAnsw
 
     // Si no hay ejercicio del backend, usar comportamiento estático
     if (!ejercicio) {
-      if (selectedOption === 2) {
+      const isStaticCorrect = (selectedOption === 2);
+      if (isStaticCorrect) {
         setScreen("correct");
       } else {
         setScreen("wrong");
+      }
+      telemetry.track('ejercicio_completado', {
+        modulo_id: modId,
+        modulo_nombre: modNombre,
+        leccion_id: lesId,
+        leccion_nombre: lesNombre,
+        ejercicio_id: 'mc-static-1',
+        ejercicio_nombre: question.slice(0, 40),
+        categoria: cat,
+        tema: tem,
+        nivel: niv,
+        dificultad: dif,
+        resultado: isStaticCorrect ? 'correcto' : 'incorrecto',
+        intentos: 1,
+        puntaje: isStaticCorrect ? 10 : 0,
+        tiempo_segundos: 30,
+        modulo: modId,
+        leccion: lesId,
+        ejercicio: 'mc-static-1'
+      });
+      if (isStaticCorrect) {
+        isCompletedRef.current = true;
       }
       return;
     }
@@ -107,20 +147,23 @@ function MultipleChoice({ ejercicio, moduleId, lessonId, teoria, apiCall, onAnsw
       });
 
       telemetry.track('ejercicio_completado', {
-        modulo_id: moduleId,
-        modulo_nombre: moduleId,
-        leccion_id: lessonId,
-        leccion_nombre: lessonId,
-        ejercicio_id: ejercicio?.id || 'mc-ex-1',
-        ejercicio_nombre: ejercicio?.enunciado?.slice(0, 40) || 'Opción Múltiple',
-        categoria: 'Aritmética',
-        tema: lessonId,
-        nivel: 'Intermedio',
-        dificultad: 'Media',
+        modulo_id: modId,
+        modulo_nombre: modNombre,
+        leccion_id: lesId,
+        leccion_nombre: lesNombre,
+        ejercicio_id: exId,
+        ejercicio_nombre: exNombre,
+        categoria: cat,
+        tema: tem,
+        nivel: niv,
+        dificultad: dif,
         resultado: result.correcto ? 'correcto' : 'incorrecto',
         intentos: 1,
         puntaje: result.correcto ? (result.puntosGanados ?? 10) : 0,
-        tiempo_segundos: 45
+        tiempo_segundos: 45,
+        modulo: modId,
+        leccion: lesId,
+        ejercicio: exId
       });
 
       if (result.correcto) {
