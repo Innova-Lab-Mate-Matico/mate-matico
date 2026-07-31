@@ -24,7 +24,7 @@ import negativo from "../assets/Negativo.png";
 import descanso from "../assets/descanso.png";
 import "./MultipleChoice.css";
 
-function NumericExercise({ ejercicio, index, moduleId, lessonId, teoria, apiCall, onAnswerSuccess, onComplete }) {
+function NumericExercise({ ejercicio, index, moduleId, lessonId, leccion, moduleDetail, teoria, apiCall, onAnswerSuccess, onComplete }) {
 
   const [screen, setScreen] = useState("exercise");
   const [answer, setAnswer] = useState("");
@@ -43,40 +43,57 @@ function NumericExercise({ ejercicio, index, moduleId, lessonId, teoria, apiCall
   const num2 = ejercicio ? (ejercicio.operandos?.num2 ?? 23) : 23;
   const isFigmaExercise = false;
 
+  const modId = moduleId || leccion?.moduleId || 'mod_general';
+  const modNombre = moduleDetail?.title || modId;
+  const lesId = lessonId || leccion?.id || 'les_general';
+  const lesNombre = leccion?.title || lesId;
+  const exId = ejercicio?.id || 'num-ex-1';
+  const exNombre = (ejercicio?.prompt || ejercicio?.enunciado || 'Ejercicio Numérico').slice(0, 50);
+  const cat = moduleDetail?.category || 'Aritmética';
+  const tem = leccion?.tema || lesId;
+  const niv = leccion?.nivel || 'Intermedio';
+  const dif = ejercicio?.dificultad || 'Media';
+
   const isCompletedRef = React.useRef(false);
   useEffect(() => {
     isCompletedRef.current = false;
     telemetry.track('ejercicio_iniciado', {
-      modulo_id: moduleId,
-      modulo_nombre: moduleId,
-      leccion_id: lessonId,
-      leccion_nombre: lessonId,
-      ejercicio_id: ejercicio?.id || 'num-ex-1',
-      ejercicio_nombre: ejercicio?.prompt?.slice(0, 40) || 'Ejercicio Numérico',
-      categoria: 'Aritmética',
-      tema: lessonId,
-      nivel: 'Intermedio',
-      dificultad: 'Media'
+      modulo_id: modId,
+      modulo_nombre: modNombre,
+      leccion_id: lesId,
+      leccion_nombre: lesNombre,
+      ejercicio_id: exId,
+      ejercicio_nombre: exNombre,
+      categoria: cat,
+      tema: tem,
+      nivel: niv,
+      dificultad: dif,
+      modulo: modId,
+      leccion: lesId,
+      ejercicio: exId
     });
 
     return () => {
       if (!isCompletedRef.current) {
         telemetry.track('ejercicio_abandonado', {
-          modulo_id: moduleId,
-          modulo_nombre: moduleId,
-          leccion_id: lessonId,
-          leccion_nombre: lessonId,
-          ejercicio_id: ejercicio?.id || 'num-ex-1',
-          ejercicio_nombre: ejercicio?.prompt?.slice(0, 40) || 'Ejercicio Numérico',
-          categoria: 'Aritmética',
-          tema: lessonId,
-          nivel: 'Intermedio',
-          dificultad: 'Media',
-          tiempo_segundos: 20
+          modulo_id: modId,
+          modulo_nombre: modNombre,
+          leccion_id: lesId,
+          leccion_nombre: lesNombre,
+          ejercicio_id: exId,
+          ejercicio_nombre: exNombre,
+          categoria: cat,
+          tema: tem,
+          nivel: niv,
+          dificultad: dif,
+          tiempo_segundos: 20,
+          modulo: modId,
+          leccion: lesId,
+          ejercicio: exId
         });
       }
     };
-  }, [moduleId, lessonId, ejercicio?.id, ejercicio?.prompt]);
+  }, [modId, modNombre, lesId, lesNombre, exId, exNombre, cat, tem, niv, dif]);
 
   const getAdaptiveHint = () => {
     // Si la API nos devolvió un comodín real y específico (no genérico), lo usamos prioritariamente
@@ -178,6 +195,26 @@ function NumericExercise({ ejercicio, index, moduleId, lessonId, teoria, apiCall
       }
       if (screen === "hint") {
         setScreen("correct");
+        telemetry.track('ejercicio_completado', {
+          modulo_id: modId,
+          modulo_nombre: modNombre,
+          leccion_id: lesId,
+          leccion_nombre: lesNombre,
+          ejercicio_id: 'num-static-1',
+          ejercicio_nombre: 'Ejercicio Numérico Estático',
+          categoria: cat,
+          tema: tem,
+          nivel: niv,
+          dificultad: dif,
+          resultado: 'correcto',
+          intentos: 1,
+          puntaje: 15,
+          tiempo_segundos: 45,
+          modulo: modId,
+          leccion: lesId,
+          ejercicio: 'num-static-1'
+        });
+        isCompletedRef.current = true;
         return;
       }
       return;
@@ -198,20 +235,23 @@ function NumericExercise({ ejercicio, index, moduleId, lessonId, teoria, apiCall
       });
 
       telemetry.track('ejercicio_completado', {
-        modulo_id: moduleId,
-        modulo_nombre: moduleId,
-        leccion_id: lessonId,
-        leccion_nombre: lessonId,
-        ejercicio_id: ejercicio?.id || 'num-ex-1',
-        ejercicio_nombre: ejercicio?.prompt?.slice(0, 40) || 'Ejercicio Numérico',
-        categoria: 'Aritmética',
-        tema: lessonId,
-        nivel: 'Intermedio',
-        dificultad: 'Media',
+        modulo_id: modId,
+        modulo_nombre: modNombre,
+        leccion_id: lesId,
+        leccion_nombre: lesNombre,
+        ejercicio_id: exId,
+        ejercicio_nombre: exNombre,
+        categoria: cat,
+        tema: tem,
+        nivel: niv,
+        dificultad: dif,
         resultado: result.correcto ? 'correcto' : 'incorrecto',
         intentos: 1,
         puntaje: result.correcto ? (result.puntosGanados ?? 15) : 0,
-        tiempo_segundos: 45
+        tiempo_segundos: 45,
+        modulo: modId,
+        leccion: lesId,
+        ejercicio: exId
       });
 
       if (result.correcto) {
