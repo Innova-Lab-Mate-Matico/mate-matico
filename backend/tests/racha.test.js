@@ -30,9 +30,9 @@ describe('Cálculo de Racha Empática con Huso Horario Adaptativo', () => {
     assert.strictEqual(res.recordRacha, 4);
   });
 
-  it('Debe reiniciar la racha a 1 si pasaron más de 48 horas', () => {
+  it('Debe reiniciar la racha a 1 si pasaron más de 24 horas', () => {
     const ultima = new Date('2026-07-20T10:00:00Z');
-    const ahora = new Date('2026-07-22T11:00:00Z'); // 49 horas de diferencia
+    const ahora = new Date('2026-07-21T11:00:00Z'); // 25 horas de diferencia
     const usuario = { rachaDias: 5, recordRacha: 5, ultimaLeccionCompletada: ultima };
     
     const res = evaluarRacha(usuario, ahora);
@@ -40,3 +40,4 @@ describe('Cálculo de Racha Empática con Huso Horario Adaptativo', () => {
     assert.strictEqual(res.rachaRota, true);
   });
 });
+

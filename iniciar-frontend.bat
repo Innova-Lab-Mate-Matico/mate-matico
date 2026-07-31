@@ -1,5 +1,5 @@
 @echo off
-title Mate-Matico - Frontend prueba
+title Mate Mático - Frontend React
 set "PATH=C:\Program Files\nodejs;%PATH%"
 
 cd /d "%~dp0frontend"
@@ -24,7 +24,7 @@ if not exist ".env" (
 
 echo.
 echo ========================================
-echo   Panel: http://localhost:5173
+echo   Panel: http://localhost:3001
 echo   (El backend debe estar en :3000)
 echo ========================================
 echo.

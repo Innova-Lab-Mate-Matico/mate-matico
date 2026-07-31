@@ -7,10 +7,14 @@ import exerciseRoutes from './routes/exercise.routes.js';
 import modulesRoutes from './routes/modules.routes.js';
 import logrosRoutes from './routes/logros.routes.js';
 import aiRoutes from './routes/ai.routes.js';
+import trackingRoutes from './routes/tracking.routes.js';
+import adminRoutes from './routes/admin.routes.js';
 import { applySecurity } from './middleware/security.js';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler.js';
 
 const app = express();
+
+app.set('trust proxy', 1);
 
 applySecurity(app);
 
@@ -28,7 +32,7 @@ app.use(express.json({ limit: '32kb' }));
 app.get('/api/health', (_req, res) => {
   res.json({
     success: true,
-    service: 'Mate-Mático API',
+    service: 'Mate Mático API',
     status: 'ok',
     version: '1.0.0',
     timestamp: new Date().toISOString(),
@@ -42,6 +46,8 @@ app.use('/api/progress', progressRoutes);
 app.use('/api/exercises', exerciseRoutes);
 app.use('/api/logros', logrosRoutes);
 app.use('/api/ai', aiRoutes);
+app.use('/api/tracking', trackingRoutes);
+app.use('/api/admin', adminRoutes);
 
 app.use(notFoundHandler);
 app.use(errorHandler);

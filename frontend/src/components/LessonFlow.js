@@ -9,6 +9,7 @@ import NumericExercise from "./NumericExercise";
 import ExitosCard from "./ExitosCard";
 import FinalizacionCard from "./FinalizacionCard";
 import TarjetaProgreso from "./TarjetaProgreso";
+import telemetry from "../services/TelemetryService";
 
 function LessonFlow({
   leccion,
@@ -24,6 +25,26 @@ function LessonFlow({
 
   const [step, setStep] = useState(1);
   const [sessionPoints, setSessionPoints] = useState(0);
+
+  const stepRef = React.useRef(step);
+  stepRef.current = step;
+
+  React.useEffect(() => {
+    return () => {
+      if (stepRef.current > 0 && stepRef.current < 5) {
+        telemetry.track('leccion_abandonada', {
+          modulo_id: moduleId,
+          modulo_nombre: moduleDetail?.title || moduleId,
+          leccion_id: leccion?.id,
+          leccion_nombre: leccion?.title || leccion?.id,
+          categoria: moduleDetail?.category || 'Aritmética',
+          tema: leccion?.tema || moduleId,
+          nivel: leccion?.nivel || 'Principiante',
+          porcentaje_completado: Math.round((stepRef.current / 5) * 100)
+        });
+      }
+    };
+  }, [moduleId, leccion?.id, moduleDetail?.title, moduleDetail?.category, leccion?.title, leccion?.tema, leccion?.nivel]);
 
   // Calcular estadísticas de progreso para el módulo actual
   let totalLessons = 6;
@@ -61,6 +82,28 @@ function LessonFlow({
             completada: true,
             puntaje: sessionPoints
           })
+        });
+
+        const pct = Math.round((completedCount / totalLessons) * 100);
+
+        telemetry.track('leccion_completada', {
+          modulo_id: moduleId,
+          modulo_nombre: moduleDetail?.title || moduleId,
+          leccion_id: leccion?.id,
+          leccion_nombre: leccion?.title || leccion?.id,
+          categoria: moduleDetail?.category || 'Aritmética',
+          tema: leccion?.tema || moduleId,
+          nivel: leccion?.nivel || 'Principiante',
+          tiempo_segundos: 180,
+          porcentaje_completado: 100
+        });
+
+        telemetry.track('progreso_actualizado', {
+          modulo_id: moduleId,
+          modulo_nombre: moduleDetail?.title || moduleId,
+          categoria: moduleDetail?.category || 'Aritmética',
+          nivel: leccion?.nivel || 'Principiante',
+          porcentaje_completado: pct
         });
       } catch (err) {
         console.error("Error al guardar progreso de lección:", err);
@@ -197,6 +240,8 @@ function LessonFlow({
           ejercicio={currentStep.exercise}
           moduleId={moduleId}
           lessonId={leccion?.id}
+          leccion={leccion}
+          moduleDetail={moduleDetail}
           teoria={leccion?.teoria}
           apiCall={apiCall}
           onAnswerSuccess={(pts) => {
@@ -214,6 +259,8 @@ function LessonFlow({
           index={currentStep.index}
           moduleId={moduleId}
           lessonId={leccion?.id}
+          leccion={leccion}
+          moduleDetail={moduleDetail}
           teoria={leccion?.teoria}
           apiCall={apiCall}
           onAnswerSuccess={(pts) => {

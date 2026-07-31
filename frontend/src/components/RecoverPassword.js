@@ -23,7 +23,7 @@ export default function RecoverPassword({
  };
  return (
  <>
- <img src={logoPrincipal} className="auth-logo" alt="Mate-Mático" />
+ <img src={logoPrincipal} className="auth-logo" alt="Mate Mático" />
  <h2 className="auth-title">Recuperar Contraseña</h2>
  <p className="auth-subtitle">
  Te enviaremos un link a tu correo

@@ -1,11 +1,12 @@
 @echo off
-title Mate-Matico - Detener servidores
+title Mate Mático - Detener servidores
 cd /d "%~dp0"
 
-echo Liberando puertos 3000, 5173 y 5174...
+echo Liberando puertos 3000, 3001, 5173 y 5174...
 echo.
 
 call :liberarPuerto 3000
+call :liberarPuerto 3001
 call :liberarPuerto 5173
 call :liberarPuerto 5174
 

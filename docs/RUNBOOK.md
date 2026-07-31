@@ -1,179 +1,148 @@
-# Runbook — Operación Mate-Mático
+# 🚀 Runbook de Operación — Mate Mático 🧉
 
-Guía para **instalar, arrancar, verificar y mantener** el entorno de desarrollo.
-
----
-
-## 1. Requisitos previos
-
-| Requisito | Nota |
-|-----------|------|
-| Node.js LTS | [nodejs.org](https://nodejs.org) — en Windows los `.bat` usan `C:\Program Files\nodejs` |
-| Proyecto Firebase | Ej. `talento14bd` |
-| Firestore | Base creada (modo Native) en Firebase Console |
-| Firebase Authentication | Activado (Comenzar + Email y/o Google) |
-| Cuenta de servicio | Variables en `backend/.env` |
+Guía exhaustiva para **instalar, configurar, arrancar, verificar, probar y mantener** el entorno de desarrollo y producción del proyecto Mate Mático.
 
 ---
 
-## 2. Instalación inicial (una vez)
+## 1. Requisitos Previos
 
-### 2.1 Dependencias
+| Requisito | Versión / Detalle | Nota de Configuración |
+| :--- | :--- | :--- |
+| **Node.js** | 18+ LTS | [nodejs.org](https://nodejs.org) (Windows usa ejecutable en `C:\Program Files\nodejs`) |
+| **Firebase Project** | Firebase Console | Proyecto activo con Auth (Email/Password + Google) y Firestore Database. |
+| **Supabase Project** | Supabase Cloud | Instancia PostgreSQL activa con la tabla `eventos` (JSONB) para telemetría. |
+| **Google Tag Manager** | Contenedor `GTM-5RDTRVPK` | Snippet incluido en `frontend/public/index.html`. |
 
+---
+
+## 2. Instalación Inicial y Configuración
+
+### 2.1 Instalación de Dependencias
+Ejecutar desde la raíz del monorepo:
 ```bash
 npm run setup
 ```
+*(Instalará automáticamente los módulos de `backend` y `frontend`).*
 
-O dejar que `iniciar-backend.bat` / `iniciar-frontend.bat` ejecuten `npm install` la primera vez.
+---
 
-### 2.2 Variables de entorno
+### 2.2 Variables de Entorno (`.env`)
 
-**Backend**
-
-```text
+#### Backend (`backend/.env`)
+Copia la plantilla y completa tus credenciales:
+```cmd
 copy backend\.env.example backend\.env
 ```
+Campos requeridos:
+```env
+PORT=3000
+NODE_ENV=development
+FIREBASE_PROJECT_ID=tu-proyecto-id
+FIREBASE_PRIVATE_KEY_ID=tu-key-id
+FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
+FIREBASE_CLIENT_EMAIL=firebase-adminsdk@...iam.gserviceaccount.com
+FIREBASE_CLIENT_ID=123456789
+FIREBASE_CLIENT_X509_CERT_URL=https://www.googleapis.com/robot/v1/metadata/x509/...
+SUPABASE_URL=https://tu-proyecto.supabase.co
+SUPABASE_ANON_KEY=tu-anon-key
+CORS_ORIGINS=http://localhost:3000,https://mate-matico.vercel.app
+```
 
-Completar: `FIREBASE_PROJECT_ID`, `FIREBASE_WEB_API_KEY`, claves de cuenta de servicio (`FIREBASE_PRIVATE_KEY`, `FIREBASE_CLIENT_EMAIL`, etc.), `CORS_ORIGINS`.
-
-**Frontend**
-
-```text
+#### Frontend (`frontend/.env`)
+Copia la plantilla:
+```cmd
 copy frontend\.env.example frontend\.env
 ```
-
-Completar todas las `VITE_FIREBASE_*` y:
-
+Campos requeridos:
 ```env
-VITE_API_BASE_URL=/api
+REACT_APP_FIREBASE_API_KEY=tu-api-key
+REACT_APP_FIREBASE_AUTH_DOMAIN=tu-proyecto.firebaseapp.com
+REACT_APP_FIREBASE_PROJECT_ID=tu-proyecto-id
+REACT_APP_FIREBASE_STORAGE_BUCKET=tu-proyecto.appspot.com
+REACT_APP_FIREBASE_MESSAGING_SENDER_ID=123456789
+REACT_APP_FIREBASE_APP_ID=1:123456789:web:...
+REACT_APP_API_BASE_URL=/api
 ```
-
-### 2.3 Firebase Console (checklist)
-
-- [ ] Authentication → **Comenzar**
-- [ ] Sign-in method → **Email/Password** (y **Google** si se usa)
-- [ ] Settings → Authorized domains → **`localhost`**
-- [ ] Firestore → base de datos creada
-- [ ] (Google) OAuth → origen `http://localhost:5173`
-
-### 2.4 Seed opcional
-
-```bash
-cd backend
-npm run seed
-```
-
-Carga colección `plantillasEjercicio` (explicaciones y comodines).
 
 ---
 
-## 3. Arranque diario
+### 2.3 Reglas de Seguridad en Firestore (`firestore.rules`)
+Asegúrate de publicar las reglas estrictas de seguridad (Zero Trust) guardadas en `firestore.rules` desde la consola de Firebase o desplegando con Firebase CLI:
+```bash
+firebase deploy --only firestore:rules
+```
 
-| Paso | Acción |
-|------|--------|
-| 1 | Si hubo errores de puerto: **`detener-todo.bat`** |
-| 2 | **`iniciar-todo.bat`** (backend + frontend en 2 ventanas) |
-| 3 | Navegador: **http://localhost:5173** |
-| 4 | Dudas: **`verificar-entorno.bat`** |
+---
 
-### Arranque manual
+## 3. Operación Diaria y Arranque
 
-**Terminal 1 — API**
+### Opción A: Scripts `.bat` (Recomendado en Windows)
+```cmd
+:: 1. Si los puertos quedaron colgados:
+detener-todo.bat
 
+:: 2. Iniciar API y Frontend juntos:
+iniciar-todo.bat
+
+:: 3. Verificar estado de dependencias:
+verificar-entorno.bat
+```
+
+### Opción B: Arranque Manual por Terminales
+
+**Terminal 1 (Backend Express)**:
 ```bash
 cd backend
 npm run dev
 ```
+*Servidor iniciado en: `http://localhost:3000/api`*
 
-→ `http://localhost:3000/api`
-
-**Terminal 2 — Panel**
-
+**Terminal 2 (Frontend React)**:
 ```bash
 cd frontend
-npm run dev
+npm start
 ```
-
-→ `http://localhost:5173`
-
----
-
-## 4. Scripts `.bat` (raíz del proyecto)
-
-| Script | Función |
-|--------|---------|
-| `iniciar-todo.bat` | Abre backend (:3000) y frontend (:5173) |
-| `detener-todo.bat` | Libera puertos 3000, 5173 y 5174 |
-| `iniciar-backend.bat` | Solo API |
-| `iniciar-frontend.bat` | Solo panel Vite |
-| `verificar-entorno.bat` | Node, `.env`, health de servicios |
+*App iniciada en: `http://localhost:3001`*
 
 ---
 
-## 5. Verificación rápida
+## 4. Telemetría y Analítica por Lotes ($0 Costo en Firestore)
 
-| Check | URL / comando | Esperado |
-|-------|---------------|----------|
-| API | http://localhost:3000/api/health | `"status": "ok"` |
-| Front | http://localhost:5173 | Panel Mate-Mático |
-| Proxy | http://localhost:5173/api/health | Mismo JSON que API |
-| Entorno | `verificar-entorno.bat` | [OK] en Node y servicios |
+El sistema acumula automáticamente hasta **10 eventos pedagógicos o 30 segundos de inactividad** en el cliente `TelemetryService.js` y realiza un push a dos vías:
+1. **Google Tag Manager (`GTM-5RDTRVPK`)**: Disparos sincrónicos en `window.dataLayer.push()`.
+2. **Supabase PostgreSQL**: Petición asíncrona `POST /api/tracking/batch` insertando en la tabla `eventos`.
+
+### Taxonomía de los 17 Eventos Soportados:
+- `usuario_registrado`, `usuario_inicio_sesion`
+- `onboarding_iniciado`, `onboarding_abandonado`, `onboarding_finalizado`
+- `leccion_iniciada`, `leccion_abandonada`, `leccion_completada`
+- `ejercicio_iniciado`, `ejercicio_abandonado`, `ejercicio_completado`
+- `pantalla_visitada`, `progreso_actualizado`, `error_aplicacion`
+- `racha_perdida`, `racha_actualizada`, `sesion_finalizada`
 
 ---
 
-## 6. Operaciones frecuentes
+## 5. Pruebas Automatizadas (Testing Suite)
 
-### Registrar / login
-
-- **Email:** Registrarse → Iniciar sesión (va al backend, no requiere popup).
-- **Google:** Continuar con Google (popup Firebase + `POST /api/auth/google`).
-
-### Reiniciar tras cambiar `.env`
-
-1. `detener-todo.bat`
-2. `iniciar-todo.bat`
-
-Vite solo lee `frontend/.env` al arrancar.
-
-### Probar API sin panel
-
-```powershell
-Invoke-RestMethod http://localhost:3000/api/health
+Para ejecutar las 11 pruebas unitarias del backend (Racha adaptativa, validaciones Zod y Telemetría por Lotes):
+```bash
+cd backend
+npm test
 ```
+*Esperado: `11/11 subtests PASSED (100% pass rate)`.*
 
 ---
 
-## 7. URLs de desarrollo
+## 6. Despliegue en Producción
 
-| Servicio | URL |
-|----------|-----|
-| Panel | http://localhost:5173 |
-| API directa | http://localhost:3000/api |
-| API vía proxy Vite | http://localhost:5173/api |
+### Frontend (Vercel)
+1. Conectar repositorio de GitHub.
+2. Build Command: `npm run build`
+3. Output Directory: `build`
+4. Configurar variables `REACT_APP_*`.
 
----
-
-## 8. Producción (orientación)
-
-- `NODE_ENV=production`, `npm run start` en backend detrás de HTTPS.
-- Agregar dominio del front en `CORS_ORIGINS`.
-- `npm run build` en frontend y servir `frontend/dist/`.
-- `VITE_API_BASE_URL` apuntando a la API pública en el build.
-
----
-
-## 9. Documentación relacionada
-
-- [ARQUITECTURA.md](./ARQUITECTURA.md) — qué hace cada parte del código
-- [TROUBLESHOOTING.md](./TROUBLESHOOTING.md) — errores y soluciones
-- [../backend/API.md](../backend/API.md) — endpoints JSON
-
----
-
-## 10. Checklist demo
-
-- [ ] `/api/health` → 200
-- [ ] Registro o login email
-- [ ] Google (si está configurado)
-- [ ] Cargar módulos y validar un ejercicio
-- [ ] Perfil muestra puntos / racha tras acertar
+### Backend (Render / GCP)
+1. Build Command: `npm install`
+2. Start Command: `npm start`
+3. Configurar variables `.env` (`NODE_ENV=production`, `CORS_ORIGINS`).
+4. El servidor cuenta con **Graceful Shutdown** (`SIGTERM`/`SIGINT`) garantizando despliegues sin caída de peticiones en curso.

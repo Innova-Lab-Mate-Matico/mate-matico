@@ -1,17 +1,20 @@
 import React, { useState } from 'react';
 import { initializeApp } from 'firebase/app';
-import { getAuth, GoogleAuthProvider, signInWithPopup, sendPasswordResetEmail } from 'firebase/auth';
+import { getAuth, GoogleAuthProvider, OAuthProvider, signInWithPopup, sendPasswordResetEmail, onIdTokenChanged } from 'firebase/auth';
 import './App.css'; // Tus estilos globales
 import './styles/Dashboard.css';
 import Auth from './components/Auth';
+import Home from './components/Home';
 import Profile from './components/Profile';
 import Modules from './components/Modules';
 import Progress from './components/Progress';
-import Logros from './components/Logros';
-
+import PracticarCard from './components/PracticarCard';
+import RachaRotaModal from './components/RachaRotaModal';
+import AdminAnalyticsView from './components/AdminAnalyticsView';
 
 // NUEVOS COMPONENTES: Control de flujo inicial de captación
 import OnboardingWizard from './components/OnboardingWizard';
+import telemetry from './services/TelemetryService';
 
 import olaSuperior from './assets/image 2.png';
 import olaInferior from './assets/image 10 (1).png';
@@ -24,6 +27,7 @@ import navPracticarSvg from './assets/cards_star.svg';
 import navInicioSvg from './assets/home.svg';
 import navProgresoSvg from './assets/diamond_shine.svg';
 import navPerfilSvg from './assets/account_circle.svg';
+import navAnaliticaImg from './assets/monitor.png';
 
 
 
@@ -56,19 +60,67 @@ export default function App() {
 
   const [user, setUser] = useState(null);
   const [progress, setProgress] = useState(null);
+  const [showRachaRota, setShowRachaRota] = useState(false);
+
+  const handleSetUser = (userData) => {
+    setUser(userData);
+    if (userData?.rachaRota) {
+      setShowRachaRota(true);
+      telemetry.track('racha_perdida', {
+        racha_dias: userData.rachaDias || 0
+      });
+    } else if (userData?.rachaDias > 0) {
+      telemetry.track('racha_actualizada', {
+        racha_dias: userData.rachaDias
+      });
+    }
+  };
 
   const [statusMsg, setStatusMsg] = useState('');
   const [isStatusOk, setIsStatusOk] = useState(true);
 
   // Pestaña activa
-  const [activeTab, setActiveTab] = useState('perfil');
+  const [activeTab, setActiveTab] = useState('inicio');
+
+  React.useEffect(() => {
+    if (activeTab) {
+      telemetry.track('pantalla_visitada', {
+        nombre_pantalla: activeTab
+      });
+    }
+  }, [activeTab]);
 
   const [networkError, setNetworkError] = useState(false);
+  const [serverError, setServerError] = useState(null);
+
+  /*
+    Escuchar cambios y renovación automática de token de Firebase
+  */
+  React.useEffect(() => {
+    if (firebaseAuth) {
+      const unsubscribe = onIdTokenChanged(firebaseAuth, async (currentUser) => {
+        if (currentUser) {
+          try {
+            const freshToken = await currentUser.getIdToken();
+            localStorage.setItem('idToken', freshToken);
+            setToken(freshToken);
+          } catch (err) {
+            console.warn("Error al renovar token de Firebase en listener:", err);
+          }
+        }
+      });
+      return () => unsubscribe();
+    }
+  }, []);
 
   /*
     Intentar recuperar sesión automáticamente al iniciar la aplicación.
+    También realiza un silencioso calentamiento en segundo plano del servidor (Render).
   */
   React.useEffect(() => {
+    // Calentamiento silencioso para despertar el backend de Render en segundo plano
+    fetch(`${API_BASE}/health`).catch(() => {});
+
     const savedToken = localStorage.getItem('idToken');
     if (savedToken) {
       loadProfile(savedToken);
@@ -92,8 +144,9 @@ export default function App() {
     setStatusMsg(msg);
     setIsStatusOk(ok);
   };
+
 /*
-  Wrapper estándar para llamadas HTTP al backend (Memorizado para evitar re-fetches en useEffect).
+  Wrapper estándar para llamadas HTTP al backend con auto-refresh, manejo de 401, reintentos automáticos y cartel empático de red/servidor.
 */
 const apiCall = React.useCallback(async (path, options = {}, customToken = null) => {
   const headers = {
@@ -102,25 +155,97 @@ const apiCall = React.useCallback(async (path, options = {}, customToken = null)
     ...options.headers,
   };
 
-  const activeToken = customToken || token;
+  let activeToken = customToken || token || localStorage.getItem('idToken');
+
+  // Si Firebase Auth está activo, obtener el token más actualizado posible
+  if (firebaseAuth && firebaseAuth.currentUser) {
+    try {
+      activeToken = await firebaseAuth.currentUser.getIdToken(false);
+      localStorage.setItem('idToken', activeToken);
+    } catch (e) {
+      console.warn("Auto-refresh previo de token falló:", e);
+    }
+  }
 
   if (activeToken) {
     headers.Authorization = `Bearer ${activeToken}`;
   }
 
-  const res = await fetch(`${API_BASE}${path}`, {
-    ...options,
-    headers,
-  });
+  let res;
+  let attempts = 0;
+  const maxAttempts = 3;
+
+  while (attempts < maxAttempts) {
+    try {
+      res = await fetch(`${API_BASE}${path}`, {
+        ...options,
+        headers,
+      });
+      break;
+    } catch (netErr) {
+      attempts += 1;
+      console.warn(`⚠️ Intento ${attempts}/${maxAttempts} para ${path} falló por red/cold-start. Reintentando automáticamente en breve...`);
+      if (attempts >= maxAttempts) {
+        console.error("Error de red persistente al conectar con la API:", netErr);
+        setServerError({
+          active: true,
+          retry: () => apiCall(path, options, customToken)
+        });
+        throw netErr;
+      }
+      const waitTime = 1200 * attempts;
+      await new Promise((r) => setTimeout(r, waitTime));
+    }
+  }
+
+  // Interceptor de 401 Unauthorized: renovar forzosamente y reintentar la petición automáticamente
+  if (res.status === 401 && firebaseAuth && firebaseAuth.currentUser) {
+    try {
+      console.log("⚠️ Token 401 detectado. Renovando token con Firebase...");
+      const refreshedToken = await firebaseAuth.currentUser.getIdToken(true);
+      localStorage.setItem('idToken', refreshedToken);
+      setToken(refreshedToken);
+      headers.Authorization = `Bearer ${refreshedToken}`;
+
+      res = await fetch(`${API_BASE}${path}`, {
+        ...options,
+        headers,
+      });
+    } catch (refreshErr) {
+      console.error("Falló la renovación forzada de token expirado:", refreshErr);
+    }
+  }
 
   const data = await res.json().catch(() => ({}));
 
   if (!res.ok) {
+    if (res.status === 401) {
+      console.warn("⚠️ Sesión expirada o no autorizada (401). Cerrando sesión de forma limpia...");
+      localStorage.removeItem('idToken');
+      setToken(null);
+      setUser(null);
+    } else if (res.status >= 500) {
+      setServerError({
+        active: true,
+        retry: () => apiCall(path, options, customToken)
+      });
+    }
+
     const err = new Error(data.error || res.statusText || "Error inesperado en la API");
     err.status = res.status;
     err.raw = data;
+
+    telemetry.track('error_aplicacion', {
+      codigo_error: res.status,
+      mensaje: err.message,
+      contexto: path
+    });
+
     throw err;
   }
+
+  // Limpiar el aviso de error de servidor si la llamada fue exitosa
+  setServerError(null);
 
   return data;
 }, [token]);
@@ -136,7 +261,8 @@ const apiCall = React.useCallback(async (path, options = {}, customToken = null)
         activeToken
       );
 
-      setUser(data.usuario);
+      handleSetUser(data.usuario);
+      telemetry.init(apiCall);
     } catch (err) {
       console.error('Error al cargar perfil:', err);
       logout();
@@ -174,6 +300,7 @@ const apiCall = React.useCallback(async (path, options = {}, customToken = null)
     Cerrar sesión.
   */
   const logout = () => {
+    telemetry.endSession();
     setToken('');
     setUser(null);
     setProgress(null);
@@ -204,13 +331,14 @@ const apiCall = React.useCallback(async (path, options = {}, customToken = null)
       firebaseAuth.languageCode = 'es';
     }
 
-    const provider = new GoogleAuthProvider();
+    const googleProvider = new GoogleAuthProvider();
 
     return {
       auth: firebaseAuth,
       GoogleAuthProvider,
+      OAuthProvider,
       signInWithPopup,
-      provider,
+      googleProvider,
     };
   };
 
@@ -245,17 +373,23 @@ const apiCall = React.useCallback(async (path, options = {}, customToken = null)
 
         return;
       }
-
       saveToken(data.idToken);
       loadUserProgress(data.idToken);
 
       setStatus(
-        '¡Registro correcto! Bienvenido a Mate-Mático',
+        '¡Registro correcto! Bienvenido a Mate Mático',
         true
       );
 
-      setUser(data.usuario);
-      setActiveTab('perfil');
+      handleSetUser(data.usuario);
+      telemetry.track('usuario_registrado', {
+        usuario_id: data.usuario?.uid,
+        metodo_login: 'Email/Password',
+        proveedor: 'password',
+        edad: data.usuario?.edad ?? null,
+        nivel_educativo: data.usuario?.nivelEducativo ?? null
+      });
+      setActiveTab('inicio');
     } catch (err) {
       setStatus(err.message, false);
     }
@@ -290,8 +424,13 @@ const apiCall = React.useCallback(async (path, options = {}, customToken = null)
         true
       );
 
-      setUser(data.usuario);
-      setActiveTab('perfil');
+      handleSetUser(data.usuario);
+      telemetry.track('usuario_inicio_sesion', {
+        usuario_id: data.usuario?.uid,
+        metodo_login: 'Email/Password',
+        proveedor: 'password'
+      });
+      setActiveTab('inicio');
     } catch (err) {
       setStatus(err.message, false);
     }
@@ -303,14 +442,15 @@ const apiCall = React.useCallback(async (path, options = {}, customToken = null)
   const handleRecoverPassword = async (email) => {
     try {
       setStatus('Enviando correo de recuperación...');
-      const { auth } = await getFirebaseAuth();
+      const { auth, sendPasswordResetEmail } = await getFirebaseAuth();
       await sendPasswordResetEmail(auth, email);
-      setStatus(
-        'Te enviamos un correo electrónico con instrucciones para restablecer tu contraseña.',
-        true
-      );
+
+      setStatus('Te enviamos un correo para restablecer tu contraseña. Revisá tu casilla.', true);
     } catch (err) {
-      setStatus(err.message, false);
+      const friendlyMsg = err.code === 'auth/user-not-found'
+        ? 'No existe una cuenta registrada con este correo.'
+        : err.message;
+      setStatus(friendlyMsg, false);
     }
   };
 
@@ -326,17 +466,13 @@ const apiCall = React.useCallback(async (path, options = {}, customToken = null)
       const {
         auth,
         signInWithPopup,
-        provider,
+        googleProvider,
       } = await getFirebaseAuth();
-
-      provider.setCustomParameters({
-        prompt: 'select_account',
-      });
 
       const credential =
         await signInWithPopup(
           auth,
-          provider
+          googleProvider
         );
 
       const googleIdToken =
@@ -372,12 +508,77 @@ const apiCall = React.useCallback(async (path, options = {}, customToken = null)
         true
       );
 
-      setUser(data.usuario);
-      setActiveTab('perfil');
+      handleSetUser(data.usuario);
+      const evt = data.esNuevo ? 'usuario_registrado' : 'usuario_inicio_sesion';
+      telemetry.track(evt, {
+        usuario_id: data.usuario?.uid,
+        metodo_login: 'Google',
+        proveedor: 'google.com',
+        ...(data.esNuevo && {
+          edad: data.usuario?.edad ?? null,
+          nivel_educativo: data.usuario?.nivelEducativo ?? null
+        })
+      });
+      setActiveTab('inicio');
     } catch (err) {
       const friendlyMsg =
         err.code ===
         'auth/popup-closed-by-user'
+          ? 'Ventana cerrada por el usuario. Reintentá.'
+          : err.message;
+
+      setStatus(friendlyMsg, false);
+    }
+  };
+
+  /*
+    Login Microsoft/Outlook usando Firebase Popup.
+  */
+  const handleMicrosoftLogin = async () => {
+    try {
+      setStatus('Abriendo panel de Microsoft/Outlook...');
+      const { auth, signInWithPopup, OAuthProvider } = await getFirebaseAuth();
+      const provider = new OAuthProvider('microsoft.com');
+      provider.setCustomParameters({
+        prompt: 'select_account',
+      });
+
+      const credential = await signInWithPopup(auth, provider);
+      const msIdToken = await credential.user.getIdToken();
+
+      setStatus('Sincronizando perfil con el servidor...');
+      const data = await apiCall('/auth/microsoft', {
+        method: 'POST',
+        body: JSON.stringify({
+          idToken: msIdToken,
+        }),
+      });
+
+      saveToken(data.idToken);
+      loadUserProgress(data.idToken);
+
+      setStatus(
+        data.esNuevo
+          ? `¡Cuenta creada! Hola, ${data.usuario?.displayName || data.usuario?.email}`
+          : `Bienvenido de nuevo, ${data.usuario?.displayName || data.usuario?.email}`,
+        true
+      );
+
+      handleSetUser(data.usuario);
+      const msEvt = data.esNuevo ? 'usuario_registrado' : 'usuario_inicio_sesion';
+      telemetry.track(msEvt, {
+        usuario_id: data.usuario?.uid,
+        metodo_login: 'Microsoft',
+        proveedor: 'microsoft.com',
+        ...(data.esNuevo && {
+          edad: data.usuario?.edad ?? null,
+          nivel_educativo: data.usuario?.nivelEducativo ?? null
+        })
+      });
+      setActiveTab('inicio');
+    } catch (err) {
+      const friendlyMsg =
+        err.code === 'auth/popup-closed-by-user'
           ? 'Ventana cerrada por el usuario. Reintentá.'
           : err.message;
 
@@ -405,7 +606,7 @@ const apiCall = React.useCallback(async (path, options = {}, customToken = null)
   const handleOnboardingComplete = (updatedUser) => {
     setUser(updatedUser);
     loadUserProgress(token);
-    setActiveTab('lecciones');
+    setActiveTab('inicio');
   };
 
   const handleRetryConnection = () => {
@@ -417,20 +618,96 @@ const apiCall = React.useCallback(async (path, options = {}, customToken = null)
     }
   };
 
-  if (!user) {
-    /* PÁGINA DE INGRESO: Solo el Login/Registro a pantalla completa con su fondo y olas */
+  const renderServerErrorBanner = () => {
+    if (!serverError?.active) return null;
     return (
-      <div className="app-main-layout">
+      <div style={{
+        position: 'fixed',
+        top: '16px',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        zIndex: 999999,
+        backgroundColor: '#FFF3CD',
+        border: '1px solid #FFEBAA',
+        borderRadius: '12px',
+        padding: '12px 20px',
+        boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '14px',
+        maxWidth: '90%',
+        width: '480px'
+      }}>
+        <span style={{ fontSize: '1.5rem' }}>🧉</span>
+        <div style={{ flex: 1 }}>
+          <p style={{ margin: 0, fontSize: '0.88rem', color: '#856404', fontWeight: 'bold' }}>
+            Tuvimos un problema al comunicarnos con la pizarra de Mate Mático.
+          </p>
+          <p style={{ margin: '2px 0 0 0', fontSize: '0.78rem', color: '#856404' }}>
+            Comprobá tu conexión a internet o reintentá en unos segundos.
+          </p>
+        </div>
+        <button
+          onClick={() => {
+            const retryFn = serverError.retry;
+            setServerError(null);
+            if (retryFn) retryFn();
+          }}
+          style={{
+            backgroundColor: '#9747FF',
+            color: '#ffffff',
+            border: 'none',
+            padding: '8px 14px',
+            borderRadius: '8px',
+            fontWeight: 'bold',
+            cursor: 'pointer',
+            fontSize: '0.82rem'
+          }}
+        >
+          Reintentar
+        </button>
+      </div>
+    );
+  };
+
+  if (!user) {
+    /* PÁGINA DE INGRESO: Login centrado con leyenda discreta al pie, todo dentro de 100vh */
+    return (
+      <div className="app-main-layout" style={{ height: '100vh', overflow: 'hidden', display: 'flex', flexDirection: 'column', position: 'relative' }}>
+        {renderServerErrorBanner()}
         <img src={olaSuperior} alt="" className="global-wave ola-superior" />
         <img src={olaInferior} alt="" className="global-wave ola-inferior" />
-        <Auth
-          onLogin={handleLogin}
-          onGoogleLogin={handleGoogleLogin}
-          onRegister={handleRegister}
-          onRecoverPassword={handleRecoverPassword}
-          statusMsg={statusMsg}
-          isStatusOk={isStatusOk}
-        />
+
+        {/* Login centrado en el espacio disponible */}
+        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', padding: '0 20px', overflow: 'hidden' }}>
+          <Auth
+            onLogin={handleLogin}
+            onGoogleLogin={handleGoogleLogin}
+            onMicrosoftLogin={handleMicrosoftLogin}
+            onRegister={handleRegister}
+            onRecoverPassword={handleRecoverPassword}
+            statusMsg={statusMsg}
+            isStatusOk={isStatusOk}
+          />
+        </div>
+
+        {/* Leyenda pie de página discreta — sin generar scroll */}
+        <div style={{
+          position: 'relative',
+          zIndex: 10,
+          textAlign: 'center',
+          padding: '10px 16px 14px',
+          fontSize: '0.75rem',
+          color: '#94a3b8',
+          lineHeight: 1.5,
+          flexShrink: 0,
+        }}>
+          <span style={{ fontWeight: '600', color: '#7b61ff' }}>Mate Mático — Innova Lab</span>
+          {'  ·  '}
+          <span>Plataforma educativa con IA y gamificación</span>
+          {'  ·  '}
+          <span>© 2026 Innova Lab</span>
+        </div>
       </div>
     );
   }
@@ -439,6 +716,7 @@ const apiCall = React.useCallback(async (path, options = {}, customToken = null)
     /* FLUJO DE ONBOARDING: Pantalla completa limpia para el asistente de onboarding */
     return (
       <div className="app-main-layout">
+        {renderServerErrorBanner()}
         <img src={olaSuperior} alt="" className="global-wave ola-superior" />
         <img src={olaInferior} alt="" className="global-wave ola-inferior" />
         <div className="app-container" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
@@ -450,10 +728,9 @@ const apiCall = React.useCallback(async (path, options = {}, customToken = null)
               />
             </section>
           </main>
-          <footer className="footer" style={{ borderTop: 'none' }}>
-            <p>API Endpoint: <code>{API_BASE}</code></p>
-            <p style={{ marginTop: '5px' }}>
-              Mate-Mático Monorepo MVP — React Frontend © 2026
+          <footer className="auth-footer-fixed">
+            <p className="auth-footer-text">
+              Innova Lab — Innovación Educativa © 2026 Mate Mático
             </p>
           </footer>
         </div>
@@ -464,20 +741,23 @@ const apiCall = React.useCallback(async (path, options = {}, customToken = null)
   /* PANEL PRINCIPAL: Usuario logueado con onboarding completado, cabecera compacta con estadísticas */
   return (
     <div className="app-main-layout">
+      {renderServerErrorBanner()}
       <img src={olaSuperior} alt="" className="global-wave ola-superior" />
       <img src={olaInferior} alt="" className="global-wave ola-inferior" />
-      <div className="app-container" id="arriba" style={{ minHeight: '100vh' }}>
-        <header className="dashboard-header">
-          <div className="dashboard-header-left" style={{ display: 'flex', alignItems: 'center' }}>
-            <img src={logoPrincipal} alt="Mate-Mático" className="dashboard-logo" style={{ height: '62px', objectFit: 'contain' }} />
-          </div>
-          <div className="dashboard-header-right">
-            <span>🔥 {user.rachaDias ?? 0} {user.rachaDias === 1 ? 'día' : 'días'}</span>
-            <span>✨ {user.puntosTotales ?? 0} pts</span>
-          </div>
-        </header>
+      <div className={`app-container ${activeTab === 'analitica' ? 'analytics-mode' : ''}`} id="arriba" style={{ minHeight: '100vh' }}>
+        {activeTab !== 'analitica' && (
+          <header className="dashboard-header">
+            <div className="dashboard-header-left" style={{ display: 'flex', alignItems: 'center' }}>
+              <img src={logoPrincipal} alt="Mate Mático" className="dashboard-logo" style={{ height: '62px', objectFit: 'contain' }} />
+            </div>
+            <div className="dashboard-header-right">
+              <span>🔥 {user.rachaDias ?? 0} {user.rachaDias === 1 ? 'día' : 'días'}</span>
+              <span>✨ {user.puntosTotales ?? 0} pts</span>
+            </div>
+          </header>
+        )}
 
-        <main style={{ paddingBottom: '75px' }}>
+        <main style={{ paddingBottom: '120px', minHeight: 'calc(100vh - 180px)', position: 'relative' }}>
           <div>
             <div className="layout-grid">
               {activeTab === 'perfil' && (
@@ -491,7 +771,15 @@ const apiCall = React.useCallback(async (path, options = {}, customToken = null)
                   }}
                 />
               )}
-              {(activeTab === 'inicio' || activeTab === 'lecciones') && (
+              {activeTab === 'inicio' && (
+                <Home
+                  user={user}
+                  progress={progress}
+                  onNavigate={(tab) => setActiveTab(tab)}
+                />
+              )}
+
+              {activeTab === 'lecciones' && (
                 <Modules
                   apiCall={apiCall}
                   onAnswerSuccess={handleAnswerSuccess}
@@ -502,14 +790,47 @@ const apiCall = React.useCallback(async (path, options = {}, customToken = null)
               )}
 
               {activeTab === 'progreso' && (
+               <Progress apiCall={apiCall} />
+    )}
+
+          {activeTab === 'practicar' && (
+            <PracticarCard
+              apiCall={apiCall}
+              onBack={() => setActiveTab('inicio')}
+              onNavigate={(tab) => setActiveTab(tab)}
+              onRefreshProfile={(res) => {
+                if (res && res.puntosTotales !== undefined) {
+                  setUser((prev) => (prev ? { ...prev, puntosTotales: res.puntosTotales } : prev));
+                }
+                loadProfile();
+                loadUserProgress();
+              }}
+            />
+          )}
+
+              {activeTab === 'logros' && (
                 <Progress apiCall={apiCall} />
               )}
 
-              {activeTab === 'logros' && (
-                <Logros apiCall={apiCall} />
+              {activeTab === 'analitica' && (
+                <AdminAnalyticsView user={user} apiCall={apiCall} />
               )}
             </div>
           </div>
+
+          {/* Footer Profesional Innova Lab */}
+          <footer className="figma-pro-footer">
+            <div className="footer-content">
+              <h3 className="footer-brand">Mate Mático — Innova Lab</h3>
+              <p className="footer-tagline">
+                Plataforma Educativa Adaptativa con Gamificación e Inteligencia Artificial
+              </p>
+              <div className="footer-divider"></div>
+              <p className="footer-copyright">
+                © 2026 Innova Lab — Todos los derechos reservados.
+              </p>
+            </div>
+          </footer>
         </main>
 
         {/* Barra de navegación inferior fija estilo Figma */}
@@ -525,8 +846,8 @@ const apiCall = React.useCallback(async (path, options = {}, customToken = null)
 
           <button
             type="button"
-            className={`figma-nav-item ${activeTab === 'logros' ? 'active' : ''}`}
-            onClick={() => setActiveTab('logros')}
+            className={`figma-nav-item ${activeTab === 'practicar' ? 'active' : ''}`}
+            onClick={() => setActiveTab('practicar')}
           >
             <img src={navPracticarSvg} alt="Practicar" />
             <span>Practicar</span>
@@ -550,6 +871,17 @@ const apiCall = React.useCallback(async (path, options = {}, customToken = null)
             <span>Progreso</span>
           </button>
 
+          {(user?.rol === 'admin' || user?.rol === 'viewer' || user?.esAdmin === true) && (
+            <button
+              type="button"
+              className={`figma-nav-item ${activeTab === 'analitica' ? 'active' : ''}`}
+              onClick={() => setActiveTab('analitica')}
+            >
+              <img src={navAnaliticaImg} alt="Analítica" />
+              <span>Analítica</span>
+            </button>
+          )}
+
           <button
             type="button"
             className={`figma-nav-item ${activeTab === 'perfil' ? 'active' : ''}`}
@@ -559,21 +891,16 @@ const apiCall = React.useCallback(async (path, options = {}, customToken = null)
             <span>Perfil</span>
           </button>
         </nav>
-
-        {/* Footer Profesional Innova Lab */}
-        <footer className="figma-pro-footer">
-          <div className="footer-content">
-            <h3 className="footer-brand">Mate-Mático — Innova Lab</h3>
-            <p className="footer-tagline">
-              Plataforma Educativa Adaptativa con Gamificación e Inteligencia Artificial
-            </p>
-            <div className="footer-divider"></div>
-            <p className="footer-copyright">
-              © 2026 Innova Lab — Todos los derechos reservados.
-            </p>
-          </div>
-        </footer>
       </div>
+      {showRachaRota && (
+        <RachaRotaModal
+          onClose={() => setShowRachaRota(false)}
+          onPracticar={() => {
+            setShowRachaRota(false);
+            setActiveTab('lecciones');
+          }}
+        />
+      )}
       {networkError && (
         <div 
           style={{
@@ -607,7 +934,7 @@ const apiCall = React.useCallback(async (path, options = {}, customToken = null)
               style={{ width: '120px', marginBottom: '20px' }}
             />
             <h2 style={{ fontFamily: 'Poppins, sans-serif', color: '#163b74', fontWeight: 800, fontSize: '1.4rem', margin: '0 0 10px 0' }}>
-              ¡Ups! No pudimos conectar con Mate-Matico
+              ¡Ups! No pudimos conectar con Mate Mático
             </h2>
             <p style={{ color: '#64748b', fontSize: '0.92rem', lineHeight: '1.5', margin: '0 0 24px 0' }}>
               Parece que hay un problema temporal con tu conexión a internet o la pizarra de la aplicación está en mantenimiento.

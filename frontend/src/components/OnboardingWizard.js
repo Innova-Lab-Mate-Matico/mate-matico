@@ -3,6 +3,7 @@ import EdadSelector from './EdadSelector';
 import NivelSelector from './NivelSelector';
 import InteresesSeleccion from './InteresesSeleccion';
 import RecomendacionModulo from './RecomendacionModulo';
+import telemetry from '../services/TelemetryService';
 import './OnboardingWizard.css';
 
 export default function OnboardingWizard({ apiCall, onComplete }) {
@@ -18,6 +19,22 @@ export default function OnboardingWizard({ apiCall, onComplete }) {
   const [errorMsg, setErrorMsg] = useState('');
   const [moduloRecomendado, setModuloRecomendado] = useState('porcentajes');
   const [savedUsuario, setSavedUsuario] = useState(null);
+
+  const stepRef = React.useRef(step);
+  stepRef.current = step;
+
+  React.useEffect(() => {
+    telemetry.track('onboarding_iniciado', { version_app: '1.0.0' });
+
+    return () => {
+      if (stepRef.current < 6) {
+        telemetry.track('onboarding_abandonado', {
+          paso: stepRef.current,
+          pantalla: `Paso ${stepRef.current}`
+        });
+      }
+    };
+  }, []);
 
   const handleSelectEdadRango = (rango) => {
     setEdadRango(rango);
@@ -68,6 +85,13 @@ export default function OnboardingWizard({ apiCall, onComplete }) {
         setSavedUsuario(res.usuario);
         const rec = res.usuario.onboarding?.moduloRecomendado || 'porcentajes';
         setModuloRecomendado(rec);
+        telemetry.track('onboarding_finalizado', {
+          modulo_recomendado: rec,
+          edad: payload.edad,
+          objetivo: payload.objetivo,
+          confianza_math: payload.confianzaMath,
+          nivel_educativo: payload.nivelEducativo
+        });
         setStep(6); // Ir al paso de recomendación estilizada
       } else {
         setErrorMsg('Error al guardar el onboarding. Intente de nuevo.');
@@ -186,7 +210,7 @@ export default function OnboardingWizard({ apiCall, onComplete }) {
       {step === 5 && (
         <div className="edad-container" style={{ textAlign: 'left' }}>
           <h2 style={{ textAlign: 'center' }}>¿Cuál es tu objetivo?</h2>
-          <p style={{ textAlign: 'center', color: '#666' }}>Contanos brevemente qué te gustaría lograr en Mate-Mático.</p>
+          <p style={{ textAlign: 'center', color: '#666' }}>Contanos brevemente qué te gustaría lograr en Mate Mático.</p>
           
           <div style={{ marginTop: '20px' }}>
             <textarea

@@ -1,122 +1,108 @@
+import { z } from 'zod';
+
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+/**
+ * Middleware genérico para ejecutar esquemas Zod con respuesta retrocompatible
+ */
+const validate = (schema, customEmptyMsg = null) => (req, res, next) => {
+  try {
+    req.body = schema.parse(req.body ?? {});
+    next();
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      const firstIssue = error.errors[0];
+      const errorMessage = firstIssue?.message || 'Error de validación en los datos enviados.';
+      return res.status(400).json({
+        success: false,
+        error: errorMessage,
+        detalles: error.errors.map((e) => ({
+          campo: e.path.join('.'),
+          mensaje: e.message,
+        })),
+      });
+    }
+    next(error);
+  }
+};
+
+// 1. Registro
 export function validateRegisterBody(req, res, next) {
   const { email, password, displayName } = req.body ?? {};
-
   if (!email || !password || !displayName || !String(displayName).trim()) {
     return res.status(400).json({
       success: false,
       error: 'Nombre, email y contraseña son obligatorios',
     });
   }
-
-  // 1. Validar nombre (solo letras)
-  const nameStr = String(displayName).trim();
-  const nameRe = /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]+$/;
-  if (!nameRe.test(nameStr)) {
-    return res.status(400).json({
-      success: false,
-      error: 'El nombre solo debe contener letras',
-    });
-  }
-
-  // 2. Validar formato de email
-  const emailStr = String(email).trim().toLowerCase();
-  if (!EMAIL_RE.test(emailStr)) {
-    return res.status(400).json({ success: false, error: 'Email inválido' });
-  }
-
-  // 3. Validar dominios permitidos
-  const domainParts = emailStr.split('@')[1]?.split('.') ?? [];
-  const baseDomain = domainParts[0];
-  const allowedDomains = ['gmail', 'outlook', 'yahoo', 'hotmail'];
-  if (!allowedDomains.includes(baseDomain)) {
-    return res.status(400).json({
-      success: false,
-      error: 'Email con dominio no permitido. Solo se aceptan gmail, outlook, yahoo o hotmail.',
-    });
-  }
-
-  // 4. Validar contraseña (mínimo 8 caracteres, mayús + minús + número + especial, sin límite máximo)
-  const passStr = String(password);
-  const hasUpper = /[A-Z]/.test(passStr);
-  const hasLower = /[a-z]/.test(passStr);
-  const hasDigit = /\d/.test(passStr);
-  const hasSpecial = /[^A-Za-z0-9]/.test(passStr);
-  const isCorrectLength = passStr.length >= 8;
-
-  if (!hasUpper || !hasLower || !hasDigit || !hasSpecial || !isCorrectLength) {
-    return res.status(400).json({
-      success: false,
-      error: 'La contraseña debe tener al menos 8 caracteres, e incluir mayúscula, minúscula, número y un carácter especial.',
-    });
-  }
-
-  next();
+  const registerSchema = z.object({
+    displayName: z.string().trim().min(2, { message: 'El nombre debe tener al menos 2 caracteres' }),
+    email: z.string().trim().toLowerCase().regex(EMAIL_RE, { message: 'Email inválido' }),
+    password: z.string().min(6, { message: 'La contraseña debe tener al menos 6 caracteres.' }),
+  });
+  return validate(registerSchema)(req, res, next);
 }
 
-
+// 2. Login
 export function validateLoginBody(req, res, next) {
   const { email, password } = req.body ?? {};
-
   if (!email || !password) {
     return res.status(400).json({
       success: false,
       error: 'Email y contraseña son obligatorios',
     });
   }
-
-  if (!EMAIL_RE.test(String(email).trim())) {
-    return res.status(400).json({ success: false, error: 'Email inválido' });
-  }
-
-  next();
+  const loginSchema = z.object({
+    email: z.string().trim().toLowerCase().regex(EMAIL_RE, { message: 'Email inválido' }),
+    password: z.string().min(1, { message: 'Email y contraseña son obligatorios' }),
+  });
+  return validate(loginSchema)(req, res, next);
 }
 
+// 3. Google Auth
 export function validateGoogleBody(req, res, next) {
-  const { idToken } = req.body ?? {};
-
-  if (!idToken || typeof idToken !== 'string' || idToken.length < 100) {
-    return res.status(400).json({
-      success: false,
-      error: 'idToken inválido',
-    });
-  }
-
-  next();
+  const googleSchema = z.object({
+    idToken: z.string({ required_error: 'idToken inválido' }).min(50, { message: 'idToken inválido' }),
+  });
+  return validate(googleSchema)(req, res, next);
 }
 
+// 4. Ejercicio
 export function validateExerciseBody(req, res, next) {
   const { moduleId, lessonId, exerciseId, answer, semilla, operandos } = req.body ?? {};
-
   if (!moduleId || !lessonId || !exerciseId) {
     return res.status(400).json({
       success: false,
       error: 'moduleId, lessonId y exerciseId son obligatorios',
     });
   }
-
   if (answer === undefined || answer === null || answer === '') {
     return res.status(400).json({
       success: false,
       error: 'answer es obligatorio',
     });
   }
-
   if (semilla === undefined || operandos === undefined) {
     return res.status(400).json({
       success: false,
       error: 'semilla y operandos son obligatorios para validar ejercicios dinámicos',
     });
   }
-
-  next();
+  const exerciseSchema = z.object({
+    moduleId: z.string().min(1),
+    lessonId: z.string().min(1),
+    exerciseId: z.string().min(1),
+    answer: z.any(),
+    semilla: z.any(),
+    operandos: z.any(),
+  });
+  return validate(exerciseSchema)(req, res, next);
 }
 
+// 5. Onboarding Wizard
 export function validateOnboardingBody(req, res, next) {
   const { edad, nivelEducativo, objetivo, confianzaMath, intereses } = req.body ?? {};
 
-  // 1. confianzaMath: obligatorio, entero, entre 1 y 5
   if (confianzaMath === undefined || confianzaMath === null) {
     return res.status(400).json({
       success: false,
@@ -131,7 +117,6 @@ export function validateOnboardingBody(req, res, next) {
     });
   }
 
-  // 2. intereses: obligatorio, array de strings, max 10 tags, no vacíos
   if (!intereses || !Array.isArray(intereses) || intereses.length === 0) {
     return res.status(400).json({
       success: false,
@@ -152,37 +137,72 @@ export function validateOnboardingBody(req, res, next) {
     });
   }
 
-  // 3. edad: opcional, entero, rango 18-120 (Público +18)
-  if (edad !== undefined && edad !== null && edad !== '') {
-    const edadNum = Number(edad);
-    if (!Number.isInteger(edadNum) || edadNum < 18 || edadNum > 120) {
-      return res.status(400).json({
-        success: false,
-        error: 'La edad debe ser un número entero válido de al menos 18 años',
-      });
+  const onboardingSchema = z.object({
+    confianzaMath: z.number().int().min(1).max(5),
+    intereses: z.array(z.string().trim().min(1)).min(1).max(10),
+    edad: z.preprocess(
+      (val) => (val === '' || val === null || val === undefined ? undefined : Number(val)),
+      z.number().int().min(18, { message: 'La edad debe ser un número entero válido de al menos 18 años' }).max(120).optional()
+    ),
+    nivelEducativo: z.enum(['primaria', 'secundaria', 'terciaria', 'universitaria', 'ninguno'], {
+      errorMap: () => ({ message: 'El campo nivelEducativo no es válido. Debe ser uno de: primaria, secundaria, terciaria, universitaria, ninguno' })
+    }).optional().nullable(),
+    objetivo: z.string().max(500, { message: 'El objetivo debe ser un texto y no puede superar los 500 caracteres' }).optional().nullable(),
+  });
+
+  return validate(onboardingSchema)(req, res, next);
+}
+
+// 6. Consultas al Tutor IA
+export function validateExplainBody(req, res, next) {
+  if (!req.body || typeof req.body !== 'object') {
+    req.body = {};
+  }
+
+  // Asignar valores por defecto para los identificadores si vienen vacíos o no se especifican
+  req.body.moduleId = (req.body.moduleId && typeof req.body.moduleId === 'string' && req.body.moduleId.trim()) ? req.body.moduleId.trim() : 'general';
+  req.body.lessonId = (req.body.lessonId && typeof req.body.lessonId === 'string' && req.body.lessonId.trim()) ? req.body.lessonId.trim() : 'general';
+  req.body.theoryId = (req.body.theoryId && typeof req.body.theoryId === 'string' && req.body.theoryId.trim()) ? req.body.theoryId.trim() : 'general';
+
+  const { question, history } = req.body;
+
+  if (!question || typeof question !== 'string' || !question.trim()) {
+    return res.status(400).json({ success: false, error: 'El campo question es obligatorio y debe ser un texto.' });
+  }
+  if (question.length > 1500) {
+    return res.status(400).json({ success: false, error: 'La pregunta no puede superar los 1500 caracteres.' });
+  }
+
+  if (history !== undefined) {
+    if (!Array.isArray(history)) {
+      return res.status(400).json({ success: false, error: 'El campo history debe ser un arreglo.' });
+    }
+
+    for (let i = 0; i < history.length; i++) {
+      const msg = history[i];
+      if (!msg || typeof msg !== 'object') {
+        return res.status(400).json({ success: false, error: `El mensaje en el índice ${i} del historial no es un objeto válido.` });
+      }
+      if (!msg.role || typeof msg.role !== 'string' || !['user', 'model', 'assistant'].includes(msg.role)) {
+        return res.status(400).json({ success: false, error: `El campo role en el índice ${i} debe ser 'user', 'assistant' o 'model'.` });
+      }
+      if (!msg.text || typeof msg.text !== 'string' || !msg.text.trim()) {
+        return res.status(400).json({ success: false, error: `El campo text en el índice ${i} debe ser un texto no vacío.` });
+      }
+      if (msg.text.length > 2000) {
+        return res.status(400).json({ success: false, error: `El mensaje en el índice ${i} del historial no puede superar los 2000 caracteres.` });
+      }
     }
   }
 
-  // 4. nivelEducativo: opcional, lista controlada
-  if (nivelEducativo !== undefined && nivelEducativo !== null && nivelEducativo !== '') {
-    const nivelesValidos = ['primaria', 'secundaria', 'terciaria', 'universitaria', 'ninguno'];
-    if (!nivelesValidos.includes(String(nivelEducativo).trim().toLowerCase())) {
-      return res.status(400).json({
-        success: false,
-        error: 'El campo nivelEducativo no es válido. Debe ser uno de: primaria, secundaria, terciaria, universitaria, ninguno',
-      });
-    }
-  }
+  const explainSchema = z.object({
+    moduleId: z.string().max(100).optional(),
+    lessonId: z.string().max(100).optional(),
+    theoryId: z.string().max(100).optional(),
+    question: z.string().trim().min(1).max(1500),
+    history: z.array(z.any()).optional(),
+    sesion_id: z.string().max(100).optional(),
+  });
 
-  // 5. objetivo: opcional, string, max 500 chars
-  if (objetivo !== undefined && objetivo !== null) {
-    if (typeof objetivo !== 'string' || objetivo.trim().length > 500) {
-      return res.status(400).json({
-        success: false,
-        error: 'El objetivo debe ser un texto y no puede superar los 500 caracteres',
-      });
-    }
-  }
-
-  next();
+  return validate(explainSchema)(req, res, next);
 }

@@ -2,9 +2,12 @@ import React, { useState, useEffect } from "react";
 import "./NumericExercise.css";
 import Calculadora from './Calculadora';
 import { EfectosService } from '../services/EfectosService';
+import telemetry from '../services/TelemetryService';
 import Microleccion1 from './microleccion1';
 import Microleccion2 from './microleccion2';
 import DynamicTheoryCard from './DynamicTheoryCard';
+import { TutorMateicoChat } from './DynamicTheoryCard';
+import mateico2Img from "../assets/Mateico2.png";
 
 import trabajo1 from "../assets/trabajo 1.png";
 import schedule from "../assets/schedule.svg";
@@ -21,7 +24,7 @@ import negativo from "../assets/Negativo.png";
 import descanso from "../assets/descanso.png";
 import "./MultipleChoice.css";
 
-function NumericExercise({ ejercicio, index, moduleId, lessonId, teoria, apiCall, onAnswerSuccess, onComplete }) {
+function NumericExercise({ ejercicio, index, moduleId, lessonId, leccion, moduleDetail, teoria, apiCall, onAnswerSuccess, onComplete }) {
 
   const [screen, setScreen] = useState("exercise");
   const [answer, setAnswer] = useState("");
@@ -33,11 +36,64 @@ function NumericExercise({ ejercicio, index, moduleId, lessonId, teoria, apiCall
   const [pointsAwarded, setPointsAwarded] = useState(0);
   const [showHintBubble, setShowHintBubble] = useState(false);
   const [showCalc, setShowCalc] = useState(false);
+  const [showMateico, setShowMateico] = useState(false);
   const [isMuted, setIsMuted] = useState(EfectosService.isMuted());
 
   const num1 = ejercicio ? (ejercicio.operandos?.num1 ?? 9) : 9;
   const num2 = ejercicio ? (ejercicio.operandos?.num2 ?? 23) : 23;
   const isFigmaExercise = false;
+
+  const modId = moduleId || leccion?.moduleId || 'mod_general';
+  const modNombre = moduleDetail?.title || modId;
+  const lesId = lessonId || leccion?.id || 'les_general';
+  const lesNombre = leccion?.title || lesId;
+  const exId = ejercicio?.id || 'num-ex-1';
+  const exNombre = (ejercicio?.prompt || ejercicio?.enunciado || 'Ejercicio Numérico').slice(0, 50);
+  const cat = moduleDetail?.category || 'Aritmética';
+  const tem = leccion?.tema || lesId;
+  const niv = leccion?.nivel || 'Intermedio';
+  const dif = ejercicio?.dificultad || 'Media';
+
+  const isCompletedRef = React.useRef(false);
+  useEffect(() => {
+    isCompletedRef.current = false;
+    telemetry.track('ejercicio_iniciado', {
+      modulo_id: modId,
+      modulo_nombre: modNombre,
+      leccion_id: lesId,
+      leccion_nombre: lesNombre,
+      ejercicio_id: exId,
+      ejercicio_nombre: exNombre,
+      categoria: cat,
+      tema: tem,
+      nivel: niv,
+      dificultad: dif,
+      modulo: modId,
+      leccion: lesId,
+      ejercicio: exId
+    });
+
+    return () => {
+      if (!isCompletedRef.current) {
+        telemetry.track('ejercicio_abandonado', {
+          modulo_id: modId,
+          modulo_nombre: modNombre,
+          leccion_id: lesId,
+          leccion_nombre: lesNombre,
+          ejercicio_id: exId,
+          ejercicio_nombre: exNombre,
+          categoria: cat,
+          tema: tem,
+          nivel: niv,
+          dificultad: dif,
+          tiempo_segundos: 20,
+          modulo: modId,
+          leccion: lesId,
+          ejercicio: exId
+        });
+      }
+    };
+  }, [modId, modNombre, lesId, lesNombre, exId, exNombre, cat, tem, niv, dif]);
 
   const getAdaptiveHint = () => {
     // Si la API nos devolvió un comodín real y específico (no genérico), lo usamos prioritariamente
@@ -101,7 +157,7 @@ function NumericExercise({ ejercicio, index, moduleId, lessonId, teoria, apiCall
       return `Pista: Primero calculá el ${pct}% de $${precio} y luego sumale ese resultado al valor original.`;
     }
 
-    return "Pista de Mate-Mático: Leé detenidamente el enunciado y resolvé los pasos uno a uno.";
+    return "Pista de Mate Mático: Leé detenidamente el enunciado y resolvé los pasos uno a uno.";
   };
 
   const currentHint = getAdaptiveHint();
@@ -139,6 +195,26 @@ function NumericExercise({ ejercicio, index, moduleId, lessonId, teoria, apiCall
       }
       if (screen === "hint") {
         setScreen("correct");
+        telemetry.track('ejercicio_completado', {
+          modulo_id: modId,
+          modulo_nombre: modNombre,
+          leccion_id: lesId,
+          leccion_nombre: lesNombre,
+          ejercicio_id: 'num-static-1',
+          ejercicio_nombre: 'Ejercicio Numérico Estático',
+          categoria: cat,
+          tema: tem,
+          nivel: niv,
+          dificultad: dif,
+          resultado: 'correcto',
+          intentos: 1,
+          puntaje: 15,
+          tiempo_segundos: 45,
+          modulo: modId,
+          leccion: lesId,
+          ejercicio: 'num-static-1'
+        });
+        isCompletedRef.current = true;
         return;
       }
       return;
@@ -158,7 +234,28 @@ function NumericExercise({ ejercicio, index, moduleId, lessonId, teoria, apiCall
         })
       });
 
+      telemetry.track('ejercicio_completado', {
+        modulo_id: modId,
+        modulo_nombre: modNombre,
+        leccion_id: lesId,
+        leccion_nombre: lesNombre,
+        ejercicio_id: exId,
+        ejercicio_nombre: exNombre,
+        categoria: cat,
+        tema: tem,
+        nivel: niv,
+        dificultad: dif,
+        resultado: result.correcto ? 'correcto' : 'incorrecto',
+        intentos: 1,
+        puntaje: result.correcto ? (result.puntosGanados ?? 15) : 0,
+        tiempo_segundos: 45,
+        modulo: modId,
+        leccion: lesId,
+        ejercicio: exId
+      });
+
       if (result.correcto) {
+        isCompletedRef.current = true;
         setPointsAwarded(result.puntosGanados ?? 15);
         if (onAnswerSuccess) {
           onAnswerSuccess(result.puntosGanados ?? 15);
@@ -280,6 +377,29 @@ function NumericExercise({ ejercicio, index, moduleId, lessonId, teoria, apiCall
                   💡 Ver Teoría
                 </button>
               )}
+
+              <button
+                type="button"
+                onClick={() => setShowMateico(true)}
+                style={{
+                  background: 'linear-gradient(135deg, #7b61ff 0%, #a855f7 100%)',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: '10px',
+                  padding: '5px 12px',
+                  fontSize: '0.78rem',
+                  fontWeight: '700',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  transition: 'all 0.15s',
+                  boxShadow: '0 2px 8px rgba(123,97,255,0.3)',
+                }}
+                aria-label="Preguntarle a Mateico"
+              >
+                <img src={mateico2Img} alt="Mateico" style={{ width: '22px', height: '22px', objectFit: 'contain' }} /> Mateico
+              </button>
             </div>
 
             {isFigmaExercise && (
@@ -415,7 +535,7 @@ function NumericExercise({ ejercicio, index, moduleId, lessonId, teoria, apiCall
                   >
                     ✕
                   </div>
-                  <strong style={{ display: 'block', marginBottom: '4px', fontSize: '0.9rem' }}>💡 Pista de Mate-Mático</strong>
+                  <strong style={{ display: 'block', marginBottom: '4px', fontSize: '0.9rem' }}>💡 Pista de Mate Mático</strong>
                   {currentHint}
                 </div>
               )}
@@ -459,7 +579,7 @@ function NumericExercise({ ejercicio, index, moduleId, lessonId, teoria, apiCall
 
       <div className="explanation-box" style={{ width: '100%', boxSizing: 'border-box' }}>
 
-        <h3 style={{ fontSize: '1.1rem', fontWeight: '800', color: '#7b61ff', marginBottom: '8px', fontFamily: "'Poppins', sans-serif" }}>Pista de Mate-Mático</h3>
+        <h3 style={{ fontSize: '1.1rem', fontWeight: '800', color: '#7b61ff', marginBottom: '8px', fontFamily: "'Poppins', sans-serif" }}>Pista de Mate Mático</h3>
         <p style={{ fontSize: '0.92rem', color: '#334155', lineHeight: '1.4', fontWeight: '500', margin: '0 0 12px 0' }}>
           {getAdaptiveHint()}
         </p>
@@ -595,14 +715,16 @@ function NumericExercise({ ejercicio, index, moduleId, lessonId, teoria, apiCall
       {showTheory && (
         <div className="theory-overlay-backdrop" onClick={() => setShowTheory(false)}>
           <div className="theory-modal-wrapper" onClick={(e) => e.stopPropagation()}>
-            <button 
-              type="button" 
-              className="theory-modal-close" 
-              onClick={() => setShowTheory(false)}
-              aria-label="Cerrar teoría"
-            >
-              ×
-            </button>
+            <div className="theory-modal-header">
+              <button 
+                type="button" 
+                className="theory-modal-close" 
+                onClick={() => setShowTheory(false)}
+                aria-label="Cerrar teoría"
+              >
+                ×
+              </button>
+            </div>
             <div className="theory-modal-content">
               {lessonId === 'multiplicacion' ? (
                 currentTheoryIndex === 0 ? (
@@ -614,6 +736,9 @@ function NumericExercise({ ejercicio, index, moduleId, lessonId, teoria, apiCall
                 teoria && teoria.length > 0 && (
                   <DynamicTheoryCard 
                     theory={teoria[currentTheoryIndex]} 
+                    moduleId={moduleId}
+                    lessonId={lessonId}
+                    apiCall={apiCall}
                     onContinuar={() => {
                       if (currentTheoryIndex < teoria.length - 1) {
                         setCurrentTheoryIndex(prev => prev + 1);
@@ -628,10 +753,34 @@ function NumericExercise({ ejercicio, index, moduleId, lessonId, teoria, apiCall
           </div>
         </div>
       )}
+
+      {showMateico && (
+        <div className="theory-overlay-backdrop" onClick={() => setShowMateico(false)}>
+          <div className="theory-modal-wrapper" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '520px', width: '90%' }}>
+            <div className="theory-modal-header">
+              <button
+                type="button"
+                className="theory-modal-close"
+                onClick={() => setShowMateico(false)}
+                aria-label="Cerrar chat Mateico"
+              >
+                ×
+              </button>
+            </div>
+            <div className="theory-modal-content" style={{ padding: '0 10px 10px 10px' }}>
+              <TutorMateicoChat
+                moduleId={moduleId}
+                lessonId={lessonId}
+                theoryId={teoria && teoria[0] ? teoria[0].id : ''}
+                apiCall={apiCall}
+                defaultOpen={true}
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
-
   );
-
 }
 
 export default NumericExercise;

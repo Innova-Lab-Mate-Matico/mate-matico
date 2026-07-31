@@ -41,7 +41,7 @@ useState(false);
  <div className="auth-form-wrapper">
  <img
  src={logoPrincipal}
- alt="Mate-Mático"
+ alt="Mate Mático"
  className="auth-logo"
  />
  <h2 className="auth-title">

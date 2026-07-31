@@ -2,10 +2,12 @@ import React, { useState } from "react";
 import "./MultipleChoice.css";
 import Calculadora from './Calculadora';
 import { EfectosService } from '../services/EfectosService';
+import telemetry from '../services/TelemetryService';
 import Microleccion1 from './microleccion1';
 import Microleccion2 from './microleccion2';
 import DynamicTheoryCard from './DynamicTheoryCard';
 import { TutorMateicoChat } from './DynamicTheoryCard';
+import mateico2Img from '../assets/Mateico2.png';
 
 // Tarjeta 3
 import tuPuedes from "../assets/tuPuedes.png";
@@ -19,7 +21,7 @@ import frame5 from "../assets/Frame 5.png";
 import imagen16 from "../assets/image16.png";
 import mateLibreta from "../assets/aprendamosJuntos.png";
 
-function MultipleChoice({ ejercicio, moduleId, lessonId, teoria, apiCall, onAnswerSuccess, onComplete })  {
+function MultipleChoice({ ejercicio, moduleId, lessonId, leccion, moduleDetail, teoria, apiCall, onAnswerSuccess, onComplete })  {
   const [screen, setScreen] = useState("question");
   const [selectedOption, setSelectedOption] = useState(null);
   const [showTheory, setShowTheory] = useState(false);
@@ -30,7 +32,61 @@ function MultipleChoice({ ejercicio, moduleId, lessonId, teoria, apiCall, onAnsw
   const [showCalc, setShowCalc] = useState(false);
   const [isMuted, setIsMuted] = useState(EfectosService.isMuted());
 
+  const modId = moduleId || leccion?.moduleId || 'mod_general';
+  const modNombre = moduleDetail?.title || modId;
+  const lesId = lessonId || leccion?.id || 'les_general';
+  const lesNombre = leccion?.title || lesId;
+  const exId = ejercicio?.id || 'mc-ex-1';
+  const exNombre = (ejercicio?.enunciado || ejercicio?.prompt || ejercicio?.pregunta || 'Opción Múltiple').slice(0, 50);
+  const cat = moduleDetail?.category || 'Aritmética';
+  const tem = leccion?.tema || lesId;
+  const niv = leccion?.nivel || 'Intermedio';
+  const dif = ejercicio?.dificultad || 'Media';
+
+  const isCompletedRef = React.useRef(false);
+
+  React.useEffect(() => {
+    isCompletedRef.current = false;
+    telemetry.track('ejercicio_iniciado', {
+      modulo_id: modId,
+      modulo_nombre: modNombre,
+      leccion_id: lesId,
+      leccion_nombre: lesNombre,
+      ejercicio_id: exId,
+      ejercicio_nombre: exNombre,
+      categoria: cat,
+      tema: tem,
+      nivel: niv,
+      dificultad: dif,
+      modulo: modId,
+      leccion: lesId,
+      ejercicio: exId
+    });
+
+    return () => {
+      if (!isCompletedRef.current) {
+        telemetry.track('ejercicio_abandonado', {
+          modulo_id: modId,
+          modulo_nombre: modNombre,
+          leccion_id: lesId,
+          leccion_nombre: lesNombre,
+          ejercicio_id: exId,
+          ejercicio_nombre: exNombre,
+          categoria: cat,
+          tema: tem,
+          nivel: niv,
+          dificultad: dif,
+          tiempo_segundos: 20,
+          modulo: modId,
+          leccion: lesId,
+          ejercicio: exId
+        });
+      }
+    };
+  }, [modId, modNombre, lesId, lesNombre, exId, exNombre, cat, tem, niv, dif]);
+
   const question = ejercicio ? (ejercicio.enunciado ?? ejercicio.prompt) : "Comprás 8 camisetas de fútbol a $73 cada una. Usando la propiedad distributiva, ¿cuánto pagás en total?";
+
   const options = ejercicio ? (ejercicio.opciones ?? []) : [
     "$582",
     "$574",
@@ -45,10 +101,33 @@ function MultipleChoice({ ejercicio, moduleId, lessonId, teoria, apiCall, onAnsw
 
     // Si no hay ejercicio del backend, usar comportamiento estático
     if (!ejercicio) {
-      if (selectedOption === 2) {
+      const isStaticCorrect = (selectedOption === 2);
+      if (isStaticCorrect) {
         setScreen("correct");
       } else {
         setScreen("wrong");
+      }
+      telemetry.track('ejercicio_completado', {
+        modulo_id: modId,
+        modulo_nombre: modNombre,
+        leccion_id: lesId,
+        leccion_nombre: lesNombre,
+        ejercicio_id: 'mc-static-1',
+        ejercicio_nombre: question.slice(0, 40),
+        categoria: cat,
+        tema: tem,
+        nivel: niv,
+        dificultad: dif,
+        resultado: isStaticCorrect ? 'correcto' : 'incorrecto',
+        intentos: 1,
+        puntaje: isStaticCorrect ? 10 : 0,
+        tiempo_segundos: 30,
+        modulo: modId,
+        leccion: lesId,
+        ejercicio: 'mc-static-1'
+      });
+      if (isStaticCorrect) {
+        isCompletedRef.current = true;
       }
       return;
     }
@@ -67,7 +146,28 @@ function MultipleChoice({ ejercicio, moduleId, lessonId, teoria, apiCall, onAnsw
         })
       });
 
+      telemetry.track('ejercicio_completado', {
+        modulo_id: modId,
+        modulo_nombre: modNombre,
+        leccion_id: lesId,
+        leccion_nombre: lesNombre,
+        ejercicio_id: exId,
+        ejercicio_nombre: exNombre,
+        categoria: cat,
+        tema: tem,
+        nivel: niv,
+        dificultad: dif,
+        resultado: result.correcto ? 'correcto' : 'incorrecto',
+        intentos: 1,
+        puntaje: result.correcto ? (result.puntosGanados ?? 10) : 0,
+        tiempo_segundos: 45,
+        modulo: modId,
+        leccion: lesId,
+        ejercicio: exId
+      });
+
       if (result.correcto) {
+        isCompletedRef.current = true;
         setPointsAwarded(result.puntosGanados ?? 10);
         if (onAnswerSuccess) {
           onAnswerSuccess(result.puntosGanados ?? 10);
@@ -206,7 +306,7 @@ function MultipleChoice({ ejercicio, moduleId, lessonId, teoria, apiCall, onAnsw
                 }}
                 aria-label="Preguntarle a Mateico"
               >
-                🧉 Mateico
+                <img src={mateico2Img} alt="Mateico" style={{ width: '22px', height: '22px', objectFit: 'contain' }} /> Mateico
               </button>
             </div>
 
@@ -425,14 +525,16 @@ function MultipleChoice({ ejercicio, moduleId, lessonId, teoria, apiCall, onAnsw
       {showTheory && (
         <div className="theory-overlay-backdrop" onClick={() => setShowTheory(false)}>
           <div className="theory-modal-wrapper" onClick={(e) => e.stopPropagation()}>
-            <button 
-              type="button" 
-              className="theory-modal-close" 
-              onClick={() => setShowTheory(false)}
-              aria-label="Cerrar teoría"
-            >
-              ×
-            </button>
+            <div className="theory-modal-header">
+              <button 
+                type="button" 
+                className="theory-modal-close" 
+                onClick={() => setShowTheory(false)}
+                aria-label="Cerrar teoría"
+              >
+                ×
+              </button>
+            </div>
             <div className="theory-modal-content">
               {lessonId === 'multiplicacion' ? (
                 currentTheoryIndex === 0 ? (
@@ -444,6 +546,9 @@ function MultipleChoice({ ejercicio, moduleId, lessonId, teoria, apiCall, onAnsw
                 teoria && teoria.length > 0 && (
                   <DynamicTheoryCard 
                     theory={teoria[currentTheoryIndex]} 
+                    moduleId={moduleId}
+                    lessonId={lessonId}
+                    apiCall={apiCall}
                     onContinuar={() => {
                       if (currentTheoryIndex < teoria.length - 1) {
                         setCurrentTheoryIndex(prev => prev + 1);

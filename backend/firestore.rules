@@ -1,0 +1,63 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper: Verificar si la petición proviene de un usuario autenticado en Firebase
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Helper: Verificar si el usuario accede a sus propios datos (UID coincide)
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Helper: Verificar si el usuario tiene rol de Administrador
+    function isAdmin() {
+      return isAuthenticated() && (
+        request.auth.token.admin == true ||
+        get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.rol == 'admin' ||
+        get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.esAdmin == true
+      );
+    }
+
+    // 1. Colección de Perfiles de Usuarios
+    // Cada alumno solo puede leer y actualizar su propio perfil; Admins pueden leer todos.
+    match /usuarios/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if isOwner(userId);
+      allow update: if isOwner(userId) || isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // 2. Colección de Progreso
+    // Cada alumno solo puede leer y actualizar su propio registro de progreso.
+    match /progreso/{userId} {
+      allow read, write: if isOwner(userId) || isAdmin();
+    }
+
+    // 3. Registro de Intentos de Ejercicios
+    match /registroIntentos/{intentoId} {
+      allow read, write: if isAuthenticated() && (resource == null || resource.data.userId == request.auth.uid || isAdmin());
+    }
+
+    // 4. Catálogos y Contenido Educativo (Lectura para alumnos autenticados, Escritura solo admins/backend)
+    match /modulos/{moduloId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+    match /lecciones/{leccionId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+    match /logros/{logroId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // 5. Regla por Defecto (Zero Trust): Cerrar acceso no autorizado a cualquier otro documento
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

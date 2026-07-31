@@ -1,4 +1,4 @@
-const MS_48H = 48 * 60 * 60 * 1000;
+const MS_24H = 24 * 60 * 60 * 1000;
 
 function toDate(valor) {
   if (!valor) return null;
@@ -48,8 +48,8 @@ export function evaluarRacha(usuario, ahora = new Date(), timezone = 'America/Ar
 
   const diffMs = ahora.getTime() - ultima.getTime();
 
-  // Más de 48 h: la racha "se lavó el mate"
-  if (diffMs > MS_48H) {
+  // Más de 24 h: la racha "se lavó el mate"
+  if (diffMs > MS_24H) {
     const nuevoRecord = Math.max(recordActual, rachaActual);
     return {
       rachaDias: 1,

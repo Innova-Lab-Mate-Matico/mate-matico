@@ -71,6 +71,13 @@ CREATE INDEX IF NOT EXISTS idx_eventos_tipo ON eventos(tipo_evento);
 CREATE INDEX IF NOT EXISTS idx_eventos_metadata ON eventos USING gin (metadata);
 CREATE INDEX IF NOT EXISTS idx_progreso_usuario ON progreso_lecciones(usuario_id);
 
+-- Índice funcional sobre la clave sesion_id dentro del JSONB de metadata
+CREATE INDEX IF NOT EXISTS idx_eventos_metadata_sesion_id ON eventos ((metadata->>'sesion_id'));
+
+-- Índices compuestos para joins temporales y filtros analíticos
+CREATE INDEX IF NOT EXISTS idx_eventos_usuario_fecha ON eventos (usuario_id, fecha DESC);
+CREATE INDEX IF NOT EXISTS idx_eventos_tipo_fecha ON eventos (tipo_evento, fecha DESC);
+
 -- Catálogo: Módulos
 CREATE TABLE IF NOT EXISTS modulos (
   modulo_id VARCHAR(50) PRIMARY KEY,

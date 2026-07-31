@@ -72,6 +72,17 @@ export const env = {
     clientX509CertUrl: required('FIREBASE_CLIENT_X509_CERT_URL'),
     universeDomain: optional('FIREBASE_UNIVERSE_DOMAIN', 'googleapis.com'),
   },
+
+  supabase: {
+    url: optional('SUPABASE_URL'),
+    anonKey: optional('SUPABASE_ANON_KEY'),
+    dbUrl: optional('SUPABASE_DB_URL'),
+  },
+
+  gemini: {
+    apiKey: optional('GEMINI_API_KEY') || optional('GROQ_API_KEY'),
+    model: optional('GEMINI_MODEL', 'gemini-1.5-flash'),
+  },
 };
 
 export function getFirebaseServiceAccount() {

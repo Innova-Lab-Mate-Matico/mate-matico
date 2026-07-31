@@ -6,11 +6,16 @@ export class EjercicioNumerico extends Ejercicio {
   }
 
   validar(respuesta) {
-    const userNum = Number(respuesta);
-    const expectedNum = Number(this.respuestaCorrecta);
+    if (respuesta === null || respuesta === undefined) return false;
+
+    const cleanUser = String(respuesta).replace(/^\$\s*/, '').replace(/\s+/g, '').replace(',', '.').trim();
+    const cleanExpected = String(this.respuestaCorrecta).replace(/^\$\s*/, '').replace(/\s+/g, '').replace(',', '.').trim();
+
+    const userNum = parseFloat(cleanUser);
+    const expectedNum = parseFloat(cleanExpected);
 
     if (Number.isNaN(userNum) || Number.isNaN(expectedNum)) {
-      return false;
+      return cleanUser.toLowerCase() === cleanExpected.toLowerCase();
     }
 
     return Math.abs(userNum - expectedNum) < 0.01;

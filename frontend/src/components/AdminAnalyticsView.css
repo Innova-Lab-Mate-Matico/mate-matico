@@ -1,0 +1,443 @@
+.admin-analytics-page {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 20px 16px 40px;
+  transition: max-width 0.3s ease;
+}
+
+.admin-analytics-page.mobile-preview-mode {
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.analytics-header-card {
+  background-color: #ffffff;
+  border-radius: 24px;
+  padding: 24px;
+  border: 1.5px solid #e2e8f0;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+  margin-bottom: 20px;
+}
+
+.analytics-header-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.analytics-title-group {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.analytics-header-logo {
+  height: 48px;
+  width: auto;
+  object-fit: contain;
+}
+
+.analytics-main-title {
+  font-family: 'Poppins', sans-serif;
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: #1e293b;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.analytics-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.view-mode-toggle-btn {
+  background-color: #f5f3ff;
+  border: 1.5px solid #c4b5fd;
+  color: #6d28d9;
+  padding: 10px 18px;
+  border-radius: 14px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(109, 40, 217, 0.08);
+}
+
+.view-mode-toggle-btn:hover {
+  background-color: #ede9fe;
+  border-color: #a78bfa;
+  transform: translateY(-1px);
+}
+
+.add-dashboard-btn {
+  background-color: #10b981;
+  color: #ffffff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 14px;
+  font-weight: 700;
+  font-size: 0.88rem;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+}
+
+.add-dashboard-btn:hover {
+  background-color: #059669;
+  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.3);
+  transform: translateY(-1px);
+}
+
+.analytics-subtitle {
+  color: #64748b;
+  font-size: 0.95rem;
+  margin: 0 0 20px 0;
+  line-height: 1.5;
+}
+
+.analytics-tabs-container {
+  border-top: 1px solid #f1f5f9;
+  padding-top: 16px;
+  width: 100%;
+}
+
+.analytics-tabs-scrollable {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.analytics-tabs-scrollable::-webkit-scrollbar {
+  display: none;
+}
+
+.analytics-tab-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: 16px;
+  border: 1.5px solid #cbd5e1;
+  background-color: #f8fafc;
+  color: #475569;
+  font-weight: 600;
+  font-size: 0.88rem;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  flex-shrink: 0;
+}
+
+.analytics-tab-pill:hover {
+  background-color: #f1f5f9;
+  color: #0f172a;
+  border-color: #94a3b8;
+}
+
+.analytics-tab-pill.active {
+  background-color: #9747FF;
+  border-color: #9747FF;
+  color: #ffffff;
+  box-shadow: 0 6px 18px rgba(151, 71, 255, 0.3);
+}
+
+.dashboard-description-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #f5f3ff;
+  border: 1.5px solid #ddd6fe;
+  border-left: 4px solid #7c3aed;
+  border-radius: 16px;
+  padding: 14px 20px;
+  margin-bottom: 16px;
+  gap: 16px;
+}
+
+.description-text {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #5b21b6;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.description-text p {
+  margin: 0;
+  line-height: 1.4;
+}
+
+.description-icon {
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.delete-dash-btn {
+  background-color: #ffffff;
+  border: 1px solid #fca5a5;
+  color: #dc2626;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 6px 14px;
+  border-radius: 10px;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.delete-dash-btn:hover {
+  background-color: #fee2e2;
+  border-color: #f87171;
+}
+
+.analytics-loading-box,
+.analytics-empty-box {
+  background-color: #ffffff;
+  border-radius: 24px;
+  border: 1.5px solid #e2e8f0;
+  padding: 60px 20px;
+  text-align: center;
+  color: #64748b;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+}
+
+.empty-icon {
+  font-size: 3rem;
+}
+
+.analytics-empty-box h3 {
+  color: #1e293b;
+  margin: 0;
+  font-size: 1.3rem;
+}
+
+/* Modal Estético */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(6px);
+  z-index: 999999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.modal-card {
+  background-color: #ffffff;
+  border-radius: 28px;
+  padding: 32px;
+  max-width: 520px;
+  width: 100%;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.25);
+  animation: modalAppear 0.25s ease-out;
+}
+
+@keyframes modalAppear {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.modal-header h2 {
+  font-family: 'Poppins', sans-serif;
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #1e293b;
+  margin: 0;
+}
+
+.modal-close-icon {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.modal-subtitle {
+  color: #64748b;
+  font-size: 0.88rem;
+  margin: 0 0 22px 0;
+  line-height: 1.4;
+}
+
+.modal-error {
+  background-color: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  margin-bottom: 18px;
+  font-weight: 500;
+}
+
+.form-group {
+  margin-bottom: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-group label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #475569;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  padding: 12px 16px;
+  border-radius: 14px;
+  border: 1.5px solid #cbd5e1;
+  font-size: 0.92rem;
+  outline: none;
+  font-family: inherit;
+  transition: all 0.2s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  border-color: #9747FF;
+  box-shadow: 0 0 0 4px rgba(151, 71, 255, 0.12);
+}
+
+.modal-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.modal-cancel-btn {
+  background-color: #f1f5f9;
+  border: 1.5px solid #cbd5e1;
+  color: #475569;
+  padding: 12px 22px;
+  border-radius: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.modal-submit-btn {
+  background-color: #9747FF;
+  border: none;
+  color: #ffffff;
+  padding: 12px 24px;
+  border-radius: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(151, 71, 255, 0.3);
+}
+
+.modal-submit-btn:hover {
+  background-color: #7b2cbf;
+}
+
+/* =========================================================
+   ADAPTACIÓN RESPONSIVA Y MODO SIMULAR CELULAR (STACK VERTICAL)
+   ========================================================= */
+
+.mobile-preview-mode .analytics-header-top-row,
+@media (max-width: 640px) {
+  .analytics-header-top-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .analytics-title-group {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .analytics-header-actions {
+    width: 100%;
+    flex-direction: column; /* Un botón sobre el otro en celular */
+    gap: 8px;
+  }
+
+  .view-mode-toggle-btn,
+  .add-dashboard-btn {
+    width: 100%;
+    text-align: center;
+    justify-content: center;
+    padding: 12px 14px;
+    box-sizing: border-box;
+  }
+}
+
+.mobile-preview-mode .analytics-tabs-scrollable,
+@media (max-width: 640px) {
+  .analytics-tabs-scrollable {
+    flex-direction: column; /* Apilar pestañas verticalmente en celular */
+    align-items: stretch;
+    width: 100%;
+    gap: 8px;
+  }
+
+  .analytics-tab-pill {
+    width: 100%;
+    justify-content: flex-start;
+    padding: 12px 16px;
+    font-size: 0.88rem;
+    white-space: normal; /* Permite saltos de línea sin encimarse */
+  }
+}
+
+.mobile-preview-mode .dashboard-description-banner,
+@media (max-width: 640px) {
+  .dashboard-description-banner {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .delete-dash-btn {
+    width: 100%;
+    text-align: center;
+    justify-content: center;
+  }
+}
