@@ -14,6 +14,7 @@ class TelemetryService {
     this.sessionStartTime = Date.now();
     this.sessionId = typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `ses_${Date.now()}`;
     this.initialized = false;
+    this.sessionEnded = false;
   }
 
   /**
@@ -141,6 +142,9 @@ class TelemetryService {
    * Finaliza la sesión actual emitiendo 'sesion_finalizada' con la duración en segundos
    */
   endSession() {
+    if (this.sessionEnded) return;
+    this.sessionEnded = true;
+
     const elapsedSeconds = Math.max(1, Math.round((Date.now() - this.sessionStartTime) / 1000));
     this.track('sesion_finalizada', {
       tiempo_segundos: elapsedSeconds

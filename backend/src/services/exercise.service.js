@@ -116,18 +116,6 @@ export async function validarEjercicio(uid, body, timezone = 'America/Argentina/
   const erroresConsecutivos = await registrarIntento(uid, clave, correcto);
 
   if (!correcto) {
-    // Telemetría en segundo plano
-    const lessonData = findLesson(moduleId, lessonId);
-    const dificultad = lessonData ? (lessonData.level.difficulty === 1 ? 'bajo' : lessonData.level.difficulty === 2 ? 'medio' : 'alto') : 'bajo';
-    trackEvent(uid, 'ejercicio_completado', {
-      ejercicio_id: exerciseId,
-      tema: moduleId,
-      subtema: lessonId,
-      dificultad,
-      resultado: 'incorrecto',
-      tiempo_segundos: body.tiempo_segundos !== undefined ? Number(body.tiempo_segundos) : null,
-    });
-
     // Incrementar contadores de ejercicios (sin costo extra de lectura)
     db.collection(COLECCION_USUARIOS).doc(uid).update({
       ejercicios_totales: admin.firestore.FieldValue.increment(1),
@@ -149,18 +137,6 @@ export async function validarEjercicio(uid, body, timezone = 'America/Argentina/
   }
 
   const puntosGanados = ejercicio.puntos ?? 10;
-
-  // Telemetría en segundo plano
-  const lessonData = findLesson(moduleId, lessonId);
-  const dificultad = lessonData ? (lessonData.level.difficulty === 1 ? 'bajo' : lessonData.level.difficulty === 2 ? 'medio' : 'alto') : 'bajo';
-  trackEvent(uid, 'ejercicio_completado', {
-    ejercicio_id: exerciseId,
-    tema: moduleId,
-    subtema: lessonId,
-    dificultad,
-    resultado: 'correcto',
-    tiempo_segundos: body.tiempo_segundos !== undefined ? Number(body.tiempo_segundos) : null,
-  });
 
   // Incrementar contadores de ejercicios (sin costo extra de lectura)
   db.collection(COLECCION_USUARIOS).doc(uid).update({

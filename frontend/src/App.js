@@ -67,10 +67,12 @@ export default function App() {
     if (userData?.rachaRota) {
       setShowRachaRota(true);
       telemetry.track('racha_perdida', {
+        usuario_id: userData.uid,
         racha_dias: userData.rachaDias || 0
       });
     } else if (userData?.rachaDias > 0) {
       telemetry.track('racha_actualizada', {
+        usuario_id: userData.uid,
         racha_dias: userData.rachaDias
       });
     }
