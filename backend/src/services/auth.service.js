@@ -21,9 +21,6 @@ export async function registerUser({ email, password, displayName }) {
     provider: 'password',
   });
 
-  trackEvent(userRecord.uid, 'usuario_registrado', { proveedor: 'password' });
-  trackEvent(userRecord.uid, 'usuario_inicio_sesion', { proveedor: 'password' });
-
   const customToken = await auth.createCustomToken(userRecord.uid);
   return { user: perfilPublico(usuario), customToken };
 }
@@ -74,11 +71,6 @@ export async function loginWithGoogle(idToken) {
     await actualizarLogin(uid, { displayName, photoURL, provider: 'google.com' });
   }
 
-  if (esNuevo) {
-    trackEvent(uid, 'usuario_registrado', { proveedor: 'google.com' });
-  }
-  trackEvent(uid, 'usuario_inicio_sesion', { proveedor: 'google.com' });
-
   const user = await getUserProfile(uid);
   return { idToken, usuario: user, esNuevo };
 }
@@ -113,11 +105,6 @@ export async function loginWithPassword(email, password, apiKey) {
     displayName: email.split('@')[0],
     provider: 'password',
   });
-
-  if (esNuevo) {
-    trackEvent(data.localId, 'usuario_registrado', { proveedor: 'password' });
-  }
-  trackEvent(data.localId, 'usuario_inicio_sesion', { proveedor: 'password' });
 
   const profile = await getUserProfile(data.localId);
   return {

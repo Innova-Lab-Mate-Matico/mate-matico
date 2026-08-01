@@ -80,17 +80,5 @@ export async function getLesson(req, res) {
   // Guardar el origen de la lección
   leccion.origen = origen;
 
-  if (req.user?.uid) {
-    const difficultyMap = { 1: 'bajo', 2: 'medio', 3: 'alto' };
-    const dificultad = difficultyMap[leccion.difficulty] || 'bajo';
-
-    trackEvent(req.user.uid, 'leccion_iniciada', {
-      leccion_id: leccion.id,
-      tema: leccion.moduleId,
-      dificultad,
-      origen,
-    });
-  }
-
   res.json({ success: true, leccion });
 }

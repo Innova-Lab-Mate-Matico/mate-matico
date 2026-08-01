@@ -74,42 +74,6 @@ export async function updateLessonProgress(uid, { moduleId, lessonId, completada
     memoryProgress.set(uid, userModMap);
   }
 
-  // Si pasa a estar completada ahora y antes no lo estaba, disparamos leccion_completada y progreso_actualizado
-  if (lecciones[lessonId].completada && !eraCompletada) {
-    const lessonData = findLesson(moduleId, lessonId);
-    const dificultad = lessonData ? (lessonData.level.difficulty === 1 ? 'bajo' : lessonData.level.difficulty === 2 ? 'medio' : 'alto') : 'bajo';
-    
-    // 1. Disparar leccion_completada en segundo plano
-    trackEvent(uid, 'leccion_completada', {
-      leccion_id: lessonId,
-      tema: moduleId,
-      dificultad,
-      tiempo_segundos: tiempo_segundos !== undefined && tiempo_segundos !== null ? Number(tiempo_segundos) : null,
-    });
-
-    // 2. Calcular porcentaje y disparar progreso_actualizado en segundo plano
-    const mod = findModule(moduleId);
-    let totalLessons = 0;
-    if (mod) {
-      for (const level of mod.levels) {
-        totalLessons += level.lessons.length;
-      }
-    }
-
-    let completedCount = 0;
-    for (const key of Object.keys(lecciones)) {
-      if (lecciones[key].completada || lecciones[key].completed) {
-        completedCount++;
-      }
-    }
-
-    const porcentaje = totalLessons > 0 ? Math.round((completedCount / totalLessons) * 100) : 0;
-    trackEvent(uid, 'progreso_actualizado', {
-      tema: moduleId,
-      porcentaje_progreso: porcentaje,
-    });
-  }
-
   return payload;
 }
 
