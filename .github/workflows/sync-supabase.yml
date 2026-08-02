@@ -1,0 +1,58 @@
+name: Sincronización Supabase ETL
+
+on:
+  schedule:
+    # Se ejecuta cada hora en punto (UTC)
+    - cron: '0 * * * *'
+  # Permite ejecución manual desde la pestaña Actions de GitHub
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: '¿Ejecutar en modo de prueba (dry-run)?'
+        required: false
+        default: 'false'
+        type: boolean
+      limit_test:
+        description: 'Límite de usuarios a sincronizar (dejar vacío para procesar todo)'
+        required: false
+        default: ''
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Descargar código
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: 'backend/package-lock.json'
+
+      - name: Instalar dependencias
+        run: |
+          cd backend
+          npm ci
+
+      - name: Ejecutar script de sincronización
+        env:
+          FORCE_PRODUCTION: "true"
+          DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
+          LIMIT_TEST: ${{ github.event.inputs.limit_test || '' }}
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+          FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
+          FIREBASE_PRIVATE_KEY_ID: ${{ secrets.FIREBASE_PRIVATE_KEY_ID }}
+          FIREBASE_PRIVATE_KEY: ${{ secrets.FIREBASE_PRIVATE_KEY }}
+          FIREBASE_CLIENT_EMAIL: ${{ secrets.FIREBASE_CLIENT_EMAIL }}
+          FIREBASE_CLIENT_ID: ${{ secrets.FIREBASE_CLIENT_ID }}
+          FIREBASE_CLIENT_X509_CERT_URL: ${{ secrets.FIREBASE_CLIENT_X509_CERT_URL }}
+        run: |
+          cd backend
+          node scripts/sync-supabase.js
