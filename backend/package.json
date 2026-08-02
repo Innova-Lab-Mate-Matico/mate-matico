@@ -29,6 +29,7 @@
     "express-rate-limit": "^7.5.0",
     "firebase-admin": "^13.0.2",
     "helmet": "^8.1.0",
+    "pg": "^8.22.0",
     "zod": "^4.4.3"
   },
   "devDependencies": {
