@@ -11,7 +11,7 @@ Plataforma educativa de matemáticas adaptativa y gamificada orientada a finanza
 | **`backend/`** | Node.js + Express + Zod + Firebase Admin + Supabase | API RESTful con validación declarativa, logging estructurado JSON, Graceful Shutdown y batching de telemetría. |
 | **`frontend/`** | React + Vanilla CSS + GTM (`GTM-5RDTRVPK`) | Aplicación SPA gamificada, responsiva (Mobile & Desktop) con telemetría en tiempo real y soporte offline/beacon. |
 | **`docs/`** | Markdown | Documentación completa de operación, arquitectura, auditoría de seguridad y troubleshooting. |
-
+**`documentos/`** | Python + SQL Server + R Studio + Google Analytics | Pipeline ETL de extracción, auditoría de integridad de datos (100% de coincidencia), análisis estadístico, informes técnicos y reportes ejecutivos.
 ---
 
 ## 📚 Índice de Documentación (`docs/`)
