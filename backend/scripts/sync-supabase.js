@@ -5,14 +5,13 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// 1. Cargar variables de entorno (con cascada de .env.local)
-dotenv.config({ path: path.resolve(__dirname, '../.env.local') });
-dotenv.config({ path: path.resolve(__dirname, '../.env') });
-
-// Si se fuerza producción, eliminamos las variables del emulador cargadas desde .env.local
+// 1. Cargar variables de entorno (evitando credenciales de emulador en producción)
 if (process.env.FORCE_PRODUCTION === 'true') {
-  delete process.env.FIRESTORE_EMULATOR_HOST;
-  delete process.env.FIREBASE_AUTH_EMULATOR_HOST;
+  console.log('[ETL] Forzando producción: cargando únicamente variables de .env');
+  dotenv.config({ path: path.resolve(__dirname, '../.env') });
+} else {
+  dotenv.config({ path: path.resolve(__dirname, '../.env.local') });
+  dotenv.config({ path: path.resolve(__dirname, '../.env') });
 }
 
 // 2. Importaciones dinámicas para evitar inicializaciones tempranas de Firebase
@@ -24,7 +23,7 @@ const { LECCION_GENERADORES } = await import('../src/exercises/registry.js');
 // Forzar al driver 'pg' a parsear fechas TIMESTAMP WITH TIME ZONE (OID: 1184) en UTC directamente en JS
 pg.types.setTypeParser(1184, stringVal => new Date(stringVal));
 
-const BATCH_SIZE = process.env.LIMIT_TEST ? Number(process.env.LIMIT_TEST) : 500;
+const BATCH_SIZE = process.env.LIMIT_TEST ? Number(process.env.LIMIT_TEST) : 100;
 const DRY_RUN = process.env.DRY_RUN === 'true';
 const ADVISORY_LOCK_ID = 987654321; // Exclusión mutua
 
@@ -37,7 +36,7 @@ function resolveFirestoreDate(value) {
 }
 
 async function runSync() {
-  console.log(`[ETL] Iniciando sincronización a Supabase... [DRY_RUN: ${DRY_RUN}] [LIMIT_TEST: ${process.env.LIMIT_TEST || 'Sin límite'}]`);
+  console.log(`[ETL] Sincronizando Usuarios y Progreso Académico desde Firestore... [DRY_RUN: ${DRY_RUN}] [LIMIT_TEST: ${process.env.LIMIT_TEST || 'Sin límite'}]`);
   
   if (!process.env.SUPABASE_DB_URL) {
     console.error('[ETL Error] La variable de entorno SUPABASE_DB_URL no está definida.');
@@ -61,22 +60,7 @@ async function runSync() {
       return;
     }
 
-    const watermarkRef = db.collection('control_etl').doc('analytics_watermark_supabase');
-    const watermarkDoc = await watermarkRef.get();
-    
-    let lastSyncedTimestamp = '1970-01-01T00:00:00.000Z';
-    if (watermarkDoc.exists && !process.env.LIMIT_TEST) { // Ignorar watermark para tests puntuales
-      const storedTimestamp = watermarkDoc.data().last_synced_timestamp;
-      if (storedTimestamp) {
-        lastSyncedTimestamp = storedTimestamp;
-      }
-    }
-
-    // Colchón de 2 minutos para contrarrestar latencias de red y asincronía
-    const startTime = new Date(new Date(lastSyncedTimestamp).getTime() - 2 * 60 * 1000).toISOString();
-    console.log(`[ETL] Sincronizando desde: ${startTime} (Watermark real: ${lastSyncedTimestamp})`);
-
-    // 1.5. Sincronizar catálogo estático (Módulos, Lecciones y Ejercicios) antes de procesar eventos
+    // 2. Sincronizar catálogo estático (Módulos, Lecciones y Ejercicios)
     console.log('[ETL] Sincronizando catálogo estático (módulos, lecciones y ejercicios)...');
     await client.query('BEGIN');
     try {
@@ -113,23 +97,28 @@ async function runSync() {
           }
         }
       }
-      await client.query('COMMIT');
-      console.log('[ETL] Catálogo estático sincronizado con éxito.');
+      if (DRY_RUN) {
+        await client.query('ROLLBACK');
+        console.log('[ETL - DRY_RUN] Simulación de catálogo estático exitosa. Rollback ejecutado.');
+      } else {
+        await client.query('COMMIT');
+        console.log('[ETL] Catálogo estático sincronizado con éxito.');
+      }
     } catch (catalogError) {
       await client.query('ROLLBACK');
       console.error('[ETL Error] Falló la sincronización del catálogo estático:', catalogError);
       throw catalogError;
     }
 
+    // 3. Barrido paginado de la colección 'usuarios'
     let lastDoc = null;
-    let maxTimestamp = lastSyncedTimestamp;
     let hasMore = true;
     let totalProcessed = 0;
 
     while (hasMore) {
-      let query = db.collection('eventos')
-        .where('fecha_hora', '>=', startTime)
-        .orderBy('fecha_hora', 'asc')
+      console.log('[ETL] Consultando lote de usuarios desde Firestore...');
+      let query = db.collection('usuarios')
+        .orderBy('__name__', 'asc') // Paginación determinista en Firestore
         .limit(BATCH_SIZE);
 
       if (lastDoc) {
@@ -139,272 +128,165 @@ async function runSync() {
       const snapshot = await query.get();
 
       if (snapshot.empty) {
-        console.log('[ETL] No hay nuevos eventos en este lote.');
+        console.log('[ETL] No quedan más usuarios por sincronizar.');
         hasMore = false;
         break;
       }
 
-      const lastEventTimestamp = snapshot.docs[snapshot.docs.length - 1].data().fecha_hora || '';
-      if (lastEventTimestamp <= lastSyncedTimestamp && !process.env.LIMIT_TEST) {
-        console.log('[ETL] Todos los eventos del lote pertenecen al colchón de seguridad. Saliendo.');
-        hasMore = false;
-        break;
-      }
-
-      console.log(`[ETL] Procesando lote de ${snapshot.size} eventos...`);
+      console.log(`[ETL] Procesando lote de ${snapshot.size} usuarios...`);
       
-      // ==========================================
-      // FASE 1: LECTURAS A DE RED (FIRESTORE) - FUERA DE LA TRANSACCIÓN
-      // ==========================================
-      const userIds = [...new Set(snapshot.docs.map(doc => doc.data().usuario_id).filter(id => id))];
-      
-      // 1.1. Leer usuarios en batch
       const userPayloads = [];
-      if (userIds.length > 0) {
-        console.log(`[ETL] Leyendo datos de ${userIds.length} usuarios desde Firestore...`);
-        const userRefs = userIds.map(id => db.collection('usuarios').doc(id));
-        const userSnapshots = await db.getAll(...userRefs);
+      const progressPayloads = [];
 
-        for (const userDoc of userSnapshots) {
-          if (userDoc.exists) {
-            const userId = userDoc.id;
-            const userData = userDoc.data();
-            const onboarding = userData.onboarding || {};
-            const fechaRegistro = resolveFirestoreDate(userData.fecha_registro || userData.createdAt) || new Date();
-            const ultimaConexion = resolveFirestoreDate(userData.ultima_conexion || userData.lastLoginAt) || new Date();
-            const ultimaLeccion = resolveFirestoreDate(userData.ultimaLeccionCompletada);
+      for (const userDoc of snapshot.docs) {
+        const userId = userDoc.id;
+        const userData = userDoc.data();
+        const onboarding = userData.onboarding || {};
+        const fechaRegistro = resolveFirestoreDate(userData.fecha_registro || userData.createdAt) || new Date();
+        const ultimaConexion = resolveFirestoreDate(userData.ultima_conexion || userData.lastLoginAt) || new Date();
+        const ultimaLeccion = resolveFirestoreDate(userData.ultimaLeccionCompletada);
 
-            userPayloads.push({
-              userId,
-              nombre: userData.nombre || userData.displayName || null,
-              email: userData.email || null,
-              fotoUrl: userData.photoURL || null,
-              proveedor: userData.provider || null,
-              puntosTotales: userData.puntos_totales !== undefined ? Number(userData.puntos_totales) : 0,
-              rolActual: userData.rolActual || 'principiante',
-              temaActual: userData.tema_actual || null,
-              nivelActual: userData.nivel_actual || null,
-              porcentajeProgreso: userData.porcentaje_progreso !== undefined ? Number(userData.porcentaje_progreso) : 0,
-              edad: onboarding.edad !== undefined ? Number(onboarding.edad) : null,
-              nivelEducativo: onboarding.nivelEducativo || null,
-              objetivo: onboarding.objetivo || null,
-              confianzaMath: onboarding.confianzaMath !== undefined ? Number(onboarding.confianzaMath) : null,
-              fechaRegistro,
-              ultimaConexion,
-              rachaActual: userData.racha_actual !== undefined ? Number(userData.racha_actual) : 0,
-              recordRacha: userData.recordRacha !== undefined ? Number(userData.recordRacha) : 0,
-              ultimaLeccion
+        const nombreRaw = userData.nombre || userData.displayName || '';
+        const emailRaw = userData.email || '';
+        const fotoUrlRaw = userData.photoURL || '';
+        const proveedorRaw = userData.provider || '';
+        const rolActualRaw = userData.rolActual || 'principiante';
+        const temaActualRaw = userData.tema_actual || '';
+        const nivelActualRaw = userData.nivel_actual || '';
+        const nivelEducativoRaw = onboarding.nivelEducativo || '';
+        const objetivoRaw = onboarding.objetivo || '';
+
+        userPayloads.push({
+          userId: userId.substring(0, 64),
+          nombre: nombreRaw ? nombreRaw.substring(0, 150) : null,
+          email: emailRaw ? emailRaw.substring(0, 150) : null,
+          fotoUrl: fotoUrlRaw ? fotoUrlRaw.substring(0, 255) : null,
+          proveedor: proveedorRaw ? proveedorRaw.substring(0, 50) : null,
+          puntosTotales: userData.puntos_totales !== undefined ? Number(userData.puntos_totales) : 0,
+          rolActual: rolActualRaw ? rolActualRaw.substring(0, 50) : 'principiante',
+          temaActual: temaActualRaw ? temaActualRaw.substring(0, 50) : null,
+          nivelActual: nivelActualRaw ? nivelActualRaw.substring(0, 50) : null,
+          porcentajeProgreso: userData.porcentaje_progreso !== undefined ? Number(userData.porcentaje_progreso) : 0,
+          edad: onboarding.edad !== undefined ? Number(onboarding.edad) : null,
+          nivelEducativo: nivelEducativoRaw ? nivelEducativoRaw.substring(0, 50) : null,
+          objetivo: objetivoRaw ? objetivoRaw.substring(0, 255) : null,
+          confianzaMath: onboarding.confianzaMath !== undefined ? Number(onboarding.confianzaMath) : null,
+          fechaRegistro,
+          ultimaConexion,
+          rachaActual: userData.racha_actual !== undefined ? Number(userData.racha_actual) : 0,
+          recordRacha: userData.recordRacha !== undefined ? Number(userData.recordRacha) : 0,
+          ultimaLeccion
+        });
+
+        // Leer la subcolección 'progreso' de este usuario
+        const progressSnap = await db.collection('usuarios').doc(userId).collection('progreso').get();
+        
+        progressSnap.forEach((progressDoc) => {
+          const moduleId = progressDoc.id;
+          const progData = progressDoc.data();
+          const lecciones = progData.lecciones || progData.lessons || {};
+
+          for (const [leccionId, leccionState] of Object.entries(lecciones)) {
+            const actualizadoEn = resolveFirestoreDate(leccionState.actualizadoEn || leccionState.updatedAt) || new Date();
+            progressPayloads.push({
+              userId: userId.substring(0, 64),
+              moduleId: moduleId.substring(0, 50),
+              leccionId: leccionId.substring(0, 50),
+              completada: leccionState.completada || leccionState.completed || false,
+              puntaje: leccionState.puntaje || leccionState.score || 0,
+              actualizadoEn
             });
           }
-        }
+        });
       }
 
-      // 1.2. Leer progreso de lecciones en batch
-      const userModulePairs = [];
-      const userModuleKeys = new Set();
-
-      snapshot.docs.forEach(doc => {
-        const evData = doc.data();
-        const userId = evData.usuario_id;
-        const meta = evData.metadata || {};
-        const moduleId = meta.tema;
-        
-        const isProgressTrigger = 
-          evData.tipo_evento === 'leccion_completada' || 
-          evData.tipo_evento === 'progreso_actualizado' || 
-          (evData.tipo_evento === 'ejercicio_completado' && meta?.resultado === 'correcto');
-
-        if (userId && moduleId && isProgressTrigger) {
-          const key = `${userId}:${moduleId}`;
-          if (!userModuleKeys.has(key)) {
-            userModuleKeys.add(key);
-            userModulePairs.push({ userId, moduleId });
-          }
-        }
-      });
-
-      const progressPayloads = [];
-      if (userModulePairs.length > 0) {
-        console.log(`[ETL] Leyendo progreso de ${userModulePairs.length} pares Usuario-Módulo en batch...`);
-        const progressRefs = userModulePairs.map(pair => 
-          db.collection('usuarios').doc(pair.userId).collection('progreso').doc(pair.moduleId)
-        );
-        const progressSnapshots = await db.getAll(...progressRefs);
-
-        for (const progressDoc of progressSnapshots) {
-          if (progressDoc.exists) {
-            const moduleId = progressDoc.id;
-            const userId = progressDoc.ref.parent.parent.id;
-            const progData = progressDoc.data();
-            const lecciones = progData.lecciones || progData.lessons || {};
-
-            for (const [leccionId, leccionState] of Object.entries(lecciones)) {
-               const actualizadoEn = resolveFirestoreDate(leccionState.actualizadoEn || leccionState.updatedAt) || new Date();
-               progressPayloads.push({
-                 userId,
-                 moduleId,
-                 leccionId,
-                 completada: leccionState.completada || leccionState.completed || false,
-                 puntaje: leccionState.puntaje || leccionState.score || 0,
-                 actualizadoEn
-               });
-            }
-          }
-        }
-      }
-
-      // ==========================================
-      // FASE 2: INSERCIÓN EN POSTGRES (TRANSACCIÓN RÁPIDA)
-      // ==========================================
+      // Iniciar Transacción en Postgres
       console.log('[ETL] Iniciando transacción Postgres para guardado...');
       await client.query('BEGIN');
 
-      // 2.1. Guardar usuarios y sus rachas
-      for (const u of userPayloads) {
-        const userParams = [
-          u.userId, u.nombre, u.email, u.fotoUrl, u.proveedor, u.puntosTotales,
-          u.rolActual, u.temaActual, u.nivelActual, u.porcentajeProgreso,
-          u.edad, u.nivelEducativo, u.objetivo, u.confianzaMath, u.fechaRegistro, u.ultimaConexion
-        ];
+      try {
+        // 3.1. Guardar usuarios y rachas
+        for (const u of userPayloads) {
+          const userParams = [
+            u.userId, u.nombre, u.email, u.fotoUrl, u.proveedor, u.puntosTotales,
+            u.rolActual, u.temaActual, u.nivelActual, u.porcentajeProgreso,
+            u.edad, u.nivelEducativo, u.objetivo, u.confianzaMath, u.fechaRegistro, u.ultimaConexion
+          ];
 
-        await client.query(`
-          INSERT INTO usuarios (
-            usuario_id, nombre, email, foto_url, proveedor, puntos_totales,
-            rol_actual, tema_actual, nivel_actual, porcentaje_progreso,
-            edad, nivel_educativo, objetivo, confianza_math, fecha_registro, ultima_conexion, actualizado_en
-          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, NOW())
-          ON CONFLICT (usuario_id) DO UPDATE SET
-            nombre = COALESCE(EXCLUDED.nombre, usuarios.nombre),
-            email = COALESCE(EXCLUDED.email, usuarios.email),
-            foto_url = COALESCE(EXCLUDED.foto_url, usuarios.foto_url),
-            proveedor = COALESCE(EXCLUDED.proveedor, usuarios.proveedor),
-            puntos_totales = EXCLUDED.puntos_totales,
-            rol_actual = EXCLUDED.rol_actual,
-            tema_actual = EXCLUDED.tema_actual,
-            nivel_actual = EXCLUDED.nivel_actual,
-            porcentaje_progreso = EXCLUDED.porcentaje_progreso,
-            edad = COALESCE(EXCLUDED.edad, usuarios.edad),
-            nivel_educativo = COALESCE(EXCLUDED.nivel_educativo, usuarios.nivel_educativo),
-            objetivo = COALESCE(EXCLUDED.objetivo, usuarios.objetivo),
-            confianza_math = COALESCE(EXCLUDED.confianza_math, usuarios.confianza_math),
-            ultima_conexion = EXCLUDED.ultima_conexion,
-            actualizado_en = NOW();
-        `, userParams);
-
-        // Guardar Racha
-        const rachaParams = [u.userId, u.rachaActual, u.recordRacha, u.ultimaLeccion];
-        await client.query(`
-          INSERT INTO rachas (usuario_id, racha_actual, record_racha, ultima_leccion_completada, actualizado_en)
-          VALUES ($1, $2, $3, $4, NOW())
-          ON CONFLICT (usuario_id) DO UPDATE SET
-            racha_actual = EXCLUDED.racha_actual,
-            record_racha = EXCLUDED.record_racha,
-            ultima_leccion_completada = EXCLUDED.ultima_leccion_completada,
-            actualizado_en = NOW();
-        `, rachaParams);
-      }
-
-      // 2.2. Guardar progreso
-      for (const p of progressPayloads) {
-        const progParams = [p.userId, p.moduleId, p.leccionId, p.completada, p.puntaje, p.actualizadoEn];
-        await client.query(`
-          INSERT INTO progreso_lecciones (usuario_id, modulo_id, leccion_id, completada, puntaje, actualizado_en)
-          VALUES ($1, $2, $3, $4, $5, $6)
-          ON CONFLICT (usuario_id, modulo_id, leccion_id) DO UPDATE SET
-            completada = EXCLUDED.completada,
-            puntaje = EXCLUDED.puntaje,
-            actualizado_en = EXCLUDED.actualizado_en;
-        `, progParams);
-      }
-
-      // 2.3. Guardar eventos y sesiones
-      for (const doc of snapshot.docs) {
-        const eventId = doc.id;
-        const data = doc.data();
-        const meta = data.metadata || {};
-        const eventDateStr = data.fecha_hora || new Date().toISOString();
-
-        const nowStr = new Date().toISOString();
-        if (eventDateStr > maxTimestamp && eventDateStr <= nowStr) {
-          maxTimestamp = eventDateStr;
-        }
-
-        const sqlParams = [
-          eventId,
-          data.usuario_id || null,
-          data.tipo_evento || 'desconocido',
-          meta.tema || null,
-          meta.subtema || null,
-          meta.ejercicio_id || null,
-          meta.tiempo_segundos !== undefined ? Number(meta.tiempo_segundos) : null,
-          meta.resultado || null,
-          meta.intentos !== undefined ? Number(meta.intentos) : null,
-          meta.puntaje !== undefined ? Number(meta.puntaje) : null,
-          JSON.stringify(meta),
-          eventDateStr
-        ];
-
-        await client.query(`
-          INSERT INTO eventos (
-            evento_id, usuario_id, tipo_evento, modulo, leccion, 
-            ejercicio, tiempo_segundos, resultado, intentos, puntaje, metadata, fecha
-          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
-          ON CONFLICT (evento_id) DO UPDATE SET
-            tipo_evento = EXCLUDED.tipo_evento,
-            resultado = EXCLUDED.resultado,
-            intentos = EXCLUDED.intentos,
-            puntaje = EXCLUDED.puntaje,
-            metadata = EXCLUDED.metadata;
-        `, sqlParams);
-
-        if (data.tipo_evento === 'usuario_inicio_sesion' && data.usuario_id) {
-          const sessionParams = [eventId, data.usuario_id, eventDateStr, meta.proveedor || 'password'];
           await client.query(`
-            INSERT INTO sesiones (sesion_id, usuario_id, fecha_inicio, proveedor)
-            VALUES ($1, $2, $3, $4)
-            ON CONFLICT (sesion_id) DO NOTHING;
-          `, sessionParams);
-        }
-      }
+            INSERT INTO usuarios (
+              usuario_id, nombre, email, foto_url, proveedor, puntos_totales,
+              rol_actual, tema_actual, nivel_actual, porcentaje_progreso,
+              edad, nivel_educativo, objetivo, confianza_math, fecha_registro, ultima_conexion, actualizado_en
+            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, NOW())
+            ON CONFLICT (usuario_id) DO UPDATE SET
+              nombre = COALESCE(EXCLUDED.nombre, usuarios.nombre),
+              email = COALESCE(EXCLUDED.email, usuarios.email),
+              foto_url = COALESCE(EXCLUDED.foto_url, usuarios.foto_url),
+              proveedor = COALESCE(EXCLUDED.proveedor, usuarios.proveedor),
+              puntos_totales = EXCLUDED.puntos_totales,
+              rol_actual = EXCLUDED.rol_actual,
+              tema_actual = EXCLUDED.tema_actual,
+              nivel_actual = EXCLUDED.nivel_actual,
+              porcentaje_progreso = EXCLUDED.porcentaje_progreso,
+              edad = COALESCE(EXCLUDED.edad, usuarios.edad),
+              nivel_educativo = COALESCE(EXCLUDED.nivel_educativo, usuarios.nivel_educativo),
+              objetivo = COALESCE(EXCLUDED.objetivo, usuarios.objetivo),
+              confianza_math = COALESCE(EXCLUDED.confianza_math, usuarios.confianza_math),
+              ultima_conexion = EXCLUDED.ultima_conexion,
+              actualizado_en = NOW();
+          `, userParams);
 
-      // ==========================================
-      // FASE 3: CIERRE (COMMIT O ROLLBACK SEGÚN MODO)
-      // ==========================================
-      if (DRY_RUN) {
-        console.log('[ETL - DRY_RUN] Simulación completa. Ejecutando ROLLBACK para no afectar la DB.');
-        await client.query('ROLLBACK');
-      } else {
-        await client.query('COMMIT');
-        
-        // Guardar Watermark en Firestore
-        if (!process.env.LIMIT_TEST) {
-          await watermarkRef.set({ 
-            last_synced_timestamp: maxTimestamp,
-            actualizado_en: new Date().toISOString()
-          }, { merge: true });
+          const rachaParams = [u.userId, u.rachaActual, u.recordRacha, u.ultimaLeccion];
+          await client.query(`
+            INSERT INTO rachas (usuario_id, racha_actual, record_racha, ultima_leccion_completada, actualizado_en)
+            VALUES ($1, $2, $3, $4, NOW())
+            ON CONFLICT (usuario_id) DO UPDATE SET
+              racha_actual = EXCLUDED.racha_actual,
+              record_racha = EXCLUDED.record_racha,
+              ultima_leccion_completada = EXCLUDED.ultima_leccion_completada,
+              actualizado_en = NOW();
+          `, rachaParams);
         }
-        console.log(`[ETL] Lote guardado con éxito en Postgres. Watermark actualizado: ${maxTimestamp}`);
+
+        // 3.2. Guardar progreso de lecciones
+        for (const p of progressPayloads) {
+          const progParams = [p.userId, p.moduleId, p.leccionId, p.completada, p.puntaje, p.actualizadoEn];
+          await client.query(`
+            INSERT INTO progreso_lecciones (usuario_id, modulo_id, leccion_id, completada, puntaje, actualizado_en)
+            VALUES ($1, $2, $3, $4, $5, $6)
+            ON CONFLICT (usuario_id, modulo_id, leccion_id) DO UPDATE SET
+              completada = EXCLUDED.completada,
+              puntaje = EXCLUDED.puntaje,
+              actualizado_en = EXCLUDED.actualizado_en;
+          `, progParams);
+        }
+
+        if (DRY_RUN) {
+          await client.query('ROLLBACK');
+          console.log('[ETL - DRY_RUN] Simulación de guardado exitosa. Rollback ejecutado.');
+        } else {
+          await client.query('COMMIT');
+          console.log('[ETL] Lote guardado con éxito en Postgres.');
+        }
+
+      } catch (transactionError) {
+        await client.query('ROLLBACK');
+        console.error('[ETL Error] Falló el guardado del lote de usuarios. Rollback ejecutado:', transactionError);
+        throw transactionError;
       }
 
       totalProcessed += snapshot.size;
       lastDoc = snapshot.docs[snapshot.docs.length - 1];
 
-      // Salir si era un test limitado o no hay más
       if (process.env.LIMIT_TEST || snapshot.size < BATCH_SIZE) {
         hasMore = false;
       }
     }
 
-    console.log(`[ETL] Sincronización completada con éxito. Total eventos leídos: ${totalProcessed}`);
+    console.log(`[ETL] Sincronización completada con éxito. Total usuarios procesados: ${totalProcessed}`);
 
   } catch (error) {
-    if (client) {
-      try {
-        await client.query('ROLLBACK');
-      } catch (rollbackError) {
-        console.error('[ETL Error] Falló el rollback:', rollbackError);
-      }
-    }
     console.error('[ETL Error] Error crítico durante la sincronización:', error);
   } finally {
     if (client) {
