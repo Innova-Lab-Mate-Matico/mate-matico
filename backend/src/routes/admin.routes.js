@@ -1,20 +1,32 @@
 import { Router } from 'express';
 import { requireAuth } from '../middleware/auth.middleware.js';
 import { db } from '../config/firebase.js';
+import { obtenerUsuario } from '../services/usuario.service.js';
 
 const router = Router();
 
 // Middleware para verificar que el usuario autenticado sea Administrador
-const requireAdmin = (req, res, next) => {
-  const role = req.user?.rol;
-  const esAdmin = req.user?.esAdmin;
-  if (role === 'admin' || esAdmin === true) {
-    return next();
+const requireAdmin = async (req, res, next) => {
+  try {
+    if (!req.user?.uid) {
+      return res.status(401).json({ success: false, error: 'No autenticado.' });
+    }
+    const userProfile = await obtenerUsuario(req.user.uid);
+    const role = userProfile?.rol;
+    const esAdmin = userProfile?.esAdmin;
+    if (role === 'admin' || esAdmin === true) {
+      req.user.rol = role;
+      req.user.esAdmin = esAdmin;
+      return next();
+    }
+    return res.status(403).json({
+      success: false,
+      error: 'Acceso denegado: Se requieren permisos de Administrador para gestionar tableros.'
+    });
+  } catch (error) {
+    console.error('Error en middleware requireAdmin:', error);
+    return res.status(500).json({ success: false, error: 'Error interno de autorización.' });
   }
-  return res.status(403).json({
-    success: false,
-    error: 'Acceso denegado: Se requieren permisos de Administrador para gestionar tableros.'
-  });
 };
 
 // Fallback por defecto si no existen tableros aún en Firestore
@@ -45,7 +57,7 @@ const DEFAULT_DASHBOARDS = [
 router.get('/dashboards', requireAuth, async (req, res) => {
   try {
     const snapshot = await db.collection('dashboards').get();
-    
+
     if (snapshot.empty) {
       return res.json({ success: true, dashboards: DEFAULT_DASHBOARDS });
     }
