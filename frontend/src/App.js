@@ -173,6 +173,26 @@ const apiCall = React.useCallback(async (path, options = {}, customToken = null)
     headers.Authorization = `Bearer ${activeToken}`;
   }
 
+  const isProgressGet = (path === '/progress' || path === '/progress/weekly') && (!options.method || options.method.toUpperCase() === 'GET');
+  const isProgressMutation = path.startsWith('/progress') && (options.method && options.method.toUpperCase() !== 'GET');
+  const PROGRESS_CACHE_KEY = `mate_matico_cache_${path}`;
+  const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutos de cache local inteligente
+
+  if (isProgressGet && !options?.forceRefresh) {
+    try {
+      const rawCache = localStorage.getItem(PROGRESS_CACHE_KEY);
+      if (rawCache) {
+        const parsed = JSON.parse(rawCache);
+        if (parsed && parsed.timestamp && (Date.now() - parsed.timestamp < CACHE_TTL_MS)) {
+          console.log(`⚡ [Cache Hit] ${path} desde localStorage (0 lecturas a BD)`);
+          return parsed.data;
+        }
+      }
+    } catch (e) {
+      // Ignorar error de parseo
+    }
+  }
+
   let res;
   let attempts = 0;
   const maxAttempts = 3;
@@ -248,6 +268,25 @@ const apiCall = React.useCallback(async (path, options = {}, customToken = null)
 
   // Limpiar el aviso de error de servidor si la llamada fue exitosa
   setServerError(null);
+
+  // Guardar en cache de localStorage si fue una lectura GET exitosa de progreso
+  if (isProgressGet && data) {
+    try {
+      localStorage.setItem(PROGRESS_CACHE_KEY, JSON.stringify({
+        timestamp: Date.now(),
+        data: data
+      }));
+    } catch (e) {
+      console.warn("Error guardando progreso en localStorage:", e);
+    }
+  }
+
+  // Invalidar cache de progreso inmediatamente si el usuario realiza un cambio/avance en lecciones
+  if (isProgressMutation) {
+    console.log(`🔄 [Cache Invalidate] Invalidadas consultas de progreso en localStorage por actualización`);
+    localStorage.removeItem('mate_matico_cache_/progress');
+    localStorage.removeItem('mate_matico_cache_/progress/weekly');
+  }
 
   return data;
 }, [token]);
