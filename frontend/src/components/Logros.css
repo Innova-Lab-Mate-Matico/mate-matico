@@ -1,222 +1,371 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&display=swap');
+
 /* ============================================================
-   LOGROS.CSS — Pantalla de Badges / Medallas
-   Sigue las mismas variables y convenciones del equipo de front:
-   - Color primario: #7b61ff
-   - Azul oscuro títulos: #163b74
-   - Texto secundario: #64748b
-   - Cards: border-radius 16px, sombra suave violeta
+   DISEÑO FIGMA OFICIAL DE LOGROS E INSIGNIAS
    ============================================================ */
 
-.logros-card {
-  max-width: 650px;
+.figma-logros-container {
+  max-width: 750px;
   margin: 0 auto;
-}
-
-/* ── Cabecera ────────────────────────────────────────────── */
-.logros-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 20px;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-.logros-header h2 {
-  margin: 0;
-  color: #163b74;
-  font-size: 1.4rem;
-  font-weight: 700;
-}
-
-/* ── Barra de progreso global ────────────────────────────── */
-.logros-progress-bar-wrapper {
-  background: #f1f0ff;
-  border: 1px solid rgba(123, 97, 255, 0.15);
-  border-radius: 16px;
   padding: 16px 20px;
-  margin-bottom: 24px;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: #1e293b;
 }
 
-.logros-progress-bar-label {
+/* Header principal */
+.figma-logros-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 10px;
+  margin-bottom: 20px;
 }
 
-.logros-progress-bar-label span {
+.figma-logros-title {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 4px 0;
+}
+
+.figma-logros-subtitle {
   font-size: 0.9rem;
-  color: #4b5563;
-  font-weight: 600;
+  color: #64748b;
+  margin: 0;
 }
 
-.logros-progress-bar-label strong {
+.figma-logros-header-mascot-wrapper {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+}
+
+.figma-logros-header-mascot {
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
+}
+
+.figma-logros-header-star {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 24px;
+  height: 24px;
+  animation: pulseStar 2s infinite ease-in-out;
+}
+
+@keyframes pulseStar {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+}
+
+/* Tarjeta de Colección */
+.figma-logros-summary-card {
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 20px;
+  padding: 16px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+}
+
+.figma-logros-summary-card span {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #334155;
+}
+
+.figma-logros-summary-card strong {
+  font-size: 1.25rem;
+  font-weight: 800;
   color: #7b61ff;
-  font-size: 1.1rem;
 }
 
-.logros-progress-track {
-  width: 100%;
-  height: 10px;
-  background: #e2e8f0;
-  border-radius: 99px;
-  overflow: hidden;
-}
-
-.logros-progress-fill {
-  height: 100%;
-  background: linear-gradient(90deg, #7b61ff, #a78bfa);
-  border-radius: 99px;
-  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* ── Sección por categoría ───────────────────────────────── */
-.logros-section {
+/* Filas de Categorías */
+.figma-logros-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
   margin-bottom: 28px;
 }
 
-.logros-section-title {
-  font-size: 0.78rem;
-  font-weight: 700;
-  color: #94a3b8;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  margin-bottom: 14px;
-  padding-left: 4px;
-}
-
-/* ── Grid de badges ──────────────────────────────────────── */
-.logros-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+.figma-logros-group-row {
+  display: flex;
+  align-items: center;
   gap: 12px;
+  position: relative;
 }
 
-/* ── Card individual de badge ────────────────────────────── */
-.logro-card {
+/* Píldora / Caja de Categoría vertical */
+.figma-logros-category-pill {
+  min-width: 100px;
+  max-width: 110px;
+  border-radius: 20px;
+  border: 1.5px solid transparent;
+  padding: 16px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.figma-logros-pill-icon {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
+
+.figma-logros-category-pill span {
+  font-size: 0.82rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: #1e293b;
+}
+
+/* Carrusel Dinámico Horizontal */
+.figma-logros-carousel {
+  display: flex;
+  gap: 12px;
+  flex: 1;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  scroll-snap-type: x mandatory;
+  padding: 4px 2px;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.figma-logros-carousel::-webkit-scrollbar {
+  display: none;
+}
+
+/* Botón Flecha Desplazamiento */
+.figma-logros-carousel-arrow {
+  background: transparent;
+  border: none;
+  padding: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.figma-logros-carousel-arrow:hover {
+  transform: translateX(3px);
+}
+
+.figma-logros-carousel-arrow img {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+}
+
+/* Card individual de Insignia */
+.figma-logro-card {
+  flex: 0 0 135px;
+  min-width: 135px;
+  scroll-snap-align: start;
   background: #ffffff;
-  border: 1px solid rgba(123, 97, 255, 0.12);
-  border-radius: 16px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 20px;
   padding: 16px 12px;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-  gap: 8px;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: all 0.2s ease;
+  position: relative;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+}
+
+.figma-logro-check-badge {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #22c55e;
+}
+
+.figma-logro-card.unlocked {
+  border-color: #cbd5e1;
   position: relative;
   overflow: hidden;
 }
 
-.logro-card.desbloqueado {
-  box-shadow: 0 4px 16px rgba(123, 97, 255, 0.12);
-  cursor: default;
-}
-
-.logro-card.desbloqueado:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 24px rgba(123, 97, 255, 0.2);
-}
-
-.logro-card.bloqueado {
-  background: #f8fafc;
-  border-color: #e2e8f0;
-  opacity: 0.7;
-}
-
-/* Shimmer en la esquina del badge desbloqueado */
-.logro-card.desbloqueado::before {
+/* Efecto de destello de luz al pasar el mouse por una medalla ganada */
+.figma-logro-card.unlocked::after {
   content: '';
   position: absolute;
-  top: -10px;
-  right: -10px;
-  width: 40px;
-  height: 40px;
-  background: radial-gradient(circle, rgba(123, 97, 255, 0.15), transparent 70%);
-  border-radius: 50%;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    60deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.6) 50%,
+    transparent 70%
+  );
+  transform: rotate(30deg) translateX(-100%);
+  transition: transform 0.6s ease-in-out;
+  pointer-events: none;
 }
 
-.logro-emoji {
-  font-size: 2rem;
-  line-height: 1;
+.figma-logro-card.unlocked:hover::after {
+  transform: rotate(30deg) translateX(100%);
 }
 
-.logro-card.bloqueado .logro-emoji {
-  filter: grayscale(1);
-  opacity: 0.5;
+.figma-logro-card.unlocked:hover {
+  transform: translateY(-4px) scale(1.03);
+  border-color: #a855f7;
+  box-shadow: 0 8px 22px rgba(168, 85, 247, 0.25), 0 0 16px rgba(255, 215, 0, 0.4);
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-.logro-nombre {
-  font-size: 0.78rem;
-  font-weight: 700;
-  color: #163b74;
-  line-height: 1.3;
+/* Resplandor y brillo pulsante en el escudo de la medalla ganada */
+.figma-logro-card.unlocked:hover .figma-shield-wrapper {
+  animation: badgeShinePulse 1.2s infinite alternate ease-in-out;
 }
 
-.logro-card.bloqueado .logro-nombre {
-  color: #94a3b8;
-}
-
-.logro-descripcion {
-  font-size: 0.68rem;
-  color: #64748b;
-  line-height: 1.4;
-}
-
-.logro-card.bloqueado .logro-descripcion {
-  color: #cbd5e1;
-}
-
-/* Ícono de candado en bloqueados */
-.logro-lock-icon {
-  font-size: 0.8rem;
-  color: #cbd5e1;
-  margin-top: 2px;
-}
-
-/* Badge "Nuevo" tick en desbloqueados */
-.logro-check-icon {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  width: 18px;
-  height: 18px;
-  background: #7b61ff;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.6rem;
-  color: white;
-  font-weight: 700;
-}
-
-/* ── Loading y estado vacío ──────────────────────────────── */
-.logros-loading {
-  text-align: center;
-  padding: 40px 20px;
-  color: #64748b;
-  font-size: 0.95rem;
-}
-
-.logros-empty {
-  text-align: center;
-  padding: 30px 20px;
-  color: #94a3b8;
-  font-style: italic;
-  font-size: 0.88rem;
-}
-
-/* ── Responsive ──────────────────────────────────────────── */
-@media (max-width: 480px) {
-  .logros-grid {
-    grid-template-columns: repeat(2, 1fr);
+@keyframes badgeShinePulse {
+  0% {
+    filter: drop-shadow(0 0 4px rgba(255, 215, 0, 0.6)) drop-shadow(0 0 8px rgba(168, 85, 247, 0.5));
+    transform: scale(1);
+  }
+  100% {
+    filter: drop-shadow(0 0 12px rgba(255, 223, 0, 0.95)) drop-shadow(0 0 18px rgba(168, 85, 247, 0.8));
+    transform: scale(1.08);
   }
 }
 
-@media (min-width: 600px) {
-  .logros-grid {
-    grid-template-columns: repeat(3, 1fr);
+.figma-logro-card.locked {
+  background: #f8fafc;
+  border-color: #f1f5f9;
+  opacity: 0.6;
+  filter: grayscale(0.5);
+}
+
+.figma-shield-wrapper {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+
+.figma-shield-bg {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+}
+
+.figma-shield-inner-icon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  filter: brightness(0) invert(1);
+}
+
+.figma-shield-legend {
+  position: absolute;
+  top: 48%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #ffffff;
+  font-size: 0.88rem;
+  font-weight: 900;
+  line-height: 1;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.figma-logro-title {
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 4px;
+  line-height: 1.2;
+}
+
+.figma-logro-desc {
+  font-size: 0.7rem;
+  color: #64748b;
+  line-height: 1.2;
+}
+
+/* Banner Inferior (Responsivo y Adaptable) */
+.figma-logros-bottom-banner {
+  background: #dbeafe;
+  border: 1.5px solid #64748b;
+  border-radius: 28px;
+  padding: 16px 28px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-top: 24px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.figma-logros-banner-mascot-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: clamp(110px, 22vw, 140px);
+  height: clamp(110px, 22vw, 140px);
+}
+
+.figma-logros-banner-img {
+  width: 100%;
+  height: 100%;
+  max-width: 140px;
+  max-height: 140px;
+  object-fit: contain;
+  transform: scaleX(-1); /* Invertido en espejo */
+}
+
+.figma-logros-banner-star {
+  position: absolute;
+  top: -6px;
+  right: 12px;
+  width: clamp(24px, 4.5vw, 32px);
+  height: clamp(24px, 4.5vw, 32px);
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.figma-logros-banner-text {
+  color: #1A1A1A;
+  font-family: 'Poppins', sans-serif;
+  font-size: clamp(1.2rem, 3vw, 1.55rem);
+  font-style: normal;
+  font-weight: 700;
+  line-height: 1.25;
+  flex: 1;
+}
+
+@media (max-width: 480px) {
+  .figma-logros-bottom-banner {
+    padding: 14px 18px;
+    gap: 16px;
   }
 }
