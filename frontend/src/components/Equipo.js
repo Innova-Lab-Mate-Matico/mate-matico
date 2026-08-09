@@ -40,8 +40,22 @@ const INTEGRANTES = [
   {
     area: "Developers",
     miembros: [
-      { nombre: "Matías Gonzales", rol: "Backend Developer", avatarColor: "#9747FF" },
-      { nombre: "Jonatan Churruarin", rol: "Backend Developer", avatarColor: "#C80ED9" },
+      { 
+        nombre: "Matías Gonzales", 
+        rol: "Backend Developer", 
+        avatarColor: "#9747FF",
+        githubUrl: "https://www.github.com/matygonza",
+        linkedinUrl: "https://www.linkedin.com/in/matygonza",
+        fotoUrl: "https://avatars.githubusercontent.com/matygonza"
+      },
+      { 
+        nombre: "Jonatan Churruarin", 
+        rol: "Backend Developer", 
+        avatarColor: "#C80ED9",
+        githubUrl: "https://github.com/jochurru",
+        linkedinUrl: "https://www.linkedin.com/in/jonatan-churruarin/",
+        fotoUrl: "https://avatars.githubusercontent.com/jochurru"
+      },
       { nombre: "Gabriel Rzecznik", rol: "Backend Developer", avatarColor: "#3b82f6" },
       { nombre: "Eliana Kaye", rol: "Frontend Developer", avatarColor: "#10b981" },
       { nombre: "Alessandra Sartori", rol: "Frontend Developer", avatarColor: "#f59e0b" }
@@ -65,7 +79,14 @@ const INTEGRANTES = [
     area: "Data Analytics",
     miembros: [
       { nombre: "Tamara Chaizaz Valenzuela", rol: "Data Analytics", avatarColor: "#f43f5e" },
-      { nombre: "Ruben Barrios", rol: "Data Analytics", avatarColor: "#06af46" }
+      { 
+        nombre: "Ruben Barrios", 
+        rol: "Data Analytics", 
+        avatarColor: "#06af46",
+        githubUrl: "https://github.com/rubenbarrios-bigdata",
+        linkedinUrl: "https://www.linkedin.com/in/ruben-barrios-1430712ab",
+        fotoUrl: "https://avatars.githubusercontent.com/rubenbarrios-bigdata"
+      }
     ]
   },
   {
@@ -114,32 +135,51 @@ export default function Equipo({ onClose, emailContacto = "talentotech17@gmail.c
                   <div className="equipo-avatar-oval-wrapper">
                     <div 
                       className="equipo-avatar-oval"
-                      style={{ backgroundColor: miembro.avatarColor }}
+                      style={{ 
+                        backgroundColor: miembro.avatarColor,
+                        overflow: 'hidden'
+                      }}
                     >
-                      <span className="equipo-avatar-initials">
-                        {getIniciales(miembro.nombre)}
-                      </span>
+                      {miembro.fotoUrl ? (
+                        <img 
+                          src={miembro.fotoUrl} 
+                          alt={miembro.nombre} 
+                          style={{
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'cover'
+                          }}
+                        />
+                      ) : (
+                        <span className="equipo-avatar-initials">
+                          {getIniciales(miembro.nombre)}
+                        </span>
+                      )}
                     </div>
                   </div>
 
                   <h4 className="equipo-member-name">{miembro.nombre}</h4>
                   <p className="equipo-member-role">{miembro.rol}</p>
 
-                  {/* Redes Sociales temporales (para completar después) */}
+                  {/* Redes Sociales */}
                   <div className="equipo-social-links">
                     <a 
-                      href="#github" 
+                      href={miembro.githubUrl || "#github"} 
                       className="equipo-social-icon github" 
-                      onClick={(e) => e.preventDefault()}
-                      title="GitHub (Próximamente)"
+                      onClick={miembro.githubUrl ? undefined : (e) => e.preventDefault()}
+                      target={miembro.githubUrl ? "_blank" : undefined}
+                      rel={miembro.githubUrl ? "noopener noreferrer" : undefined}
+                      title={miembro.githubUrl ? `Visitar GitHub de ${miembro.nombre}` : "GitHub (Próximamente)"}
                     >
                       <GithubIcon />
                     </a>
                     <a 
-                      href="#linkedin" 
+                      href={miembro.linkedinUrl || "#linkedin"} 
                       className="equipo-social-icon linkedin" 
-                      onClick={(e) => e.preventDefault()}
-                      title="LinkedIn (Próximamente)"
+                      onClick={miembro.linkedinUrl ? undefined : (e) => e.preventDefault()}
+                      target={miembro.linkedinUrl ? "_blank" : undefined}
+                      rel={miembro.linkedinUrl ? "noopener noreferrer" : undefined}
+                      title={miembro.linkedinUrl ? `Visitar LinkedIn de ${miembro.nombre}` : "LinkedIn (Próximamente)"}
                     >
                       <LinkedinIcon />
                     </a>
