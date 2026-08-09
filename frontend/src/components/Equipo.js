@@ -1,6 +1,10 @@
 import React from 'react';
 import './Equipo.css';
 
+import rubenFoto from '../assets/ruben_barrios.png';
+import matiasFoto from '../assets/matias_gonzales.png';
+import jonatanFoto from '../assets/jonatan_churruarin.png';
+
 // SVG Inline para GitHub (basado en frontend/src/assets/github.svg)
 const GithubIcon = () => (
   <svg 
@@ -46,7 +50,7 @@ const INTEGRANTES = [
         avatarColor: "#9747FF",
         githubUrl: "https://www.github.com/matygonza",
         linkedinUrl: "https://www.linkedin.com/in/matygonza",
-        fotoUrl: "https://avatars.githubusercontent.com/matygonza"
+        fotoUrl: matiasFoto
       },
       { 
         nombre: "Jonatan Churruarin", 
@@ -54,7 +58,7 @@ const INTEGRANTES = [
         avatarColor: "#C80ED9",
         githubUrl: "https://github.com/jochurru",
         linkedinUrl: "https://www.linkedin.com/in/jonatan-churruarin/",
-        fotoUrl: "https://avatars.githubusercontent.com/jochurru"
+        fotoUrl: jonatanFoto
       },
       { nombre: "Gabriel Rzecznik", rol: "Backend Developer", avatarColor: "#3b82f6" },
       { nombre: "Eliana Kaye", rol: "Frontend Developer", avatarColor: "#10b981" },
@@ -85,7 +89,7 @@ const INTEGRANTES = [
         avatarColor: "#06af46",
         githubUrl: "https://github.com/rubenbarrios-bigdata",
         linkedinUrl: "https://www.linkedin.com/in/ruben-barrios-1430712ab",
-        fotoUrl: "https://avatars.githubusercontent.com/rubenbarrios-bigdata"
+        fotoUrl: rubenFoto
       }
     ]
   },
