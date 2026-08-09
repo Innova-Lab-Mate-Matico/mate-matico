@@ -2,8 +2,8 @@ import React from 'react';
 import './Equipo.css';
 
 import rubenFoto from '../assets/ruben_barrios.png';
-import matiasFoto from '../assets/matias_gonzales.png';
-import jonatanFoto from '../assets/jonatan_churruarin.png';
+import matiasFoto from '../assets/matias_gonzales.jpg';
+import jonatanFoto from '../assets/jonatan_churruarin.jpg';
 
 // SVG Inline para GitHub (basado en frontend/src/assets/github.svg)
 const GithubIcon = () => (
