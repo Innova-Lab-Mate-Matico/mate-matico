@@ -1,9 +1,9 @@
 import React from 'react';
 import './Equipo.css';
 
-import rubenFoto from '../assets/ruben_barrios.png';
-import matiasFoto from '../assets/matias_gonzales.jpg';
-import jonatanFoto from '../assets/jonatan_churruarin.jpg';
+import rubenFoto from '../assets/Equipo/ruben_barrios.png';
+import matiasFoto from '../assets/Equipo/matias_gonzales.jpg';
+import jonatanFoto from '../assets/Equipo/jonatan_churruarin.jpg';
 
 import olaCard1 from '../assets/ola1.png';
 import olaCard2 from '../assets/ola2.png';
