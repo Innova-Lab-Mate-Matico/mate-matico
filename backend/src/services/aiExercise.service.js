@@ -605,126 +605,297 @@ function generateDiverseDetective(input) {
 function generateDiverseDecision(input) {
   const levelNum = Number(input.level) || 0;
 
-  // ESCENARIO PARA NIVEL 0 (PRINCIPIANTE - 2 OPCIONES A vs B)
+  // Estructura contenedora para barajar las opciones
+  let options = [];
+  let title = '';
+  let consigna = '';
+
+  // ESCENARIO PARA NIVEL 0 (PRINCIPIANTE - 2 OPCIONES)
   if (levelNum === 0) {
     const base = randomInt(1, 4) * 10000; // $10.000 a $40.000
-    const desc = 10;
-    const totalA = Math.round(base * (1 - desc / 100));
+    
+    // Opción Contado (Suele ser la mejor por defecto, pero ahora la hacemos variable)
+    const isContadoBetter = Math.random() > 0.4;
+    const desc = isContadoBetter ? 15 : 5;
+    const totalContado = Math.round(base * (1 - desc / 100));
+
     const cuotas = 3;
-    const valorCuota = Math.round((base * 1.15) / cuotas);
-    const totalB = valorCuota * cuotas;
-    const consigna = `Vas a realizar una compra por un total de $${base.toLocaleString('es-AR')}. Tenés dos opciones: Opción A con ${desc}% de descuento contado ($${totalA.toLocaleString('es-AR')}) vs Opción B en ${cuotas} cuotas de $${valorCuota.toLocaleString('es-AR')} ($${totalB.toLocaleString('es-AR')} total). ¿Cuál es la opción más económica?`;
+    // Si contado es mejor, las cuotas tienen recargo del 10%. Si cuotas es mejor, contado tiene poco descuento y cuotas tiene recargo del 0%.
+    const recargoCuotas = isContadoBetter ? 10 : -5;
+    const totalCuotas = Math.round(base * (1 + recargoCuotas / 100));
+    const valorCuota = Math.round(totalCuotas / cuotas);
+
+    const correctId = isContadoBetter ? 'CONTADO' : 'CUOTAS';
+
+    title = 'Dilema de Compra: Contado vs 3 Cuotas';
+    consigna = `Vas a realizar una compra por un total de $${base.toLocaleString('es-AR')}. Tenés dos opciones: una opción de pago contado con ${desc}% de descuento ($${totalContado.toLocaleString('es-AR')} final) o financiarlo en ${cuotas} cuotas de $${valorCuota.toLocaleString('es-AR')} ($${totalCuotas.toLocaleString('es-AR')} total). ¿Cuál es la opción que representa el MENOR desembolso total de dinero?`;
+
+    options = [
+      {
+        realId: 'CONTADO',
+        titulo: 'Pago Contado',
+        detalle: `${desc}% Descuento Inmediato`,
+        montoTotal: totalContado,
+        subtexto: `Pagás $${totalContado.toLocaleString('es-AR')} hoy`
+      },
+      {
+        realId: 'CUOTAS',
+        titulo: `${cuotas} Cuotas Fijas`,
+        detalle: `${cuotas} cuotas de $${valorCuota.toLocaleString('es-AR')}`,
+        montoTotal: totalCuotas,
+        subtexto: `Pagás $${totalCuotas.toLocaleString('es-AR')} en total`
+      }
+    ];
+
+    // Barajamos
+    options = shuffle(options);
+
+    // Mapeamos a las variables de salida A y B.
+    // Para nivel 0, la opcion C queda nula
+    const correctIdx = options.findIndex(o => o.realId === correctId);
+    const letterMapping = ['A', 'B'];
+    const correctLetter = letterMapping[correctIdx];
 
     return {
-      title: 'Dilema de Compra: Contado vs 3 Cuotas',
+      title,
       consigna,
       opcionA: {
         id: 'A',
-        titulo: 'Opción A: Pago Contado',
-        detalle: `${desc}% Descuento Inmediato`,
-        montoTotal: totalA,
-        subtexto: `Pagás $${totalA.toLocaleString('es-AR')} hoy`
+        titulo: `Opción A: ${options[0].titulo}`,
+        detalle: options[0].detalle,
+        montoTotal: options[0].montoTotal,
+        subtexto: options[0].subtexto
       },
       opcionB: {
         id: 'B',
-        titulo: `Opción B: ${cuotas} Cuotas Fijas`,
-        detalle: `${cuotas} cuotas de $${valorCuota.toLocaleString('es-AR')}`,
-        montoTotal: totalB,
-        subtexto: `Pagás $${totalB.toLocaleString('es-AR')} en total`
+        titulo: `Opción B: ${options[1].titulo}`,
+        detalle: options[1].detalle,
+        montoTotal: options[1].montoTotal,
+        subtexto: options[1].subtexto
       },
-      respuestaCorrecta: 'A',
-      correctAnswer: 'A'
+      opcionC: null,
+      respuestaCorrecta: correctLetter,
+      correctAnswer: correctLetter
     };
   }
 
-  // ESCENARIO PARA NIVEL 1 (INTERMEDIO - 3 OPCIONES A vs B vs C)
+  // ESCENARIO PARA NIVEL 1 (INTERMEDIO - 3 OPCIONES)
   if (levelNum === 1) {
     const base = randomInt(5, 12) * 10000; // $50.000 a $120.000
-    const descA = 15;
-    const totalA = Math.round(base * (1 - descA / 100));
     
-    // Opción B: 6 cuotas con 10% recargo
-    const recargoB = 10;
-    const totalB = Math.round(base * (1 + recargoB / 100));
-    const cuotaB = Math.round(totalB / 6);
+    // Generamos coeficientes dinámicos para que la mejor opción cambie aleatoriamente
+    const r = Math.random();
+    let bestOptionType = 'A'; // 'A' = Contado, 'B' = 6 Cuotas, 'C' = 12 Cuotas
+    if (r > 0.66) {
+      bestOptionType = 'C';
+    } else if (r > 0.33) {
+      bestOptionType = 'B';
+    }
 
-    // Opción C: 12 cuotas con 30% recargo
-    const recargoC = 30;
-    const totalC = Math.round(base * (1 + recargoC / 100));
-    const cuotaC = Math.round(totalC / 12);
+    // Configurar valores según cuál queramos que sea la mejor opción
+    let descContado = 10;
+    let recargo6 = 15;
+    let recargo12 = 30;
 
-    const consigna = `Querés comprar equipamiento por $${base.toLocaleString('es-AR')}. Tenés 3 opciones de pago: Opción A con ${descA}% de descuento contado ($${totalA.toLocaleString('es-AR')}), Opción B en 6 cuotas ($${totalB.toLocaleString('es-AR')} total) u Opción C en 12 cuotas ($${totalC.toLocaleString('es-AR')} total). ¿Cuál opción representa el MENOR desembolso total de dinero?`;
+    if (bestOptionType === 'A') {
+      descContado = 20; // Mucho descuento contado
+      recargo6 = 10;
+      recargo12 = 35;
+    } else if (bestOptionType === 'B') {
+      descContado = 5;  // Poco descuento contado
+      recargo6 = -2;    // Cuotas bonificadas sin interés / con descuento
+      recargo12 = 25;
+    } else {
+      descContado = 5;
+      recargo6 = 15;
+      recargo12 = -5;   // 12 cuotas con descuento / reintegro financiero especial
+    }
+
+    const totalA_val = Math.round(base * (1 - descContado / 100));
+    const totalB_val = Math.round(base * (1 + recargo6 / 100));
+    const cuotaB = Math.round(totalB_val / 6);
+    const totalC_val = Math.round(base * (1 + recargo12 / 100));
+    const cuotaC = Math.round(totalC_val / 12);
+
+    title = 'Dilema de Finanzas: 3 Opciones de Pago';
+    consigna = `Querés comprar equipamiento por $${base.toLocaleString('es-AR')}. Tenés 3 opciones de pago: una opción con descuento contado ($${totalA_val.toLocaleString('es-AR')} total), una opción en 6 cuotas de $${cuotaB.toLocaleString('es-AR')} ($${totalB_val.toLocaleString('es-AR')} total), o una opción en 12 cuotas de $${cuotaC.toLocaleString('es-AR')} ($${totalC_val.toLocaleString('es-AR')} total). ¿Cuál opción representa el MENOR desembolso total de dinero?`;
+
+    options = [
+      {
+        realId: 'OP_CONTADO',
+        titulo: `Contado (${descContado}% desc.)`,
+        detalle: 'Descuento en 1 Pago',
+        montoTotal: totalA_val,
+        subtexto: `Total a pagar: $${totalA_val.toLocaleString('es-AR')}`
+      },
+      {
+        realId: 'OP_CUOTAS_6',
+        titulo: '6 Cuotas Financieras',
+        detalle: `6 cuotas de $${cuotaB.toLocaleString('es-AR')}`,
+        montoTotal: totalB_val,
+        subtexto: `Total a pagar: $${totalB_val.toLocaleString('es-AR')}`
+      },
+      {
+        realId: 'OP_CUOTAS_12',
+        titulo: '12 Cuotas Financieras',
+        detalle: `12 cuotas de $${cuotaC.toLocaleString('es-AR')}`,
+        montoTotal: totalC_val,
+        subtexto: `Total a pagar: $${totalC_val.toLocaleString('es-AR')}`
+      }
+    ];
+
+    // Buscamos cuál es matemáticamente la menor
+    let minMonto = Infinity;
+    let bestRealId = '';
+    options.forEach(o => {
+      if (o.montoTotal < minMonto) {
+        minMonto = o.montoTotal;
+        bestRealId = o.realId;
+      }
+    });
+
+    // Barajamos
+    options = shuffle(options);
+
+    const correctIdx = options.findIndex(o => o.realId === bestRealId);
+    const letterMapping = ['A', 'B', 'C'];
+    const correctLetter = letterMapping[correctIdx];
 
     return {
-      title: 'Dilema de Finanzas: 3 Opciones de Pago',
+      title,
       consigna,
       opcionA: {
         id: 'A',
-        titulo: 'Opción A: Contado 15% OFF',
-        detalle: 'Descuento en 1 Pago',
-        montoTotal: totalA,
-        subtexto: `Total a pagar: $${totalA.toLocaleString('es-AR')}`
+        titulo: `Opción A: ${options[0].titulo}`,
+        detalle: options[0].detalle,
+        montoTotal: options[0].montoTotal,
+        subtexto: options[0].subtexto
       },
       opcionB: {
         id: 'B',
-        titulo: 'Opción B: 6 Cuotas',
-        detalle: `6 cuotas de $${cuotaB.toLocaleString('es-AR')}`,
-        montoTotal: totalB,
-        subtexto: `Total a pagar: $${totalB.toLocaleString('es-AR')}`
+        titulo: `Opción B: ${options[1].titulo}`,
+        detalle: options[1].detalle,
+        montoTotal: options[1].montoTotal,
+        subtexto: options[1].subtexto
       },
       opcionC: {
         id: 'C',
-        titulo: 'Opción C: 12 Cuotas',
-        detalle: `12 cuotas de $${cuotaC.toLocaleString('es-AR')}`,
-        montoTotal: totalC,
-        subtexto: `Total a pagar: $${totalC.toLocaleString('es-AR')}`
+        titulo: `Opción C: ${options[2].titulo}`,
+        detalle: options[2].detalle,
+        montoTotal: options[2].montoTotal,
+        subtexto: options[2].subtexto
       },
-      respuestaCorrecta: 'A',
-      correctAnswer: 'A'
+      respuestaCorrecta: correctLetter,
+      correctAnswer: correctLetter
     };
   }
 
-  // ESCENARIO PARA NIVEL 2 (AVANZADO - 3 OPCIONES COMPLEJAS A vs B vs C)
+  // ESCENARIO PARA NIVEL 2 (AVANZADO - 3 OPCIONES COMPLEJAS)
   const precioPar = randomInt(30, 50) * 1000; // $30.000 a $50.000 por unidad
   const cant = 3;
   const totalSinPromo = precioPar * cant;
 
-  // Opción A: Promo 3x2 (1 gratis)
-  const totalA = precioPar * (cant - 1);
+  // Generar coeficientes dinámicos para el mejor escenario de forma aleatoria
+  const r2 = Math.random();
+  let bestScenario = '3X2'; // '3X2', '2DO_70' o '25_OFF'
+  if (r2 > 0.66) {
+    bestScenario = '25_OFF';
+  } else if (r2 > 0.33) {
+    bestScenario = '2DO_70';
+  }
 
-  // Opción B: 2do par al 70% de descuento
-  const totalB = precioPar + Math.round(precioPar * 0.3) + precioPar;
+  let totalA_promo = precioPar * (cant - 1); // 3x2 por defecto
+  let desc2do = 70;
+  let totalB_promo = precioPar + Math.round(precioPar * (1 - desc2do / 100)) + precioPar;
+  let descDirecto = 25;
+  let totalC_promo = Math.round(totalSinPromo * (1 - descDirecto / 100));
 
-  // Opción C: 25% de descuento directo en el total
-  const totalC = Math.round(totalSinPromo * 0.75);
+  if (bestScenario === '2DO_70') {
+    // Para que el 2do al 90% sea el mejor de todos
+    desc2do = 90;
+    totalB_promo = precioPar + Math.round(precioPar * 0.1) + precioPar; // total = 2.1 * precioPar
+    totalA_promo = precioPar * 2; // total = 2 * precioPar (3x2 siempre paga 2 pares, por lo tanto 3x2 sigue ganando por poco. Haremos 3x2 modificado)
+    // Modificamos 3x2 para que sea llevar 4 pagando 3, pero queremos comprar exactamente 3 pares.
+    // Entonces 3x2 no aplica o se paga completo: totalA = totalSinPromo.
+    totalA_promo = totalSinPromo; 
+  } else if (bestScenario === '25_OFF') {
+    // Para que el descuento directo del 40% sea el mejor
+    descDirecto = 40;
+    totalC_promo = Math.round(totalSinPromo * 0.6); // 1.8 * precioPar
+    totalA_promo = precioPar * 2; // 2 * precioPar
+    desc2do = 50;
+    totalB_promo = precioPar + Math.round(precioPar * 0.5) + precioPar; // 2.5 * precioPar
+  }
 
-  const consigna = `En un local de indumentaria querés llevar 3 pares de zapatillas de $${precioPar.toLocaleString('es-AR')} cada uno (total sin promo $${totalSinPromo.toLocaleString('es-AR')}). ¿Cuál de las 3 promociones te da el PRECIO TOTAL MÁS BAJO?`;
+  consigna = `En un local de indumentaria querés llevar 3 pares de zapatillas de $${precioPar.toLocaleString('es-AR')} cada uno (total sin promo $${totalSinPromo.toLocaleString('es-AR')}). Evaluá las promociones disponibles para encontrar la que ofrezca el PRECIO TOTAL MÁS BAJO.`;
+  title = 'Comparativa Avanzada de Promociones Comerciales';
+
+  options = [
+    {
+      realId: 'PROMO_3X2',
+      titulo: 'Promo 3x2',
+      detalle: 'Llevás 3, pagás 2 (1 de regalo)',
+      montoTotal: totalA_promo,
+      subtexto: `Pagás $${totalA_promo.toLocaleString('es-AR')} en total`
+    },
+    {
+      realId: 'PROMO_2DO_70',
+      titulo: `2do Par al ${desc2do}% OFF`,
+      detalle: `Descuento del ${desc2do}% en la segunda unidad`,
+      montoTotal: totalB_promo,
+      subtexto: `Pagás $${totalB_promo.toLocaleString('es-AR')} en total`
+    },
+    {
+      realId: 'PROMO_25_OFF',
+      titulo: `${descDirecto}% OFF Directo`,
+      detalle: `${descDirecto}% de descuento en el total de la compra`,
+      montoTotal: totalC_promo,
+      subtexto: `Pagás $${totalC_promo.toLocaleString('es-AR')} en total`
+    }
+  ];
+
+  // Buscamos cuál es matemáticamente la menor
+  let minMonto = Infinity;
+  let bestRealId = '';
+  options.forEach(o => {
+    if (o.montoTotal < minMonto) {
+      minMonto = o.montoTotal;
+      bestRealId = o.realId;
+    }
+  });
+
+  // Barajamos
+  options = shuffle(options);
+
+  const correctIdx = options.findIndex(o => o.realId === bestRealId);
+  const letterMapping = ['A', 'B', 'C'];
+  const correctLetter = letterMapping[correctIdx];
 
   return {
-    title: 'Comparativa Avanzada: Promo 3x2 vs 2do al 70% vs 25% OFF',
+    title,
     consigna,
     opcionA: {
       id: 'A',
-      titulo: 'Opción A: Promo 3x2',
-      detalle: 'Llevás 3, pagás 2 (1 gratis)',
-      montoTotal: totalA,
-      subtexto: `Pagás $${totalA.toLocaleString('es-AR')} por los 3 pares`
+      titulo: `Opción A: ${options[0].titulo}`,
+      detalle: options[0].detalle,
+      montoTotal: options[0].montoTotal,
+      subtexto: options[0].subtexto
     },
     opcionB: {
       id: 'B',
-      titulo: 'Opción B: 2do al 70% OFF',
-      detalle: 'Descuento del 70% en la 2da unidad',
-      montoTotal: totalB,
-      subtexto: `Pagás $${totalB.toLocaleString('es-AR')} por los 3 pares`
+      titulo: `Opción B: ${options[1].titulo}`,
+      detalle: options[1].detalle,
+      montoTotal: options[1].montoTotal,
+      subtexto: options[1].subtexto
     },
     opcionC: {
       id: 'C',
-      titulo: 'Opción C: 25% OFF Directo',
-      detalle: '25% de descuento en el total',
-      montoTotal: totalC,
-      subtexto: `Pagás $${totalC.toLocaleString('es-AR')} por los 3 pares`
+      titulo: `Opción C: ${options[2].titulo}`,
+      detalle: options[2].detalle,
+      montoTotal: options[2].montoTotal,
+      subtexto: options[2].subtexto
     },
-    respuestaCorrecta: 'A',
-    correctAnswer: 'A'
+    respuestaCorrecta: correctLetter,
+    correctAnswer: correctLetter
   };
 }
