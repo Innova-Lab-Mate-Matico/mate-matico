@@ -5,6 +5,9 @@ import rubenFoto from '../assets/ruben_barrios.png';
 import matiasFoto from '../assets/matias_gonzales.jpg';
 import jonatanFoto from '../assets/jonatan_churruarin.jpg';
 
+import olaCard1 from '../assets/ola1.png';
+import olaCard2 from '../assets/ola2.png';
+
 // SVG Inline para GitHub (basado en frontend/src/assets/github.svg)
 const GithubIcon = () => (
   <svg 
@@ -147,6 +150,10 @@ export default function Equipo({ onClose, emailContacto = "talentotech17@gmail.c
             <div className="equipo-cards-grid">
               {grupo.miembros.map((miembro, index) => (
                 <div key={index} className="equipo-member-card">
+                  {/* Olas decorativas del marco */}
+                  <img src={olaCard1} alt="" className="card-wave card-wave-top" />
+                  <img src={olaCard2} alt="" className="card-wave card-wave-bottom" />
+                  
                   {/* Contenedor del Avatar en Óvalo como pidió el usuario */}
                   <div className="equipo-avatar-oval-wrapper">
                     <div 

@@ -96,6 +96,8 @@
 
 /* Tarjetas individuales de integrantes */
 .equipo-member-card {
+  position: relative;
+  overflow: hidden; /* Recorta las olas en las esquinas redondeadas */
   background: #ffffff;
   border: 1px solid rgba(151, 71, 255, 0.15);
   border-radius: 20px;
@@ -114,12 +116,49 @@
   border-color: rgba(151, 71, 255, 0.4);
 }
 
+/* Olas decorativas del marco de la tarjeta */
+.card-wave {
+  position: absolute;
+  pointer-events: none;
+  opacity: 0.12; /* Sutil degradado decorativo */
+  transition: opacity 0.3s ease, transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1;
+}
+
+.card-wave-top {
+  top: 0;
+  right: 0;
+  width: 70px;
+  height: auto;
+}
+
+.card-wave-bottom {
+  bottom: 0;
+  left: 0;
+  width: 70px;
+  height: auto;
+}
+
+.equipo-member-card:hover .card-wave {
+  opacity: 0.24; /* Resalta un poco más al hacer hover */
+}
+
+.equipo-member-card:hover .card-wave-top {
+  transform: translate(2px, -2px) scale(1.08);
+}
+
+.equipo-member-card:hover .card-wave-bottom {
+  transform: translate(-2px, 2px) scale(1.08);
+}
+
 /* Óvalo en el centro para la foto */
 .equipo-avatar-oval-wrapper {
   margin-bottom: 16px;
   display: flex;
   justify-content: center;
   align-items: center;
+  position: relative;
+  z-index: 2; /* Por encima de las olas */
 }
 
 .equipo-avatar-oval {
@@ -155,6 +194,8 @@
   color: #1e293b;
   margin: 0 0 4px 0;
   line-height: 1.3;
+  position: relative;
+  z-index: 2; /* Por encima de las olas */
 }
 
 .equipo-member-role {
@@ -162,6 +203,8 @@
   font-weight: 600;
   color: #64748b;
   margin: 0 0 16px 0;
+  position: relative;
+  z-index: 2; /* Por encima de las olas */
 }
 
 /* Links a Redes Sociales */
@@ -169,6 +212,8 @@
   display: flex;
   gap: 12px;
   margin-top: auto;
+  position: relative;
+  z-index: 2; /* Por encima de las olas */
 }
 
 .equipo-social-icon {
