@@ -331,6 +331,65 @@ export const moduleCatalog = [
       },
     ],
   },
+  {
+    id: 'pensamiento',
+    title: 'Pensamiento matemático',
+    description: 'Detección de errores, dilemas financieros y estimación crítica',
+    branch: 'pensamiento',
+    order: 5,
+    rolSugerido: 'principiante',
+    levels: [
+      {
+        id: 'nivel-1',
+        title: 'Nivel 1 — Razonamiento crítico cotidiano',
+        difficulty: 1,
+        lessons: [
+          {
+            id: 'detective-facturas',
+            title: 'Detective de facturas',
+            durationMinutes: 5,
+            teoria: [
+              {
+                titulo: '¿Cómo detectar errores en tickets?',
+                explicacionTitle: 'Auditoría matemática cotidiana',
+                explicacion: 'En la vida real, las computadoras y cajeros a veces fallan o aplican descuentos de forma errónea. Aprender a revisar los números con pensamiento crítico te protege de pagar de más.',
+                ejemploTitle: 'Caso típico',
+                ejemplo: 'Comprás $10.000 y tenés un 10% de descuento. Si el ticket resta $2.500 en lugar de $1.000, la cuenta está mal aplicada.'
+              }
+            ]
+          },
+          {
+            id: 'dilema-compras',
+            title: 'Dilemas de compras',
+            durationMinutes: 6,
+            teoria: [
+              {
+                titulo: '¿Contado vs Cuotas?',
+                explicacionTitle: 'Evaluación estratégica de alternativas',
+                explicacion: 'Elegir la mejor forma de pago requiere comparar el monto total final de cada opción contra tus ahorros o costo de oportunidad.',
+                ejemploTitle: 'Caso típico',
+                ejemplo: 'Opción A: Contado con 15% de descuento ($170.000). Opción B: 12 cuotas fijas de $18.000 ($216.000). ¡La opción A ahorra $46.000!'
+              }
+            ]
+          },
+          {
+            id: 'estimacion-presupuesto',
+            title: 'Estimación rápida',
+            durationMinutes: 4,
+            teoria: [
+              {
+                titulo: 'Redondeo e intuición numérica',
+                explicacionTitle: 'Saber el resultado aproximado antes de calcular',
+                explicacion: 'Redondear cifras te permite saber en segundos si un presupuesto tiene sentido o si un cobro es absurdo. ¡Ojo! En esta lección la velocidad cuenta: tendrás un reloj de 20s (Inicial), 15s (Intermedio) o 10s (Avanzado) para responder cada ejercicio antes de que se agote el tiempo.',
+                ejemploTitle: 'Caso típico',
+                ejemplo: '$1.950 + $2.050 + $3.980 + $990 ≈ 2k + 2k + 4k + 1k = $9.000 aproximadamente.'
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
 ];
 
 export function findModule(moduleId) {

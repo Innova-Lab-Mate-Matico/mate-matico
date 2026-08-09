@@ -26,6 +26,7 @@ import percentSvg from '../assets/percent.svg';
 import shoppingCartSvg from '../assets/shopping_cart.svg';
 import frame10Svg from '../assets/Frame 10.svg';
 import aritmeticaPng from '../assets/aritmetica.png';
+import cerebroPng from '../assets/cerebro.png';
 import mateAcademico from '../assets/mate_academico.webp';
 import mateEscolar from '../assets/mate_escolar.webp';
 import mateProfesor from '../assets/mate_profesor.webp';
@@ -57,6 +58,13 @@ const MODULE_THEMES = {
     iconBg: '#B95B1E',
     circleBg: '#B95B1E',
     title: 'Economía de hogar',
+    badge: 'En curso'
+  },
+  pensamiento: {
+    icon: <img src={cerebroPng} alt="Pensamiento matemático" className="figma-svg-icon" />,
+    iconBg: '#7B61FF',
+    circleBg: '#7B61FF',
+    title: 'Pensamiento matemático',
     badge: 'En curso'
   }
 };

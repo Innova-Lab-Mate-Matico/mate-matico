@@ -7,8 +7,8 @@ const PUNTOS_EJERCICIO = 10;
 const TTL_MS = 30 * 60 * 1000;
 const MAX_RECENT_EXERCISES = 25;
 const recentDescriptions = new Map();
-const SECCIONES = ['Suma y Resta', 'Multiplicación', 'División', 'Fracciones', 'Ecuaciones'];
-const TIPOS = ['multiple_choice', 'input'];
+const SECCIONES = ['Suma y Resta', 'Multiplicación', 'División', 'Fracciones', 'Ecuaciones', 'Pensamiento matemático'];
+const TIPOS = ['multiple_choice', 'input', 'detective', 'decision'];
 const PROHIBITED_WORDS = /\bconchas?\b/iu;
 let aiClient;
 
@@ -100,6 +100,10 @@ function localExercise({ level, section, structure }) {
     description = `Una pizza se divide en ${denominator} partes iguales y se comen ${numerator}. ¿Qué fracción de la pizza se comió? Escribila como a/b.`;
     correctAnswer = `${numerator}/${denominator}`;
     explanation = `Se comieron ${numerator} de las ${denominator} partes iguales: ${correctAnswer}.`;
+  } else if (section === 'Pensamiento matemático' || structure === 'detective' || structure === 'decision') {
+    description = `En una factura de supermercado por $10.000 se aplicó un 10% de descuento pero se restaron $2.500 por error. ¿Dónde estuvo la falla?`;
+    correctAnswer = `El 10% de $10.000 debió ser $1.000 en vez de $2.500.`;
+    explanation = `El cajero restó $2.500 por error. El 10% de $10.000 es exactamente $1.000.`;
   } else {
     const p = randomInt(5, 50); const base = randomInt(10, 50) * 100; const res = (base * p) / 100;
     description = `Un producto cuesta $${base} y tiene un descuento del ${p}%. ¿Cuántos pesos te descuentan en total?`;
@@ -220,7 +224,7 @@ async function generateWithGroq(input) {
 Diseñas un único problema de matemáticas en español rioplatense (usando vos, comprás, tenés) inventando valores numéricos lógicos, realistas y creativos.
 Tema del ejercicio: ${input.section}
 Nivel de dificultad: Nivel ${input.level} (0 = principiantes, 1 = intermedio, 2 = avanzado).
-Tipo de respuesta: ${input.structure === 'multiple_choice' ? 'Opción Múltiple (4 respuestas posibles)' : 'Entrada libre de texto o número'}.
+Tipo de respuesta: ${input.structure === 'input' ? 'Entrada libre de texto o número' : 'Opción Múltiple (4 respuestas posibles)'}.
 
 REGLA DE UNICIDAD CRÍTICA:
 El ejercicio NO debe ser igual ni similar a estos problemas ya realizados:
@@ -230,13 +234,18 @@ Devuelve EXCLUSIVAMENTE un objeto JSON válido con este formato:
 {
   "description": "enunciado breve del problema",
   "type": "${input.structure}",
-  "answers": ${input.structure === 'multiple_choice' ? '["opcion1", "opcion2", "opcion3", "opcion4"]' : '[]'},
+  "answers": ${input.structure === 'input' ? '[]' : '["opcion1", "opcion2", "opcion3", "opcion4"]'},
   "correctAnswer": "respuesta_correcta",
   "hint": "pista sutil para el primer error (sin revelar la respuesta)",
   "explanation": "explicación del procedimiento paso a paso para el segundo error"
 }`;
 
-  const userPrompt = `Generá un nuevo problema matemático de nivel ${input.level} sobre "${input.section}". Formato "${input.structure}".`;
+  let structurePrompt = `Generá un nuevo problema matemático de nivel ${input.level} sobre "${input.section}". Formato "${input.structure}".`;
+  if (input.structure === 'detective') {
+    structurePrompt = `Generá un ejercicio de DETECTIVE DE ERRORES de nivel ${input.level} sobre "${input.section}". Planteá la revisión de una factura, recibo o cálculo comercial donde se comete un error en un cobro, descuento o impuesto. En description detallá el caso. En answers poné 4 opciones que describan posibles errores en el ticket (una opción correcta y 3 distractores). En correctAnswer colocá exactamente el texto de la opción que señala la falla real.`;
+  } else if (input.structure === 'decision') {
+    structurePrompt = `Generá un ejercicio de DILEMA DE COMPRA de nivel ${input.level} sobre "${input.section}". Planteá una comparación estratégica entre dos alternativas financieras u ofertas (ej: descuento por pago en efectivo vs cuotas sin interés, o promoción 3x2 vs 20% descuento). En description explicá la situación. En answers poné 4 opciones descriptivas de la mejor decisión (una opción correcta y 3 distractores). En correctAnswer colocá la opción más conveniente.`;
+  }
 
   const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
     method: 'POST',
@@ -248,7 +257,7 @@ Devuelve EXCLUSIVAMENTE un objeto JSON válido con este formato:
       model: 'llama-3.3-70b-versatile',
       messages: [
         { role: 'system', content: systemInstruction },
-        { role: 'user', content: userPrompt }
+        { role: 'user', content: structurePrompt }
       ],
       response_format: { type: 'json_object' },
       temperature: 0.8
@@ -268,7 +277,7 @@ Devuelve EXCLUSIVAMENTE un objeto JSON válido con este formato:
     throw new Error('Respuesta incompleta de Groq');
   }
 
-  if (input.structure === 'multiple_choice') {
+  if (input.structure !== 'input') {
     if (!Array.isArray(generated.answers) || generated.answers.length !== 4 || !generated.answers.includes(String(generated.correctAnswer))) {
       const set = new Set([String(generated.correctAnswer), ...(generated.answers || []).map(String)]);
       while (set.size < 4) {
@@ -334,8 +343,53 @@ export async function generateAiExercise(uid, input) {
     source = 'local';
   }
 
+  // Generadores multi-escenarios diversos para Detective y Decisiones
+  if (input.structure === 'detective' && !generated.ticket) {
+    const dev = generateDiverseDetective(input);
+    generated.title = dev.title;
+    generated.description = dev.consigna;
+    generated.consigna = dev.consigna;
+    generated.ticket = dev.ticket;
+    generated.opciones = dev.opciones;
+    generated.correctAnswer = dev.correctAnswer;
+  }
+
+  if (input.structure === 'decision') {
+    const dev = generateDiverseDecision(input);
+    generated.title = dev.title;
+    generated.description = dev.consigna;
+    generated.consigna = dev.consigna;
+    generated.opcionA = dev.opcionA;
+    generated.opcionB = dev.opcionB;
+    generated.opcionC = dev.opcionC;
+    generated.respuestaCorrecta = dev.respuestaCorrecta;
+    generated.correctAnswer = dev.correctAnswer;
+  }
+
   const id = `ai_${randomUUID()}`;
-  const exercise = { id, level: Number(input.level), section: input.section, description: String(generated.description).trim(), type: input.structure, answers: generated.answers.map(String), hint: String(generated.hint).trim(), explanation: String(generated.explanation).trim(), puntos: PUNTOS_EJERCICIO, createdAt: new Date().toISOString(), validationToken: createValidationToken(uid, id, generated.correctAnswer) };
+  const targetCorrect = String(generated.correctAnswer || generated.respuestaCorrecta || 'A');
+
+  const exercise = {
+    id,
+    level: Number(input.level),
+    section: input.section,
+    description: String(generated.description || generated.consigna).trim(),
+    consigna: String(generated.consigna || generated.description).trim(),
+    title: String(generated.title || (input.structure === 'detective' ? 'Detective de errores' : 'Dilema de compra')).trim(),
+    type: input.structure,
+    answers: (generated.answers || []).map(String),
+    opciones: generated.opciones || [],
+    ticket: generated.ticket || null,
+    opcionA: generated.opcionA || null,
+    opcionB: generated.opcionB || null,
+    opcionC: generated.opcionC || null,
+    respuestaCorrecta: targetCorrect,
+    hint: String(generated.hint || 'Revisá los valores e intentá de nuevo.').trim(),
+    explanation: String(generated.explanation || 'Análisis detallado de la solución.').trim(),
+    puntos: PUNTOS_EJERCICIO,
+    createdAt: new Date().toISOString(),
+    validationToken: createValidationToken(uid, id, targetCorrect)
+  };
   return { exercise, source };
 }
 
@@ -386,4 +440,291 @@ export async function validateAiExercise(uid, { exerciseId, answer, validationTo
     console.log('💡 Modo offline o usuario dev: Recompensa aplicada localmente.', err.message);
   }
   return { correcto: true, puntosGanados, ...recompensa };
+}
+
+function generateDiverseDetective(input) {
+  const mode = Math.random();
+  const levelNum = Number(input.level) || 0;
+
+  // Escalamiento de montos por nivel:
+  // Nivel 0 (Principiante): $1.000 a $8.000, 10%
+  // Nivel 1 (Intermedio): $10.000 a $40.000, 15% o 20%
+  // Nivel 2 (Avanzado): $50.000 a $250.000, 21% IVA
+  const subtotalBase = levelNum === 0 
+    ? randomInt(2, 8) * 1000 
+    : levelNum === 1 
+      ? randomInt(10, 40) * 1000 
+      : randomInt(50, 200) * 1000;
+
+  const descPerc = levelNum === 0 ? 10 : levelNum === 1 ? 15 : 21;
+
+  // MODO 1: TICKET 100% CORRECTO (El alumno debe verificar y confirmar que NO hay error)
+  if (mode < 0.3) {
+    const p1 = Math.round(subtotalBase * 0.6);
+    const p2 = Math.round(subtotalBase * 0.4);
+    const subtotal = p1 + p2;
+    const correctDesc = Math.round((subtotal * descPerc) / 100);
+    const total = subtotal - correctDesc;
+
+    const consigna = `Auditá el siguiente ticket de compra por $${subtotal.toLocaleString('es-AR')}. Se aplicó un ${descPerc}% de descuento. ¿Existe algún error en la liquidación?`;
+    const opciones = shuffle([
+      { id: 'opt-1', texto: `El ticket es 100% correcto: el ${descPerc}% de $${subtotal.toLocaleString('es-AR')} es $${correctDesc.toLocaleString('es-AR')} y el total de $${total.toLocaleString('es-AR')} está perfecto.`, correcta: true },
+      { id: 'opt-2', texto: `El subtotal está mal sumado en el ticket.` },
+      { id: 'opt-3', texto: `El descuento del ${descPerc}% debió ser de $${(correctDesc + 1000).toLocaleString('es-AR')}.` }
+    ]);
+    const correctOpt = opciones.find(o => o.correcta);
+
+    return {
+      title: 'Auditoría de Ticket: ¿Hay Falla o Está Correcto?',
+      consigna,
+      ticket: {
+        empresa: levelNum === 0 ? 'Almacén de Barrio Don Pedro' : levelNum === 1 ? 'Supermercado Central' : 'Mega Mayorista Comercial',
+        fecha: new Date().toLocaleDateString('es-AR'),
+        items: [
+          { nombre: 'Artículos Básicos', precio: p1 },
+          { nombre: 'Productos Varios', precio: p2 }
+        ],
+        subtotal,
+        descuentoTexto: `Descuento Especial ${descPerc}%`,
+        descuentoAplicado: correctDesc,
+        totalCobrado: total
+      },
+      opciones,
+      correctAnswer: correctOpt.id
+    };
+  }
+
+  // MODO 2: PREGUNTA POR LA CIFRA NUMÉRICA TOTAL CORRECTA ($)
+  if (mode < 0.6) {
+    const subtotal = subtotalBase;
+    const correctDesc = Math.round((subtotal * descPerc) / 100);
+    const errorDesc = correctDesc + (levelNum === 0 ? 500 : levelNum === 1 ? 2500 : 8000);
+    const badTotal = subtotal - errorDesc;
+    const realTotal = subtotal - correctDesc;
+
+    const consigna = `En el siguiente ticket por $${subtotal.toLocaleString('es-AR')} se descontó $${errorDesc.toLocaleString('es-AR')} por error en lugar del ${descPerc}% correcto. ¿Cuál era el TOTAL CORRECTO que debió pagar el cliente?`;
+    const opciones = shuffle([
+      { id: 'opt-1', texto: `$${realTotal.toLocaleString('es-AR')} (Total correcto con ${descPerc}% de descuento)`, correcta: true },
+      { id: 'opt-2', texto: `$${badTotal.toLocaleString('es-AR')} (Monto mal cobrado)` },
+      { id: 'opt-3', texto: `$${(subtotal - Math.round(correctDesc / 2)).toLocaleString('es-AR')} (Cálculo incorrecto)` },
+      { id: 'opt-4', texto: `$${subtotal.toLocaleString('es-AR')} (Sin aplicar ningún descuento)` }
+    ]);
+    const correctOpt = opciones.find(o => o.correcta);
+
+    return {
+      title: '¿Cuál era el Total Correcto a Cobrar?',
+      consigna,
+      ticket: {
+        empresa: levelNum === 0 ? 'Kiosco Central' : levelNum === 1 ? 'Tienda de Indumentaria' : 'Distribuidora Tecnológica',
+        fecha: new Date().toLocaleDateString('es-AR'),
+        items: [
+          { nombre: 'Compra del día', precio: subtotal }
+        ],
+        subtotal,
+        descuentoTexto: `Descuento ${descPerc}%`,
+        descuentoAplicado: errorDesc,
+        totalCobrado: badTotal
+      },
+      opciones,
+      correctAnswer: correctOpt.id
+    };
+  }
+
+  // MODO 3: PREGUNTA POR LA DIFERENCIA EN PESOS COBRADA DE MÁS ($)
+  if (mode < 0.8) {
+    const subtotal = subtotalBase;
+    const recargoPerc = levelNum === 0 ? 10 : 20;
+    const correctRecargo = Math.round((subtotal * recargoPerc) / 100);
+    const errorRecargo = correctRecargo * 2;
+    const cobroExceso = errorRecargo - correctRecargo;
+    const total = subtotal + errorRecargo;
+
+    const consigna = `En una compra de $${subtotal.toLocaleString('es-AR')} cobraron $${errorRecargo.toLocaleString('es-AR')} de recargo en lugar del ${recargoPerc}% correcto ($${correctRecargo.toLocaleString('es-AR')}). ¿Cuántos pesos cobraron DE MÁS por este error?`;
+    const opciones = shuffle([
+      { id: 'opt-1', texto: `$${cobroExceso.toLocaleString('es-AR')} de más`, correcta: true },
+      { id: 'opt-2', texto: `$${errorRecargo.toLocaleString('es-AR')} de más` },
+      { id: 'opt-3', texto: `$${(cobroExceso * 2).toLocaleString('es-AR')} de más` }
+    ]);
+    const correctOpt = opciones.find(o => o.correcta);
+
+    return {
+      title: '¿Cuántos Pesos Cobraron de Más?',
+      consigna,
+      ticket: {
+        empresa: levelNum === 0 ? 'Librería de Barrio' : levelNum === 1 ? 'Tienda de Electrodomésticos' : 'Importadora Industrial',
+        fecha: new Date().toLocaleDateString('es-AR'),
+        items: [
+          { nombre: 'Equipos y Mercadería', precio: subtotal }
+        ],
+        subtotal,
+        recargoTexto: `Recargo Tarjeta ${recargoPerc}%`,
+        descuentoAplicado: errorRecargo,
+        totalCobrado: total
+      },
+      opciones,
+      correctAnswer: correctOpt.id
+    };
+  }
+
+  // MODO 4: DETECTAR ERROR ESPECÍFICO EXPLICADO
+  const p1 = Math.round(subtotalBase * 0.6);
+  const p2 = Math.round(subtotalBase * 0.4);
+  const subtotal = p1 + p2;
+  const correctDesc = Math.round((subtotal * descPerc) / 100);
+  const errorDesc = correctDesc + (levelNum === 0 ? 300 : levelNum === 1 ? 2000 : 7000);
+  const total = subtotal - errorDesc;
+  const consigna = `Revisá la liquidación de la compra por un subtotal de $${subtotal.toLocaleString('es-AR')}. Se debía aplicar un ${descPerc}% de descuento, pero se restaron $${errorDesc.toLocaleString('es-AR')}. ¿Dónde está la falla?`;
+
+  const opciones = shuffle([
+    { id: 'opt-1', texto: `El subtotal está mal sumado.` },
+    { id: 'opt-2', texto: `El ${descPerc}% de $${subtotal.toLocaleString('es-AR')} debió ser $${correctDesc.toLocaleString('es-AR')}, no $${errorDesc.toLocaleString('es-AR')}.`, correcta: true },
+    { id: 'opt-3', texto: `El cobro final está perfecto.` }
+  ]);
+  const correctOpt = opciones.find(o => o.correcta);
+
+  return {
+    title: 'Detección de Error en la Liquidación',
+    consigna,
+    ticket: {
+      empresa: levelNum === 0 ? 'Pizzería de Barrio' : levelNum === 1 ? 'Restaurante Gourmet' : 'Cadena Gastronómica',
+      fecha: new Date().toLocaleDateString('es-AR'),
+      items: [
+        { nombre: 'Consumo Principal', precio: p1 },
+        { nombre: 'Bebidas y Adicionales', precio: p2 }
+      ],
+      subtotal,
+      descuentoTexto: `Descuento Especial ${descPerc}%`,
+      descuentoAplicado: errorDesc,
+      totalCobrado: total
+    },
+    opciones,
+    correctAnswer: correctOpt.id
+  };
+}
+
+function generateDiverseDecision(input) {
+  const levelNum = Number(input.level) || 0;
+
+  // ESCENARIO PARA NIVEL 0 (PRINCIPIANTE - 2 OPCIONES A vs B)
+  if (levelNum === 0) {
+    const base = randomInt(1, 4) * 10000; // $10.000 a $40.000
+    const desc = 10;
+    const totalA = Math.round(base * (1 - desc / 100));
+    const cuotas = 3;
+    const valorCuota = Math.round((base * 1.15) / cuotas);
+    const totalB = valorCuota * cuotas;
+    const consigna = `Vas a realizar una compra por un total de $${base.toLocaleString('es-AR')}. Tenés dos opciones: Opción A con ${desc}% de descuento contado ($${totalA.toLocaleString('es-AR')}) vs Opción B en ${cuotas} cuotas de $${valorCuota.toLocaleString('es-AR')} ($${totalB.toLocaleString('es-AR')} total). ¿Cuál es la opción más económica?`;
+
+    return {
+      title: 'Dilema de Compra: Contado vs 3 Cuotas',
+      consigna,
+      opcionA: {
+        id: 'A',
+        titulo: 'Opción A: Pago Contado',
+        detalle: `${desc}% Descuento Inmediato`,
+        montoTotal: totalA,
+        subtexto: `Pagás $${totalA.toLocaleString('es-AR')} hoy`
+      },
+      opcionB: {
+        id: 'B',
+        titulo: `Opción B: ${cuotas} Cuotas Fijas`,
+        detalle: `${cuotas} cuotas de $${valorCuota.toLocaleString('es-AR')}`,
+        montoTotal: totalB,
+        subtexto: `Pagás $${totalB.toLocaleString('es-AR')} en total`
+      },
+      respuestaCorrecta: 'A',
+      correctAnswer: 'A'
+    };
+  }
+
+  // ESCENARIO PARA NIVEL 1 (INTERMEDIO - 3 OPCIONES A vs B vs C)
+  if (levelNum === 1) {
+    const base = randomInt(5, 12) * 10000; // $50.000 a $120.000
+    const descA = 15;
+    const totalA = Math.round(base * (1 - descA / 100));
+    
+    // Opción B: 6 cuotas con 10% recargo
+    const recargoB = 10;
+    const totalB = Math.round(base * (1 + recargoB / 100));
+    const cuotaB = Math.round(totalB / 6);
+
+    // Opción C: 12 cuotas con 30% recargo
+    const recargoC = 30;
+    const totalC = Math.round(base * (1 + recargoC / 100));
+    const cuotaC = Math.round(totalC / 12);
+
+    const consigna = `Querés comprar equipamiento por $${base.toLocaleString('es-AR')}. Tenés 3 opciones de pago: Opción A con ${descA}% de descuento contado ($${totalA.toLocaleString('es-AR')}), Opción B en 6 cuotas ($${totalB.toLocaleString('es-AR')} total) u Opción C en 12 cuotas ($${totalC.toLocaleString('es-AR')} total). ¿Cuál opción representa el MENOR desembolso total de dinero?`;
+
+    return {
+      title: 'Dilema de Finanzas: 3 Opciones de Pago',
+      consigna,
+      opcionA: {
+        id: 'A',
+        titulo: 'Opción A: Contado 15% OFF',
+        detalle: 'Descuento en 1 Pago',
+        montoTotal: totalA,
+        subtexto: `Total a pagar: $${totalA.toLocaleString('es-AR')}`
+      },
+      opcionB: {
+        id: 'B',
+        titulo: 'Opción B: 6 Cuotas',
+        detalle: `6 cuotas de $${cuotaB.toLocaleString('es-AR')}`,
+        montoTotal: totalB,
+        subtexto: `Total a pagar: $${totalB.toLocaleString('es-AR')}`
+      },
+      opcionC: {
+        id: 'C',
+        titulo: 'Opción C: 12 Cuotas',
+        detalle: `12 cuotas de $${cuotaC.toLocaleString('es-AR')}`,
+        montoTotal: totalC,
+        subtexto: `Total a pagar: $${totalC.toLocaleString('es-AR')}`
+      },
+      respuestaCorrecta: 'A',
+      correctAnswer: 'A'
+    };
+  }
+
+  // ESCENARIO PARA NIVEL 2 (AVANZADO - 3 OPCIONES COMPLEJAS A vs B vs C)
+  const precioPar = randomInt(30, 50) * 1000; // $30.000 a $50.000 por unidad
+  const cant = 3;
+  const totalSinPromo = precioPar * cant;
+
+  // Opción A: Promo 3x2 (1 gratis)
+  const totalA = precioPar * (cant - 1);
+
+  // Opción B: 2do par al 70% de descuento
+  const totalB = precioPar + Math.round(precioPar * 0.3) + precioPar;
+
+  // Opción C: 25% de descuento directo en el total
+  const totalC = Math.round(totalSinPromo * 0.75);
+
+  const consigna = `En un local de indumentaria querés llevar 3 pares de zapatillas de $${precioPar.toLocaleString('es-AR')} cada uno (total sin promo $${totalSinPromo.toLocaleString('es-AR')}). ¿Cuál de las 3 promociones te da el PRECIO TOTAL MÁS BAJO?`;
+
+  return {
+    title: 'Comparativa Avanzada: Promo 3x2 vs 2do al 70% vs 25% OFF',
+    consigna,
+    opcionA: {
+      id: 'A',
+      titulo: 'Opción A: Promo 3x2',
+      detalle: 'Llevás 3, pagás 2 (1 gratis)',
+      montoTotal: totalA,
+      subtexto: `Pagás $${totalA.toLocaleString('es-AR')} por los 3 pares`
+    },
+    opcionB: {
+      id: 'B',
+      titulo: 'Opción B: 2do al 70% OFF',
+      detalle: 'Descuento del 70% en la 2da unidad',
+      montoTotal: totalB,
+      subtexto: `Pagás $${totalB.toLocaleString('es-AR')} por los 3 pares`
+    },
+    opcionC: {
+      id: 'C',
+      titulo: 'Opción C: 25% OFF Directo',
+      detalle: '25% de descuento en el total',
+      montoTotal: totalC,
+      subtexto: `Pagás $${totalC.toLocaleString('es-AR')} por los 3 pares`
+    },
+    respuestaCorrecta: 'A',
+    correctAnswer: 'A'
+  };
 }

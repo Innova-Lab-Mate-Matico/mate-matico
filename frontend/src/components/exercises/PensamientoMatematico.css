@@ -1,0 +1,308 @@
+/* Estilos para ejercicios de Pensamiento Matemático y TutorBubble */
+
+.tutor-bubble-container {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: linear-gradient(135deg, #f0fdf4 0%, #e0f2fe 100%);
+  border: 1.5px solid #93c5fd;
+  border-radius: 20px;
+  padding: 14px 18px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+}
+
+.tutor-bubble-container.align-right {
+  flex-direction: row;
+}
+
+.tutor-avatar-wrapper {
+  flex-shrink: 0;
+  width: 70px;
+  height: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tutor-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.12));
+}
+
+.tutor-speech-bubble {
+  flex: 1;
+}
+
+.tutor-badge-tag {
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: #2563eb;
+  background: #ffffff;
+  padding: 3px 10px;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.tutor-bubble-text {
+  margin: 6px 0 0 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #1e293b;
+  line-height: 1.35;
+}
+
+/* Estilos de Ticket Detective */
+.detective-card {
+  background: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.05);
+}
+
+.ticket-receipt {
+  background: #f8fafc;
+  border: 1px dashed #94a3b8;
+  border-radius: 14px;
+  padding: 16px;
+  font-family: 'Courier New', Courier, monospace;
+  margin: 16px 0;
+}
+
+.ticket-header {
+  text-align: center;
+  border-bottom: 1px dashed #cbd5e1;
+  padding-bottom: 10px;
+  margin-bottom: 12px;
+}
+
+.ticket-title {
+  font-weight: bold;
+  font-size: 1.05rem;
+  color: #0f172a;
+}
+
+.ticket-date {
+  font-size: 0.8rem;
+  color: #64748b;
+}
+
+.ticket-items-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.ticket-item-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  color: #334155;
+}
+
+.ticket-summary-divider {
+  border-top: 1px dashed #cbd5e1;
+  margin: 10px 0;
+}
+
+.ticket-summary-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.92rem;
+  font-weight: bold;
+  margin-bottom: 6px;
+}
+
+.ticket-summary-row.error-highlight {
+  background: #fef2f2;
+  color: #dc2626;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+.ticket-total-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 1.1rem;
+  font-weight: 900;
+  color: #1e1b4b;
+  border-top: 2px solid #0f172a;
+  padding-top: 8px;
+  margin-top: 6px;
+}
+
+/* Opciones de Selección */
+.detective-options-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.detective-option-btn {
+  background: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 14px;
+  padding: 12px 16px;
+  text-align: left;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #1e293b;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.detective-option-btn:hover {
+  border-color: #3b82f6;
+  background: #f0f9ff;
+  transform: translateY(-1px);
+}
+
+.detective-option-btn.selected {
+  border-color: #2563eb;
+  background: #eff6ff;
+  box-shadow: 0 0 0 2px #93c5fd;
+}
+
+.detective-option-btn.correct {
+  border-color: #22c55e;
+  background: #f0fdf4;
+  color: #15803d;
+}
+
+.detective-option-btn.wrong {
+  border-color: #ef4444;
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+/* Estilos de Ejercicio de Decisión (A vs B vs C) */
+.decision-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+  margin: 20px 0;
+  width: 100%;
+}
+
+.decision-cards-grid.has-3-options {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+@media (max-width: 640px) {
+  .decision-cards-grid,
+  .decision-cards-grid.has-3-options {
+    grid-template-columns: 1fr;
+  }
+}
+
+.decision-card-option {
+  background: #ffffff;
+  border: 2px solid #e2e8f0;
+  border-radius: 18px;
+  padding: 16px 14px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+  box-sizing: border-box;
+  height: 100%;
+}
+
+.decision-card-option:hover {
+  border-color: #8b5cf6;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(139, 92, 246, 0.12);
+}
+
+.decision-card-option.selected-A {
+  border-color: #3b82f6;
+  background: #f0f9ff;
+  box-shadow: 0 0 0 3px #93c5fd;
+}
+
+.decision-card-option.selected-B {
+  border-color: #8b5cf6;
+  background: #f5f3ff;
+  box-shadow: 0 0 0 3px #ddd6fe;
+}
+
+.decision-card-option.selected-C {
+  border-color: #0284c7;
+  background: #f0f9ff;
+  box-shadow: 0 0 0 3px #bae6fd;
+}
+
+.decision-card-option.correct {
+  border-color: #22c55e !important;
+  background: #f0fdf4 !important;
+  box-shadow: 0 0 0 3.5px #86efac !important;
+}
+
+.decision-card-option.wrong {
+  border-color: #ef4444 !important;
+  background: #fef2f2 !important;
+  box-shadow: 0 0 0 3.5px #fca5a5 !important;
+}
+
+.decision-option-badge {
+  font-size: 0.8rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: #6366f1;
+  background: #eeef4ff;
+  padding: 4px 10px;
+  border-radius: 10px;
+  width: fit-content;
+}
+
+.decision-option-title {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.decision-option-amount {
+  font-size: 1.35rem;
+  font-weight: 900;
+  color: #2563eb;
+}
+
+.decision-option-subtext {
+  font-size: 0.82rem;
+  color: #64748b;
+}
+
+.btn-confirm-thinking {
+  width: 100%;
+  padding: 14px;
+  border-radius: 16px;
+  border: none;
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 1.05rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 14px;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+}
+
+.btn-confirm-thinking:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.35);
+}
+
+.btn-confirm-thinking:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
