@@ -102,6 +102,18 @@ const INTEGRANTES = [
 ];
 
 export default function Equipo({ onClose, emailContacto = "talentotech17@gmail.com" }) {
+  const [invalidImages, setInvalidImages] = React.useState({});
+
+  const handleImageLoad = (e, name) => {
+    if (e.target.naturalWidth <= 1 && e.target.naturalHeight <= 1) {
+      setInvalidImages(prev => ({ ...prev, [name]: true }));
+    }
+  };
+
+  const handleImageError = (name) => {
+    setInvalidImages(prev => ({ ...prev, [name]: true }));
+  };
+
   // Obtener iniciales de un nombre
   const getIniciales = (nombre) => {
     const partes = nombre.split(" ");
@@ -144,10 +156,12 @@ export default function Equipo({ onClose, emailContacto = "talentotech17@gmail.c
                         overflow: 'hidden'
                       }}
                     >
-                      {miembro.fotoUrl ? (
+                      {miembro.fotoUrl && !invalidImages[miembro.nombre] ? (
                         <img 
                           src={miembro.fotoUrl} 
                           alt={miembro.nombre} 
+                          onLoad={(e) => handleImageLoad(e, miembro.nombre)}
+                          onError={() => handleImageError(miembro.nombre)}
                           style={{
                             width: '100%',
                             height: '100%',
