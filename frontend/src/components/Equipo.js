@@ -67,6 +67,12 @@ const INTEGRANTES = [
       { nombre: "Tamara Chaizaz Valenzuela", rol: "Data Analytics", avatarColor: "#f43f5e" },
       { nombre: "Ruben Barrios", rol: "Data Analytics", avatarColor: "#06af46" }
     ]
+  },
+  {
+    area: "Mentor del Equipo",
+    miembros: [
+      { nombre: "Matias Campos", rol: "Mentor", avatarColor: "#7b61ff" }
+    ]
   }
 ];
 
