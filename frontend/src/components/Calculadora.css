@@ -1,63 +1,79 @@
 /* ============================================================
-   CALCULADORA.CSS — Calculadora flotante de Mate Mático
-   Usa las mismas variables del sistema de diseño del proyecto:
-   - Color primario: #7b61ff
-   - Azul títulos: #163b74
-   - Fondo cards: #ffffff
-   - Border-radius 16px
+   CALCULADORA.CSS — Calculadora responsiva y lateral de Mate Mático
    ============================================================ */
 
-/* ── Contenedor flex para centrar tarjeta + calculadora side-by-side ── */
+/* Contenedor principal que une tarjeta de ejercicio y calculadora */
 .exercise-layout-wrapper {
   display: flex;
   flex-direction: row;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
-  gap: 20px;
+  gap: 24px;
   width: 100%;
   position: relative;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-@media (max-width: 768px) {
-  .exercise-layout-wrapper {
-    flex-direction: column;
-    gap: 16px;
-  }
-}
-
-/* ── Contenedor de la calculadora integrado en el layout ── */
+/* ── Panel Overlay de Calculadora ── */
 .calc-overlay {
   z-index: 100;
   flex-shrink: 0;
-  /* Animación de entrada */
+  position: sticky;
+  top: 20px;
   animation: calcSlideIn 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
+@keyframes calcSlideIn {
+  from { opacity: 0; transform: translateX(20px) scale(0.95); }
+  to   { opacity: 1; transform: translateX(0) scale(1); }
+}
+
+/* ── Responsivo para celulares (max-width: 768px) ── */
 @media (max-width: 768px) {
+  .exercise-layout-wrapper {
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+
   .calc-overlay {
     position: fixed;
-    bottom: 80px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 9999;
-    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.25);
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(15, 23, 42, 0.55);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 99999;
+    padding: 16px;
+    margin: 0;
+  }
+
+  .calc-panel {
+    width: 100% !important;
+    max-width: 320px !important;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35) !important;
+    animation: popUp 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   }
 }
 
-@keyframes calcSlideIn {
-  from { opacity: 0; transform: scale(0.95) translateX(15px); }
-  to   { opacity: 1; transform: scale(1)    translateX(0); }
+@keyframes popUp {
+  from { opacity: 0; transform: scale(0.85) translateY(20px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
 }
 
 /* ── Panel principal ─────────────────────────────────────── */
 .calc-panel {
-  width: 240px;
+  width: 260px;
   background: #ffffff;
   border-radius: 20px;
   box-shadow:
-    0 8px 32px rgba(123, 97, 255, 0.18),
-    0 2px 8px  rgba(0, 0, 0, 0.08);
-  border: 1px solid rgba(123, 97, 255, 0.15);
+    0 12px 36px rgba(123, 97, 255, 0.2),
+    0 2px 10px rgba(0, 0, 0, 0.08);
+  border: 1.5px solid rgba(123, 97, 255, 0.2);
   overflow: hidden;
   user-select: none;
 }
@@ -67,25 +83,26 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 16px 10px;
+  padding: 12px 16px;
   background: linear-gradient(135deg, #7b61ff 0%, #a78bfa 100%);
 }
 
 .calc-title {
-  font-size: 0.85rem;
+  font-size: 0.88rem;
   font-weight: 700;
   color: #ffffff;
   letter-spacing: 0.02em;
 }
 
 .calc-close {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.25);
   border: none;
   color: #ffffff;
   border-radius: 50%;
-  width: 24px;
-  height: 24px;
-  font-size: 0.7rem;
+  width: 26px;
+  height: 26px;
+  font-size: 0.8rem;
+  font-weight: bold;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -94,31 +111,32 @@
 }
 
 .calc-close:hover {
-  background: rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.4);
 }
 
 /* ── Display ─────────────────────────────────────────────── */
 .calc-display {
   background: #f8f7ff;
-  padding: 10px 14px 8px;
-  min-height: 60px;
+  padding: 12px 16px 10px;
+  min-height: 64px;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
   justify-content: flex-end;
-  border-bottom: 1px solid rgba(123, 97, 255, 0.08);
+  border-bottom: 1.5px solid rgba(123, 97, 255, 0.1);
 }
 
 .calc-display-op {
-  font-size: 0.75rem;
+  font-size: 0.78rem;
   color: #94a3b8;
   margin-bottom: 2px;
   min-height: 16px;
+  font-weight: 500;
 }
 
 .calc-display-main {
-  font-size: 1.7rem;
-  font-weight: 700;
+  font-size: 1.8rem;
+  font-weight: 800;
   color: #163b74;
   letter-spacing: -0.02em;
   word-break: break-all;
@@ -129,24 +147,23 @@
 .calc-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 1px;
-  background: rgba(123, 97, 255, 0.06);
-  padding: 8px;
   gap: 6px;
+  background: rgba(123, 97, 255, 0.04);
+  padding: 10px;
 }
 
 /* ── Botón base ──────────────────────────────────────────── */
 .calc-btn {
   background: #f1f0ff;
   border: none;
-  border-radius: 10px;
+  border-radius: 12px;
   padding: 0;
-  height: 44px;
-  font-size: 1rem;
-  font-weight: 600;
+  height: 46px;
+  font-size: 1.05rem;
+  font-weight: 700;
   color: #163b74;
   cursor: pointer;
-  transition: background 0.1s, transform 0.08s;
+  transition: all 0.1s ease;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -168,41 +185,41 @@
 }
 
 .calc-btn--operador {
-  background: rgba(123, 97, 255, 0.12);
+  background: rgba(123, 97, 255, 0.14);
   color: #7b61ff;
-  font-size: 1.1rem;
+  font-size: 1.15rem;
 }
 
 .calc-btn--operador:active {
-  background: rgba(123, 97, 255, 0.25);
+  background: rgba(123, 97, 255, 0.28);
 }
 
 .calc-btn--igual {
   background: linear-gradient(135deg, #7b61ff 0%, #a78bfa 100%);
   color: #ffffff;
-  font-size: 1.1rem;
+  font-size: 1.15rem;
   grid-column: span 1;
+  box-shadow: 0 4px 12px rgba(123, 97, 255, 0.3);
 }
 
 .calc-btn--igual:active {
-  opacity: 0.85;
+  opacity: 0.88;
   transform: scale(0.93);
 }
 
-/* El 0 ocupa 2 columnas */
 .calc-btn--cero {
   grid-column: span 2;
   justify-content: flex-start;
-  padding-left: 16px;
+  padding-left: 18px;
 }
 
 /* ── Nota al pie ─────────────────────────────────────────── */
 .calc-hint {
-  font-size: 0.62rem;
+  font-size: 0.65rem;
   color: #94a3b8;
   text-align: center;
   padding: 6px 12px 10px;
   margin: 0;
   line-height: 1.4;
+  font-weight: 500;
 }
-

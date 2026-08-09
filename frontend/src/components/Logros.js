@@ -28,6 +28,7 @@ import starImg16 from '../assets/Progreso_img/Imagenes_progreso/image 16.png';
 import ventaIcon from '../assets/Img Logros/venta.png';
 import graficoCircularIcon from '../assets/Img Logros/grafico-circular.png';
 import decimalIcon from '../assets/Img Logros/decimal.png';
+import cerebroPng from '../assets/cerebro.png';
 
 // Mascotas por Nivel (Escolar, Profesor/Intermedio, Academico/Experto)
 import mateEscolar from '../assets/mate_escolar.webp';
@@ -81,6 +82,13 @@ const CATALOGO_DEFAULT = [
   { id: 'modulo-porcentajes', icon: shieldOrange, nombre: 'Experto en Porcentajes', descripcion: 'Módulo de Porcentajes completado', categoria: 'modulo', leyenda: '%' },
   { id: 'modulo-fracciones', icon: shieldOrange, nombre: 'Especialista en Fracciones', descripcion: 'Módulo de Fracciones completado', categoria: 'modulo', leyenda: '½' },
 
+  // Pensamiento Matemático
+  { id: 'detective-novato', icon: shieldPurple, innerIcon: cerebroPng, nombre: 'Detective Novato', descripcion: 'Completaste tu primera lección de Pensamiento', categoria: 'pensamiento' },
+  { id: 'ojo-critico', icon: shieldPurple, innerIcon: cerebroPng, nombre: 'Ojo Crítico', descripcion: 'Detectaste errores en facturas (Detective de Facturas)', categoria: 'pensamiento' },
+  { id: 'consumidor-inteligente', icon: shieldPurple, innerIcon: cerebroPng, nombre: 'Consumidor Inteligente', descripcion: 'Tomaste las mejores decisiones de compra (Dilemas)', categoria: 'pensamiento' },
+  { id: 'cerebro-rapido', icon: shieldPurple, innerIcon: cerebroPng, nombre: 'Cerebro Rápido', descripcion: 'Dominaste la estimación mental (Estimación Rápida)', categoria: 'pensamiento' },
+  { id: 'maestro-pensamiento', icon: shieldPurple, innerIcon: cerebroPng, nombre: 'Maestro del Pensamiento', descripcion: 'Completaste todo el módulo de Pensamiento Matemático', categoria: 'pensamiento' },
+
   // Puntaje alcanzado (star_rate, stars_2, star_shine)
   { id: 'pts-100', icon: shieldYellow, innerIcon: starRateIcon, nombre: '100 puntos', descripcion: 'Acumulación inicial de puntos', categoria: 'puntaje' },
   { id: 'pts-500', icon: shieldYellow, innerIcon: stars2Icon, nombre: 'Nivel intermedio', descripcion: 'Alcanzaste el rango con 500 pts', categoria: 'puntaje' },
@@ -92,6 +100,7 @@ const CATEGORIAS = [
   { key: 'racha', title: 'Hábito diario', boxBg: '#f3e8ff', boxBorder: '#e9d5ff', icon: modeHeatIcon },
   { key: 'leccion', title: 'Lecciones superadas', boxBg: '#e0f2fe', boxBorder: '#bae6fd', icon: twoPager2Icon },
   { key: 'modulo', title: 'Módulos completos', boxBg: '#ffedd5', boxBorder: '#fed7aa', icon: dashboardIcon },
+  { key: 'pensamiento', title: 'Pensamiento matemático', boxBg: '#ede9fe', boxBorder: '#c4b5fd', icon: cerebroPng },
   { key: 'puntaje', title: 'Puntaje alcanzado', boxBg: '#fef9c3', boxBorder: '#fef08a', icon: starShine2Icon },
 ];
 
@@ -143,6 +152,9 @@ export default function Logros({ embedded = false, userNivel = 'experto', apiCal
       const fraccionesCompletas = ['concepto-fraccion', 'decimales']
         .filter(id => leccionCompletada('fracciones', id)).length;
 
+      const pensamientoCompletas = ['detective-facturas', 'dilema-compras', 'estimacion-presupuesto']
+        .filter(id => leccionCompletada('pensamiento', id)).length;
+
       const condiciones = {
         'primer-paso': totalLecciones >= 1 || localUnlocked.includes('primer-paso') || true,
         'racha-3': racha >= 3 || localUnlocked.includes('racha-3'),
@@ -160,6 +172,13 @@ export default function Logros({ embedded = false, userNivel = 'experto', apiCal
         'base-aritmetica': aritmeticaCompletas >= 4 || localUnlocked.includes('base-aritmetica'),
         'modulo-porcentajes': porcentajesCompletas >= 2 || localUnlocked.includes('modulo-porcentajes'),
         'modulo-fracciones': fraccionesCompletas >= 2 || localUnlocked.includes('modulo-fracciones'),
+        // Pensamiento Matemático
+        'detective-novato': pensamientoCompletas >= 1 || localUnlocked.includes('detective-novato'),
+        'ojo-critico': leccionCompletada('pensamiento', 'detective-facturas') || localUnlocked.includes('ojo-critico'),
+        'consumidor-inteligente': leccionCompletada('pensamiento', 'dilema-compras') || localUnlocked.includes('consumidor-inteligente'),
+        'cerebro-rapido': leccionCompletada('pensamiento', 'estimacion-presupuesto') || localUnlocked.includes('cerebro-rapido'),
+        'maestro-pensamiento': pensamientoCompletas >= 3 || localUnlocked.includes('maestro-pensamiento'),
+        // Puntaje
         'pts-100': puntos >= 100 || localUnlocked.includes('pts-100'),
         'pts-500': puntos >= 500 || localUnlocked.includes('pts-500'),
         'pts-1500': puntos >= 1500 || localUnlocked.includes('pts-1500'),

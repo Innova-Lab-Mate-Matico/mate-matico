@@ -11,6 +11,7 @@ import Progress from './components/Progress';
 import PracticarCard from './components/PracticarCard';
 import RachaRotaModal from './components/RachaRotaModal';
 import AdminAnalyticsView from './components/AdminAnalyticsView';
+import Equipo from './components/Equipo';
 
 // NUEVOS COMPONENTES: Control de flujo inicial de captación
 import OnboardingWizard from './components/OnboardingWizard';
@@ -61,6 +62,7 @@ export default function App() {
   const [user, setUser] = useState(null);
   const [progress, setProgress] = useState(null);
   const [showRachaRota, setShowRachaRota] = useState(false);
+  const [showEquipoPage, setShowEquipoPage] = useState(false);
 
   const handleSetUser = (userData) => {
     setUser(userData);
@@ -711,6 +713,17 @@ const apiCall = React.useCallback(async (path, options = {}, customToken = null)
     );
   };
 
+  if (showEquipoPage) {
+    return (
+      <div className="app-main-layout" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', position: 'relative', overflowX: 'hidden' }}>
+        {renderServerErrorBanner()}
+        <img src={olaSuperior} alt="" className="global-wave ola-superior" />
+        <img src={olaInferior} alt="" className="global-wave ola-inferior" />
+        <Equipo onClose={() => setShowEquipoPage(false)} emailContacto="talentotech17@gmail.com" />
+      </div>
+    );
+  }
+
   if (!user) {
     /* PÁGINA DE INGRESO: Login centrado con leyenda discreta al pie, todo dentro de 100vh */
     return (
@@ -745,7 +758,13 @@ const apiCall = React.useCallback(async (path, options = {}, customToken = null)
         }}>
           <span style={{ fontWeight: '600', color: '#7b61ff' }}>Mate Mático — Innova Lab</span>
           {'  ·  '}
-          <span>Plataforma educativa con IA y gamificación</span>
+          <button 
+            type="button" 
+            onClick={() => setShowEquipoPage(true)}
+            style={{ background: 'none', border: 'none', color: '#9747FF', textDecoration: 'underline', cursor: 'pointer', fontSize: '0.75rem', fontWeight: '600', padding: 0 }}
+          >
+            Equipo de Mate Mático
+          </button>
           {'  ·  '}
           <span>© 2026 Innova Lab</span>
         </div>
@@ -866,6 +885,15 @@ const apiCall = React.useCallback(async (path, options = {}, customToken = null)
               <p className="footer-tagline">
                 Plataforma Educativa Adaptativa con Gamificación e Inteligencia Artificial
               </p>
+              <div style={{ marginTop: '12px', marginBottom: '12px' }}>
+                <button 
+                  type="button" 
+                  onClick={() => setShowEquipoPage(true)}
+                  style={{ background: 'none', border: 'none', color: '#7b61ff', textDecoration: 'underline', cursor: 'pointer', fontFamily: "'Poppins', sans-serif", fontWeight: '700', fontSize: '0.88rem' }}
+                >
+                  Equipo de Mate Mático
+                </button>
+              </div>
               <div className="footer-divider"></div>
               <p className="footer-copyright">
                 © 2026 Innova Lab — Todos los derechos reservados.

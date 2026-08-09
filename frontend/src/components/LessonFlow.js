@@ -5,7 +5,7 @@ import Microleccion2 from "./microleccion2";
 import DynamicTheoryCard from "./DynamicTheoryCard";
 import MultipleChoice from "./MultipleChoice";
 import DescansoCard from "./descansoCard";
-import NumericExercise from "./NumericExercise";
+import ExerciseDispatcher from "./exercises/ExerciseDispatcher";
 import ExitosCard from "./ExitosCard";
 import FinalizacionCard from "./FinalizacionCard";
 import TarjetaProgreso from "./TarjetaProgreso";
@@ -252,9 +252,10 @@ function LessonFlow({
         />
       )}
 
-      {currentStep.type === 'exercise' && currentStep.exercise.tipo === 'numeric' && (
-        <NumericExercise 
+      {currentStep.type === 'exercise' && currentStep.exercise.tipo !== 'multiple_choice' && (
+        <ExerciseDispatcher 
           key={currentStep.exercise.id}
+          exercise={currentStep.exercise}
           ejercicio={currentStep.exercise}
           index={currentStep.index}
           moduleId={moduleId}
@@ -263,6 +264,7 @@ function LessonFlow({
           moduleDetail={moduleDetail}
           teoria={leccion?.teoria}
           apiCall={apiCall}
+          userRole={user?.rolActual || 'principiante'}
           onAnswerSuccess={(pts) => {
             setSessionPoints(prev => prev + pts);
             if (onAnswerSuccess) onAnswerSuccess(pts);

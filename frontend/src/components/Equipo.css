@@ -1,0 +1,240 @@
+/* Estilos de la Vista de Equipo — Mate Mático */
+
+.equipo-view-container {
+  width: 100%;
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 24px 16px 80px 16px;
+  font-family: 'Poppins', sans-serif;
+  z-index: 20;
+  position: relative;
+}
+
+@media (min-width: 768px) {
+  .equipo-view-container {
+    padding-top: 40px;
+  }
+}
+
+/* Botón de volver superior */
+.equipo-header-nav {
+  margin-bottom: 24px;
+}
+
+.equipo-back-btn {
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(123, 97, 255, 0.2);
+  padding: 10px 20px;
+  border-radius: 30px;
+  font-weight: 700;
+  color: #7b61ff;
+  font-size: 0.92rem;
+  box-shadow: 0 4px 12px rgba(123, 97, 255, 0.08);
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.equipo-back-btn:hover {
+  background: #7b61ff;
+  color: #ffffff;
+  transform: translateX(-4px);
+  box-shadow: 0 6px 16px rgba(123, 97, 255, 0.2);
+}
+
+/* Encabezado */
+.equipo-heading-section {
+  text-align: center;
+  margin-bottom: 48px;
+}
+
+.equipo-main-title {
+  font-size: 2.2rem;
+  font-weight: 900;
+  color: #1e1b4b;
+  margin: 0;
+  line-height: 1.15;
+}
+
+.equipo-brand-subtitle {
+  font-size: 1.25rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #9747FF 0%, #C80ED9 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-top: 6px;
+  margin-bottom: 16px;
+}
+
+.equipo-description {
+  font-size: 0.95rem;
+  color: #64748b;
+  max-width: 580px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+/* Secciones de grupos */
+.equipo-group-section {
+  margin-bottom: 40px;
+}
+
+.equipo-group-title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #163b74;
+  border-left: 4px solid #9747FF;
+  padding-left: 12px;
+  margin-bottom: 20px;
+}
+
+/* Grid de tarjetas */
+.equipo-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 20px;
+}
+
+/* Tarjetas individuales de integrantes */
+.equipo-member-card {
+  background: #ffffff;
+  border: 1px solid rgba(151, 71, 255, 0.15);
+  border-radius: 20px;
+  padding: 24px 20px;
+  text-align: center;
+  box-shadow: 0 8px 24px rgba(151, 71, 255, 0.04);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.equipo-member-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 30px rgba(151, 71, 255, 0.12);
+  border-color: rgba(151, 71, 255, 0.4);
+}
+
+/* Óvalo en el centro para la foto */
+.equipo-avatar-oval-wrapper {
+  margin-bottom: 16px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.equipo-avatar-oval {
+  width: 90px;
+  height: 115px;
+  /* Proporción de óvalo vertical exacto */
+  border-radius: 50% / 40%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.15), 0 4px 10px rgba(0, 0, 0, 0.05);
+  border: 3.5px solid #ffffff;
+  outline: 2px solid rgba(151, 71, 255, 0.25);
+  transition: transform 0.3s ease;
+}
+
+.equipo-member-card:hover .equipo-avatar-oval {
+  transform: scale(1.05);
+  outline-color: rgba(151, 71, 255, 0.5);
+}
+
+.equipo-avatar-initials {
+  font-size: 1.6rem;
+  font-weight: 900;
+  color: #ffffff;
+  letter-spacing: 0.5px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+.equipo-member-name {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #1e293b;
+  margin: 0 0 4px 0;
+  line-height: 1.3;
+}
+
+.equipo-member-role {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #64748b;
+  margin: 0 0 16px 0;
+}
+
+/* Links a Redes Sociales */
+.equipo-social-links {
+  display: flex;
+  gap: 12px;
+  margin-top: auto;
+}
+
+.equipo-social-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #9747FF; /* Violeta oficial de la pagina */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff; /* Color de logo blanco para contraste */
+  box-shadow: 0 4px 10px rgba(151, 71, 255, 0.2);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.equipo-social-icon:hover {
+  background: #7b2cbf; /* Violeta mas oscuro */
+  color: #ffffff;
+  transform: scale(1.12);
+  box-shadow: 0 6px 16px rgba(123, 97, 255, 0.35);
+}
+
+/* Caja de Contacto y Mail */
+.equipo-contact-box {
+  background: #ffffff;
+  border: 1.5px solid rgba(151, 71, 255, 0.2);
+  border-radius: 24px;
+  padding: 30px 24px;
+  text-align: center;
+  margin-top: 56px;
+  box-shadow: 0 10px 30px rgba(123, 97, 255, 0.06);
+}
+
+.equipo-contact-icon {
+  font-size: 2.2rem;
+  display: block;
+  margin-bottom: 12px;
+}
+
+.equipo-contact-title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #1e1b4b;
+  margin: 0 0 6px 0;
+}
+
+.equipo-contact-text {
+  font-size: 0.9rem;
+  color: #64748b;
+  margin: 0 0 16px 0;
+}
+
+.equipo-contact-email {
+  display: inline-block;
+  font-size: 1.15rem;
+  font-weight: 900;
+  color: #7b61ff;
+  background: #f3f0ff;
+  padding: 10px 24px;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+}
+
+.equipo-contact-email:hover {
+  background: #7b61ff;
+  color: #ffffff;
+  transform: scale(1.03);
+  box-shadow: 0 4px 14px rgba(123, 97, 255, 0.15);
+}

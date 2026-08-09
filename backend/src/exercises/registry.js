@@ -16,6 +16,12 @@ import {
   generarEjercicioEconomia,
   resolverRespuestaEconomia,
 } from './modules/economiaBasica.js';
+import {
+  generarEjercicioDetective,
+  generarEjercicioDecision,
+  generarEjercicioEstimacion,
+  resolverRespuestaPensamiento,
+} from './modules/pensamientoMatematico.js';
 
 export const LECCION_GENERADORES = {
   aritmetica: {
@@ -41,6 +47,11 @@ export const LECCION_GENERADORES = {
     'interes-compuesto':  ['interes_compuesto_mc', 'interes_compuesto_num'],
     'presupuesto':        ['presupuesto_mc', 'presupuesto_num'],
   },
+  pensamiento: {
+    'detective-facturas': ['detective_mc'],
+    'dilema-compras':     ['decision_mc'],
+    'estimacion-presupuesto': ['estimacion_mc'],
+  },
 };
 
 const GENERADORES_MODULO = {
@@ -48,6 +59,11 @@ const GENERADORES_MODULO = {
   porcentajes: generarEjercicioPorcentajes,
   fracciones: generarEjercicioFracciones,
   economia: generarEjercicioEconomia,
+  pensamiento: (tipo, seed, userRole) => {
+    if (tipo === 'detective_mc') return generarEjercicioDetective(seed, userRole);
+    if (tipo === 'decision_mc') return generarEjercicioDecision(seed, userRole);
+    return generarEjercicioEstimacion(seed, userRole);
+  },
 };
 
 const RESOLVERS_MODULO = {
@@ -55,6 +71,7 @@ const RESOLVERS_MODULO = {
   porcentajes: resolverRespuestaPorcentajes,
   fracciones: resolverRespuestaFracciones,
   economia: resolverRespuestaEconomia,
+  pensamiento: resolverRespuestaPensamiento,
 };
 
 const META_TIPOS = buildMetaTipos();
@@ -133,16 +150,37 @@ export function reconstruirEjercicio(moduleId, lessonId, exerciseId, semilla, op
   if (!generar || !resolver) return null;
 
   for (const tipo of tipos) {
-    const ejercicio = generar(tipo, semilla, userRole);
+    let ejercicio = generar(tipo, semilla, userRole);
+    if (ejercicio?.id !== baseExerciseId) {
+      for (let i = 0; i < 10; i++) {
+        const altEj = generar(tipo, (Number(semilla) || 1000) + i * 9973, userRole);
+        if (altEj?.id === baseExerciseId) {
+          ejercicio = altEj;
+          break;
+        }
+      }
+    }
     if (ejercicio?.id !== baseExerciseId) continue;
 
-    const respuesta = resolver(operandos ?? ejercicio.operandos, tipo);
+    let respuesta = null;
+    try {
+      if (moduleId !== 'pensamiento') {
+        respuesta = resolver(operandos ?? ejercicio.operandos, tipo);
+      }
+    } catch (err) {
+      respuesta = null;
+    }
+
+    const respuestaFinal = (typeof respuesta === 'string' || typeof respuesta === 'number')
+      ? respuesta
+      : (ejercicio.respuestaCorrecta || ejercicio.correctAnswer || 'A');
+
     return FabricaEjercicios.crear({
       ...ejercicio,
       semilla,
       tipoGenerador: tipo,
       operandos: operandos ?? ejercicio.operandos,
-      respuestaCorrecta: respuesta ?? ejercicio.respuestaCorrecta,
+      respuestaCorrecta: respuestaFinal,
     });
   }
 

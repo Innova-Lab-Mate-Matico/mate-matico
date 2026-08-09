@@ -1,5 +1,8 @@
 import React, { useState } from "react";
 import telemetry from "../services/TelemetryService";
+import { EfectosService } from "../services/EfectosService";
+import ExerciseDispatcher from "./exercises/ExerciseDispatcher";
+import Calculadora from "./Calculadora";
 import "./PracticarCard.css";
 
 // ============================
@@ -25,6 +28,7 @@ function PracticarCard({ apiCall, onBack, onNavigate, onRefreshProfile }) {
 
   // Estados de generación y resolución
   const [loading, setLoading] = useState(false);
+  const [showCalc, setShowCalc] = useState(false);
   const [errorMsg, setErrorMsg] = useState(null);
   const [aiExercise, setAiExercise] = useState(null); // { exercise, source }
   const [selectedAnswer, setSelectedAnswer] = useState("");
@@ -36,7 +40,6 @@ function PracticarCard({ apiCall, onBack, onNavigate, onRefreshProfile }) {
   const handleGenerate = async () => {
     setLoading(true);
     setErrorMsg(null);
-    setAiExercise(null);
     setValidationResult(null);
     setSelectedAnswer("");
     setAttempt(1);
@@ -80,8 +83,9 @@ function PracticarCard({ apiCall, onBack, onNavigate, onRefreshProfile }) {
   };
 
   // Validar respuesta del ejercicio de IA
-  const handleValidateAnswer = async () => {
-    if (!selectedAnswer.trim() || validating || !aiExercise) return;
+  const handleValidateAnswer = async (answerOverride) => {
+    const answerToValidate = String(answerOverride || selectedAnswer || '').trim();
+    if (!answerToValidate || validating || !aiExercise) return;
 
     setValidating(true);
     try {
@@ -90,7 +94,7 @@ function PracticarCard({ apiCall, onBack, onNavigate, onRefreshProfile }) {
         method: "POST",
         body: JSON.stringify({
           exerciseId: exercise.id,
-          answer: selectedAnswer,
+          answer: answerToValidate,
           validationToken: exercise.validationToken,
           attempt,
         }),
@@ -99,6 +103,8 @@ function PracticarCard({ apiCall, onBack, onNavigate, onRefreshProfile }) {
       setValidationResult(res);
 
       if (res.correcto) {
+        EfectosService.reproducirSonido('acierto');
+        EfectosService.dispararConfeti();
         telemetry.track("ejercicio_completado", {
           modulo_id: "practica_ia",
           modulo_nombre: "Práctica con IA",
@@ -119,6 +125,7 @@ function PracticarCard({ apiCall, onBack, onNavigate, onRefreshProfile }) {
           onRefreshProfile(res);
         }
       } else {
+        EfectosService.reproducirSonido('error');
         setAttempt((prev) => prev + 1);
         telemetry.track("ejercicio_fallado", {
           modulo_id: "practica_ia",
@@ -184,8 +191,9 @@ function PracticarCard({ apiCall, onBack, onNavigate, onRefreshProfile }) {
     const isCompleted = validationResult?.correcto === true;
 
     return (
-      <div className="app-card practicar-card" style={{ maxWidth: '600px', margin: '0 auto' }}>
-        <img src={image2} alt="" className="card-top-wave" />
+      <div className="exercise-layout-wrapper" style={{ maxWidth: showCalc ? '920px' : '600px', margin: '0 auto', transition: 'max-width 0.3s ease' }}>
+        <div className="app-card practicar-card" style={{ flex: '1', maxWidth: '600px', margin: 0 }}>
+          <img src={image2} alt="" className="card-top-wave" />
 
         <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <button className="back-button" onClick={handleResetFilters}>
@@ -201,27 +209,69 @@ function PracticarCard({ apiCall, onBack, onNavigate, onRefreshProfile }) {
         </div>
 
         <div className="card-content" style={{ padding: '10px 0 20px 0' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
-            <img src={mateicoImg} alt="Mateico IA" style={{ width: '45px', height: '45px', objectFit: 'contain' }} />
-            <div>
-              <h2 style={{ fontSize: '1.1rem', fontWeight: '800', color: '#163b74', margin: 0 }}>
-                Ejercicio Práctico ({section})
-              </h2>
-              <span style={{ fontSize: '0.8rem', color: '#64748b' }}>
-                Nivel {level === 0 ? '0 (Principiante)' : level === 1 ? '1 (Intermedio)' : '2 (Avanzado)'} • {source === 'gemini' ? '✨ Gemini' : '⚡ Groq Llama 3.3'}
-              </span>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <img src={mateicoImg} alt="Mateico IA" style={{ width: '45px', height: '45px', objectFit: 'contain' }} />
+              <div>
+                <h2 style={{ fontSize: '1.1rem', fontWeight: '800', color: '#163b74', margin: 0 }}>
+                  Ejercicio Práctico ({section})
+                </h2>
+                <span style={{ fontSize: '0.8rem', color: '#64748b' }}>
+                  Nivel {level === 0 ? '0 (Principiante)' : level === 1 ? '1 (Intermedio)' : '2 (Avanzado)'} • {source === 'gemini' ? '✨ Gemini' : '⚡ Groq Llama 3.3'}
+                </span>
+              </div>
             </div>
+            <button
+              type="button"
+              onClick={() => setShowCalc(true)}
+              style={{
+                background: '#ffffff',
+                border: '1.5px solid #cbd5e1',
+                borderRadius: '12px',
+                padding: '8px 14px',
+                fontSize: '0.82rem',
+                fontWeight: '700',
+                color: '#475569',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.03)'
+              }}
+            >
+              <span>🧮</span>
+              <span>Calculadora</span>
+            </button>
           </div>
 
-          {/* Enunciado */}
-          <div style={{ background: '#f8fafc', border: '1.5px solid #e2e8f0', borderRadius: '16px', padding: '18px', marginBottom: '20px' }}>
-            <p style={{ fontSize: '0.98rem', color: '#1e293b', lineHeight: '1.5', margin: 0, fontWeight: '500' }}>
-              {exercise.description}
-            </p>
-          </div>
+          {/* Enunciado (Solo para opciones multiples clasicas o entradas directas) */}
+          {exercise.type !== 'detective' && exercise.type !== 'decision' && structure !== 'detective' && structure !== 'decision' && (
+            <div style={{ background: '#f8fafc', border: '1.5px solid #e2e8f0', borderRadius: '16px', padding: '18px', marginBottom: '20px' }}>
+              <p style={{ fontSize: '0.98rem', color: '#1e293b', lineHeight: '1.5', margin: 0, fontWeight: '500' }}>
+                {exercise.description}
+              </p>
+            </div>
+          )}
 
-          {/* Opciones Múltiples o Entrada Libre */}
-          {exercise.type === 'multiple_choice' && exercise.answers ? (
+          {/* Ejercicios de Pensamiento Matemático (Detective, Decisión, etc.) o Múltiple Opción / Entrada */}
+          {exercise.type === 'detective' || exercise.type === 'decision' || structure === 'detective' || structure === 'decision' ? (
+            <div style={{ marginBottom: '20px' }}>
+              <ExerciseDispatcher
+                exercise={{
+                  ...exercise,
+                  type: exercise.type || structure,
+                  consigna: exercise.consigna || exercise.description,
+                  title: exercise.title || (structure === 'detective' ? 'Detective de errores' : 'Dilema de compra')
+                }}
+                onAnswer={(ans) => {
+                  setSelectedAnswer(ans);
+                  handleValidateAnswer(ans);
+                }}
+                feedback={validationResult}
+                isAnswered={isCompleted}
+              />
+            </div>
+          ) : exercise.type === 'multiple_choice' && exercise.answers ? (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '20px' }}>
               {exercise.answers.map((ans, idx) => {
                 const isSelected = selectedAnswer === ans;
@@ -341,7 +391,7 @@ function PracticarCard({ apiCall, onBack, onNavigate, onRefreshProfile }) {
           )}
         </div>
 
-        {!isCompleted && (
+        {!isCompleted && exercise.type !== 'detective' && exercise.type !== 'decision' && structure !== 'detective' && structure !== 'decision' && (
           <div className="card-footer">
             <button
               className="primary-button generar-button"
@@ -350,6 +400,66 @@ function PracticarCard({ apiCall, onBack, onNavigate, onRefreshProfile }) {
             >
               <span>{validating ? 'Comprobando...' : 'Comprobar respuesta'}</span>
             </button>
+          </div>
+        )}
+        </div>
+
+        {/* MODAL CALCULADORA MATE-MÁTICO */}
+        {showCalc && (
+          <Calculadora
+            onClose={() => setShowCalc(false)}
+            onInsertResult={(v) => setSelectedAnswer(String(v))}
+          />
+        )}
+
+        {/* MODAL DE CARGA MATEICO */}
+        {loading && (
+          <div style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(15, 23, 42, 0.7)',
+            backdropFilter: 'blur(5px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 9999,
+            padding: '20px'
+          }}>
+            <div style={{
+              background: '#ffffff',
+              borderRadius: '24px',
+              padding: '36px 24px',
+              maxWidth: '380px',
+              width: '100%',
+              textAlign: 'center',
+              boxShadow: '0 20px 40px rgba(0,0,0,0.25)',
+              border: '2px solid #e2e8f0',
+              position: 'relative',
+              overflow: 'hidden'
+            }}>
+              <img src={image2} alt="" className="card-top-wave" style={{ opacity: 0.6 }} />
+              <div style={{ position: 'relative', zIndex: 2 }}>
+                <img 
+                  src={mateicoImg} 
+                  alt="Mateico creando..." 
+                  style={{ 
+                    width: '85px', 
+                    height: '85px', 
+                    objectFit: 'contain',
+                    marginBottom: '16px'
+                  }} 
+                />
+                <h3 style={{ fontSize: '1.2rem', fontWeight: '800', color: '#163b74', margin: '0 0 8px 0' }}>
+                  ¡Mateico está pensando! ✨
+                </h3>
+                <p style={{ fontSize: '0.9rem', color: '#64748b', margin: 0, lineHeight: '1.5', fontWeight: '500' }}>
+                  Creando un nuevo ejercicio exclusivo de <strong>{section}</strong> para tu nivel...
+                </p>
+              </div>
+            </div>
           </div>
         )}
       </div>
@@ -430,7 +540,15 @@ function PracticarCard({ apiCall, onBack, onNavigate, onRefreshProfile }) {
             <select
               className="filter-select"
               value={section}
-              onChange={(e) => setSection(e.target.value)}
+              onChange={(e) => {
+                const val = e.target.value;
+                setSection(val);
+                if (val === 'Pensamiento matemático') {
+                  setStructure('detective');
+                } else if (structure === 'detective' || structure === 'decision') {
+                  setStructure('multiple_choice');
+                }
+              }}
               disabled={loading}
             >
               <option value="Suma y Resta">Suma y resta</option>
@@ -438,6 +556,7 @@ function PracticarCard({ apiCall, onBack, onNavigate, onRefreshProfile }) {
               <option value="División">División</option>
               <option value="Fracciones">Fracciones</option>
               <option value="Ecuaciones">Porcentajes y finanzas</option>
+              <option value="Pensamiento matemático">Pensamiento matemático (Detective y Dilemas)</option>
             </select>
           </div>
         </div>
@@ -455,8 +574,17 @@ function PracticarCard({ apiCall, onBack, onNavigate, onRefreshProfile }) {
               onChange={(e) => setStructure(e.target.value)}
               disabled={loading}
             >
-              <option value="multiple_choice">Opción múltiple</option>
-              <option value="input">Entrada libre de texto / número</option>
+              {section === 'Pensamiento matemático' ? (
+                <>
+                  <option value="detective">Detective (Buscar error en ticket)</option>
+                  <option value="decision">Dilema de compra (Opción A vs B)</option>
+                </>
+              ) : (
+                <>
+                  <option value="multiple_choice">Opción múltiple</option>
+                  <option value="input">Entrada libre de texto / número</option>
+                </>
+              )}
             </select>
           </div>
         </div>
@@ -497,6 +625,65 @@ function PracticarCard({ apiCall, onBack, onNavigate, onRefreshProfile }) {
           <img src={group52} alt="" className="button-icon" />
         </button>
       </div>
+
+      {/* MODAL CALCULADORA MATE-MÁTICO (EN VISTA FILTROS) */}
+      {showCalc && (
+        <Calculadora
+          onClose={() => setShowCalc(false)}
+          onInsertResult={(v) => setSelectedAnswer(String(v))}
+        />
+      )}
+
+      {/* MODAL DE CARGA MATEICO (EN VISTA FILTROS) */}
+      {loading && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(15, 23, 42, 0.7)',
+          backdropFilter: 'blur(5px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 9999,
+          padding: '20px'
+        }}>
+          <div style={{
+            background: '#ffffff',
+            borderRadius: '24px',
+            padding: '36px 24px',
+            maxWidth: '380px',
+            width: '100%',
+            textAlign: 'center',
+            boxShadow: '0 20px 40px rgba(0,0,0,0.25)',
+            border: '2px solid #e2e8f0',
+            position: 'relative',
+            overflow: 'hidden'
+          }}>
+            <img src={image2} alt="" className="card-top-wave" style={{ opacity: 0.6 }} />
+            <div style={{ position: 'relative', zIndex: 2 }}>
+              <img 
+                src={mateicoImg} 
+                alt="Mateico creando..." 
+                style={{ 
+                  width: '85px', 
+                  height: '85px', 
+                  objectFit: 'contain',
+                  marginBottom: '16px'
+                }} 
+              />
+              <h3 style={{ fontSize: '1.2rem', fontWeight: '800', color: '#163b74', margin: '0 0 8px 0' }}>
+                ¡Mateico está pensando! ✨
+              </h3>
+              <p style={{ fontSize: '0.9rem', color: '#64748b', margin: 0, lineHeight: '1.5', fontWeight: '500' }}>
+                Creando un nuevo ejercicio exclusivo de <strong>{section}</strong> para tu nivel...
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

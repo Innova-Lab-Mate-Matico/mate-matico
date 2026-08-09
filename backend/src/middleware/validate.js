@@ -69,25 +69,24 @@ export function validateGoogleBody(req, res, next) {
 
 // 4. Ejercicio
 export function validateExerciseBody(req, res, next) {
-  const { moduleId, lessonId, exerciseId, answer, semilla, operandos } = req.body ?? {};
+  const { moduleId, lessonId, exerciseId, answer } = req.body ?? {};
   if (!moduleId || !lessonId || !exerciseId) {
     return res.status(400).json({
       success: false,
       error: 'moduleId, lessonId y exerciseId son obligatorios',
     });
   }
-  if (answer === undefined || answer === null || answer === '') {
+  if (answer === undefined || answer === null || String(answer).trim() === '') {
     return res.status(400).json({
       success: false,
       error: 'answer es obligatorio',
     });
   }
-  if (semilla === undefined || operandos === undefined) {
-    return res.status(400).json({
-      success: false,
-      error: 'semilla y operandos son obligatorios para validar ejercicios dinámicos',
-    });
-  }
+  
+  // Asignar defaults si no vienen definidos (ej: ejercicios de pensamiento matemático o estáticos)
+  if (req.body.semilla === undefined) req.body.semilla = 1000;
+  if (req.body.operandos === undefined) req.body.operandos = {};
+
   const exerciseSchema = z.object({
     moduleId: z.string().min(1),
     lessonId: z.string().min(1),
@@ -95,6 +94,7 @@ export function validateExerciseBody(req, res, next) {
     answer: z.any(),
     semilla: z.any(),
     operandos: z.any(),
+    userRole: z.any().optional()
   });
   return validate(exerciseSchema)(req, res, next);
 }
