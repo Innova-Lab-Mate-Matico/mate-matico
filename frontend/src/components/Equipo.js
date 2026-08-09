@@ -4,6 +4,7 @@ import './Equipo.css';
 import rubenFoto from '../assets/Equipo/ruben_barrios.png';
 import matiasFoto from '../assets/Equipo/matias_gonzales.jpg';
 import jonatanFoto from '../assets/Equipo/jonatan_churruarin.jpg';
+import aliFoto from '../assets/Equipo/ali_tovar.png';
 
 import olaCard1 from '../assets/ola1.png';
 import olaCard2 from '../assets/ola2.png';
@@ -77,7 +78,14 @@ const INTEGRANTES = [
   {
     area: "Testing QA",
     miembros: [
-      { nombre: "Ali Valentin Tovar Morales", rol: "Testing QA", avatarColor: "#06b6d4" },
+      { 
+        nombre: "Ali Valentin Tovar Morales", 
+        rol: "Testing QA", 
+        avatarColor: "#06b6d4",
+        githubUrl: "https://github.com/avtovar",
+        linkedinUrl: "https://www.linkedin.com/in/ali-v-tovar/",
+        fotoUrl: aliFoto
+      },
       { nombre: "Sebastian Estraviz", rol: "Testing QA", avatarColor: "#8b5cf6" },
       { nombre: "Jesus Augusto Parra Capdevielle", rol: "Testing QA", avatarColor: "#14b8a6" }
     ]
@@ -85,7 +93,13 @@ const INTEGRANTES = [
   {
     area: "Data Analytics",
     miembros: [
-      { nombre: "Tamara Chaizaz Valenzuela", rol: "Data Analytics", avatarColor: "#f43f5e" },
+      { 
+        nombre: "Tamara Chaizaz Valenzuela", 
+        rol: "Data Analytics", 
+        avatarColor: "#f43f5e",
+        githubUrl: "https://github.com/TamaraChaizaz",
+        linkedinUrl: "https://www.linkedin.com/in/silvia-tamara-chaizaz-valenzuela-1a9ab1290/"
+      },
       { 
         nombre: "Ruben Barrios", 
         rol: "Data Analytics", 
