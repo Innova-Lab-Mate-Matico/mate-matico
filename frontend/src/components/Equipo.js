@@ -7,6 +7,7 @@ import jonatanFoto from '../assets/Equipo/jonatan_churruarin.jpg';
 import aliFoto from '../assets/Equipo/ali_tovar.png';
 import gissellaFoto from '../assets/Equipo/gi_saldana.png';
 import jesusFoto from '../assets/Equipo/jesus_capdevielle.jpg';
+import tamaraFoto from '../assets/Equipo/tamara_chaizas.jpeg';
 
 import olaCard1 from '../assets/ola1.png';
 import olaCard2 from '../assets/ola2.png';
@@ -112,7 +113,8 @@ const INTEGRANTES = [
         rol: "Data Analytics", 
         avatarColor: "#f43f5e",
         githubUrl: "https://github.com/TamaraChaizaz",
-        linkedinUrl: "https://www.linkedin.com/in/silvia-tamara-chaizaz-valenzuela-1a9ab1290/"
+        linkedinUrl: "https://www.linkedin.com/in/silvia-tamara-chaizaz-valenzuela-1a9ab1290/",
+        fotoUrl: tamaraFoto
       },
       { 
         nombre: "Ruben Barrios", 
