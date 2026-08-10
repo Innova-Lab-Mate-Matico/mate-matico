@@ -122,7 +122,11 @@ const INTEGRANTES = [
         avatarColor: "#f43f5e",
         githubUrl: "https://github.com/TamaraChaizaz",
         linkedinUrl: "https://www.linkedin.com/in/silvia-tamara-chaizaz-valenzuela-1a9ab1290/",
-        fotoUrl: tamaraFoto
+        fotoUrl: tamaraFoto,
+        fotoStyle: {
+          objectPosition: 'center 12%',
+          transform: 'scale(0.92)'
+        }
       },
       { 
         nombre: "Ruben Barrios", 
@@ -210,7 +214,8 @@ export default function Equipo({ onClose, emailContacto = "talentotech17@gmail.c
                           style={{
                             width: '100%',
                             height: '100%',
-                            objectFit: 'cover'
+                            objectFit: 'cover',
+                            ...miembro.fotoStyle
                           }}
                         />
                       ) : (
