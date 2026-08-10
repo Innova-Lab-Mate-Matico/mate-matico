@@ -5,6 +5,8 @@ import rubenFoto from '../assets/Equipo/ruben_barrios.png';
 import matiasFoto from '../assets/Equipo/matias_gonzales.jpg';
 import jonatanFoto from '../assets/Equipo/jonatan_churruarin.jpg';
 import aliFoto from '../assets/Equipo/ali_tovar.png';
+import gissellaFoto from '../assets/Equipo/gi_saldana.png';
+import jesusFoto from '../assets/Equipo/jesus_capdevielle.jpg';
 
 import olaCard1 from '../assets/ola1.png';
 import olaCard2 from '../assets/ola2.png';
@@ -72,7 +74,13 @@ const INTEGRANTES = [
   {
     area: "Diseño UX/UI",
     miembros: [
-      { nombre: "Gissella Saldaña Brachowicz", rol: "Diseño UX/UI", avatarColor: "#ec4899" }
+      { 
+        nombre: "Gissella Saldaña Brachowicz", 
+        rol: "Diseño UX/UI", 
+        avatarColor: "#ec4899",
+        linkedinUrl: "https://www.linkedin.com/in/gisaldana/",
+        fotoUrl: gissellaFoto
+      }
     ]
   },
   {
@@ -87,7 +95,13 @@ const INTEGRANTES = [
         fotoUrl: aliFoto
       },
       { nombre: "Sebastian Estraviz", rol: "Testing QA", avatarColor: "#8b5cf6" },
-      { nombre: "Jesus Augusto Parra Capdevielle", rol: "Testing QA", avatarColor: "#14b8a6" }
+      { 
+        nombre: "Jesus Augusto Parra Capdevielle", 
+        rol: "Testing QA", 
+        avatarColor: "#14b8a6",
+        linkedinUrl: "https://www.linkedin.com/in/jesus-capdevielle/",
+        fotoUrl: jesusFoto
+      }
     ]
   },
   {
