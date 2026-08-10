@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { initializeApp } from 'firebase/app';
-import { getAuth, GoogleAuthProvider, OAuthProvider, signInWithPopup, sendPasswordResetEmail, onIdTokenChanged } from 'firebase/auth';
+import { onIdTokenChanged } from 'firebase/auth';
 import './App.css'; // Tus estilos globales
 import './styles/Dashboard.css';
 import Auth from './components/Auth';
@@ -13,9 +12,12 @@ import RachaRotaModal from './components/RachaRotaModal';
 import AdminAnalyticsView from './components/AdminAnalyticsView';
 import Equipo from './components/Equipo';
 
-// NUEVOS COMPONENTES: Control de flujo inicial de captación
+// NUEVOS COMPONENTES: Control de flujo inicial de captación y refactorización
 import OnboardingWizard from './components/OnboardingWizard';
+import NetworkErrorModal from './components/NetworkErrorModal';
+import FigmaBottomNav from './components/FigmaBottomNav';
 import telemetry from './services/TelemetryService';
+import { getFirebaseAuthDetails, getFirebaseAuth as getFirebaseInstanceAuth } from './config/firebase';
 
 import olaSuperior from './assets/image 2.png';
 import olaInferior from './assets/image 10 (1).png';
@@ -30,8 +32,6 @@ import navProgresoSvg from './assets/diamond_shine.svg';
 import navPerfilSvg from './assets/account_circle.svg';
 import navAnaliticaImg from './assets/monitor.png';
 
-
-
 // URL base de la API backend
 const API_BASE =
   process.env.REACT_APP_API_BASE_URL ||
@@ -40,21 +40,9 @@ const API_BASE =
     : 'https://mate-matico-backend.onrender.com/api');
 
 
-// Configuración Firebase Client
-const firebaseClientConfig = {
-  apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
-  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.REACT_APP_FIREBASE_APP_ID,
-};
-
-let firebaseApp;
-let firebaseAuth;
-
-
 export default function App() {
+  const authInstance = getFirebaseInstanceAuth();
+
   const [token, setToken] = useState(
     localStorage.getItem('idToken') || ''
   );
@@ -85,6 +73,213 @@ export default function App() {
 
   // Pestaña activa
   const [activeTab, setActiveTab] = useState('inicio');
+  const [networkError, setNetworkError] = useState(false);
+  const [serverError, setServerError] = useState(null);
+
+  const setStatus = (msg, ok = true) => {
+    setStatusMsg(msg);
+    setIsStatusOk(ok);
+  };
+
+  /*
+    Cerrar sesión.
+  */
+  const logout = React.useCallback(() => {
+    telemetry.endSession();
+    setToken('');
+    setUser(null);
+    setProgress(null);
+
+    localStorage.removeItem('idToken');
+
+    setStatus(
+      'Sesión cerrada correctamente',
+      true
+    );
+  }, []);
+
+  /*
+    Wrapper estándar para llamadas HTTP al backend con auto-refresh, manejo de 401, reintentos automáticos y cartel empático de red/servidor.
+  */
+  const apiCall = React.useCallback(async (path, options = {}, customToken = null) => {
+    const headers = {
+      "Content-Type": "application/json",
+      "x-client-timezone": Intl.DateTimeFormat().resolvedOptions().timeZone,
+      ...options.headers,
+    };
+
+    let activeToken = customToken || token || localStorage.getItem('idToken');
+
+    // Si Firebase Auth está activo, obtener el token más actualizado posible
+    if (authInstance && authInstance.currentUser) {
+      try {
+        activeToken = await authInstance.currentUser.getIdToken(false);
+        localStorage.setItem('idToken', activeToken);
+      } catch (e) {
+        console.warn("Auto-refresh previo de token falló:", e);
+      }
+    }
+
+    if (activeToken) {
+      headers.Authorization = `Bearer ${activeToken}`;
+    }
+
+    const isProgressGet = (path === '/progress' || path === '/progress/weekly') && (!options.method || options.method.toUpperCase() === 'GET');
+    const isProgressMutation = path.startsWith('/progress') && (options.method && options.method.toUpperCase() !== 'GET');
+    const PROGRESS_CACHE_KEY = `mate_matico_cache_${path}`;
+    const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutos de cache local inteligente
+
+    if (isProgressGet && !options?.forceRefresh) {
+      try {
+        const rawCache = localStorage.getItem(PROGRESS_CACHE_KEY);
+        if (rawCache) {
+          const parsed = JSON.parse(rawCache);
+          if (parsed && parsed.timestamp && (Date.now() - parsed.timestamp < CACHE_TTL_MS)) {
+            console.log(`⚡ [Cache Hit] ${path} desde localStorage (0 lecturas a BD)`);
+            return parsed.data;
+          }
+        }
+      } catch (e) {
+        // Ignorar error de parseo
+      }
+    }
+
+    let res;
+    let attempts = 0;
+    const maxAttempts = 3;
+
+    while (attempts < maxAttempts) {
+      try {
+        res = await fetch(`${API_BASE}${path}`, {
+          ...options,
+          headers,
+        });
+        break;
+      } catch (netErr) {
+        attempts += 1;
+        console.warn(`⚠️ Intento ${attempts}/${maxAttempts} para ${path} falló por red/cold-start. Reintentando automáticamente en breve...`);
+        if (attempts >= maxAttempts) {
+          console.error("Error de red persistente al conectar con la API:", netErr);
+          setServerError({
+            active: true,
+            retry: () => apiCall(path, options, customToken)
+          });
+          throw netErr;
+        }
+        const waitTime = 1200 * attempts;
+        await new Promise((r) => setTimeout(r, waitTime));
+      }
+    }
+
+    // Interceptor de 401 Unauthorized: renovar forzosamente y reintentar la petición automáticamente
+    if (res.status === 401 && authInstance && authInstance.currentUser) {
+      try {
+        console.log("⚠️ Token 401 detectado. Renovando token con Firebase...");
+        const refreshedToken = await authInstance.currentUser.getIdToken(true);
+        localStorage.setItem('idToken', refreshedToken);
+        setToken(refreshedToken);
+        headers.Authorization = `Bearer ${refreshedToken}`;
+
+        res = await fetch(`${API_BASE}${path}`, {
+          ...options,
+          headers,
+        });
+      } catch (refreshErr) {
+        console.error("Falló la renovación forzada de token expirado:", refreshErr);
+      }
+    }
+
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok) {
+      if (res.status === 401) {
+        console.warn("⚠️ Sesión expirada o no autorizada (401). Cerrando sesión de forma limpia...");
+        localStorage.removeItem('idToken');
+        setToken(null);
+        setUser(null);
+        setProgress(null);
+      } else if (res.status >= 500) {
+        setServerError({
+          active: true,
+          retry: () => apiCall(path, options, customToken)
+        });
+      }
+
+      const err = new Error(data.error || res.statusText || "Error inesperado en la API");
+      err.status = res.status;
+      err.raw = data;
+
+      telemetry.track('error_aplicacion', {
+        codigo_error: res.status,
+        mensaje: err.message,
+        contexto: path
+      });
+
+      throw err;
+    }
+
+    // Limpiar el aviso de error de servidor si la llamada fue exitosa
+    setServerError(null);
+
+    // Guardar en cache de localStorage si fue una lectura GET exitosa de progreso
+    if (isProgressGet && data) {
+      try {
+        localStorage.setItem(PROGRESS_CACHE_KEY, JSON.stringify({
+          timestamp: Date.now(),
+          data: data
+        }));
+      } catch (e) {
+        console.warn("Error guardando progreso en localStorage:", e);
+      }
+    }
+
+    // Invalidar cache de progreso inmediatamente si el usuario realiza un cambio/avance en lecciones
+    if (isProgressMutation) {
+      console.log(`🔄 [Cache Invalidate] Invalidadas consultas de progreso en localStorage por actualización`);
+      localStorage.removeItem('mate_matico_cache_/progress');
+      localStorage.removeItem('mate_matico_cache_/progress/weekly');
+    }
+
+    return data;
+  }, [token, authInstance]);
+
+  /*
+    Obtener perfil del usuario autenticado.
+  */
+  const loadProfile = React.useCallback(async (activeToken = null) => {
+    try {
+      const data = await apiCall(
+        '/auth/me',
+        {},
+        activeToken
+      );
+
+      handleSetUser(data.usuario);
+      telemetry.init(apiCall);
+    } catch (err) {
+      console.error('Error al cargar perfil:', err);
+      logout();
+    }
+  }, [apiCall, logout]);
+
+  /*
+    Obtener progreso académico del alumno.
+  */
+  const loadUserProgress = React.useCallback(async (
+    activeToken = null
+  ) => {
+    try {
+      const data = await apiCall(
+        '/progress',
+        {},
+        activeToken
+      );
+
+      setProgress(data.progreso || {});
+    } catch (err) {
+      console.error('Error al cargar progreso:', err);
+    }
+  }, [apiCall]);
 
   React.useEffect(() => {
     if (activeTab) {
@@ -94,15 +289,12 @@ export default function App() {
     }
   }, [activeTab]);
 
-  const [networkError, setNetworkError] = useState(false);
-  const [serverError, setServerError] = useState(null);
-
   /*
     Escuchar cambios y renovación automática de token de Firebase
   */
   React.useEffect(() => {
-    if (firebaseAuth) {
-      const unsubscribe = onIdTokenChanged(firebaseAuth, async (currentUser) => {
+    if (authInstance) {
+      const unsubscribe = onIdTokenChanged(authInstance, async (currentUser) => {
         if (currentUser) {
           try {
             const freshToken = await currentUser.getIdToken();
@@ -115,7 +307,7 @@ export default function App() {
       });
       return () => unsubscribe();
     }
-  }, []);
+  }, [authInstance]);
 
   /*
     Intentar recuperar sesión automáticamente al iniciar la aplicación.
@@ -130,7 +322,7 @@ export default function App() {
       loadProfile(savedToken);
       loadUserProgress(savedToken);
     }
-  }, []);
+  }, [loadProfile, loadUserProgress]);
 
   React.useEffect(() => {
     if (!user) {
@@ -144,193 +336,6 @@ export default function App() {
   }, [user]);
 
 
-  const setStatus = (msg, ok = true) => {
-    setStatusMsg(msg);
-    setIsStatusOk(ok);
-  };
-
-/*
-  Wrapper estándar para llamadas HTTP al backend con auto-refresh, manejo de 401, reintentos automáticos y cartel empático de red/servidor.
-*/
-const apiCall = React.useCallback(async (path, options = {}, customToken = null) => {
-  const headers = {
-    "Content-Type": "application/json",
-    "x-client-timezone": Intl.DateTimeFormat().resolvedOptions().timeZone,
-    ...options.headers,
-  };
-
-  let activeToken = customToken || token || localStorage.getItem('idToken');
-
-  // Si Firebase Auth está activo, obtener el token más actualizado posible
-  if (firebaseAuth && firebaseAuth.currentUser) {
-    try {
-      activeToken = await firebaseAuth.currentUser.getIdToken(false);
-      localStorage.setItem('idToken', activeToken);
-    } catch (e) {
-      console.warn("Auto-refresh previo de token falló:", e);
-    }
-  }
-
-  if (activeToken) {
-    headers.Authorization = `Bearer ${activeToken}`;
-  }
-
-  const isProgressGet = (path === '/progress' || path === '/progress/weekly') && (!options.method || options.method.toUpperCase() === 'GET');
-  const isProgressMutation = path.startsWith('/progress') && (options.method && options.method.toUpperCase() !== 'GET');
-  const PROGRESS_CACHE_KEY = `mate_matico_cache_${path}`;
-  const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutos de cache local inteligente
-
-  if (isProgressGet && !options?.forceRefresh) {
-    try {
-      const rawCache = localStorage.getItem(PROGRESS_CACHE_KEY);
-      if (rawCache) {
-        const parsed = JSON.parse(rawCache);
-        if (parsed && parsed.timestamp && (Date.now() - parsed.timestamp < CACHE_TTL_MS)) {
-          console.log(`⚡ [Cache Hit] ${path} desde localStorage (0 lecturas a BD)`);
-          return parsed.data;
-        }
-      }
-    } catch (e) {
-      // Ignorar error de parseo
-    }
-  }
-
-  let res;
-  let attempts = 0;
-  const maxAttempts = 3;
-
-  while (attempts < maxAttempts) {
-    try {
-      res = await fetch(`${API_BASE}${path}`, {
-        ...options,
-        headers,
-      });
-      break;
-    } catch (netErr) {
-      attempts += 1;
-      console.warn(`⚠️ Intento ${attempts}/${maxAttempts} para ${path} falló por red/cold-start. Reintentando automáticamente en breve...`);
-      if (attempts >= maxAttempts) {
-        console.error("Error de red persistente al conectar con la API:", netErr);
-        setServerError({
-          active: true,
-          retry: () => apiCall(path, options, customToken)
-        });
-        throw netErr;
-      }
-      const waitTime = 1200 * attempts;
-      await new Promise((r) => setTimeout(r, waitTime));
-    }
-  }
-
-  // Interceptor de 401 Unauthorized: renovar forzosamente y reintentar la petición automáticamente
-  if (res.status === 401 && firebaseAuth && firebaseAuth.currentUser) {
-    try {
-      console.log("⚠️ Token 401 detectado. Renovando token con Firebase...");
-      const refreshedToken = await firebaseAuth.currentUser.getIdToken(true);
-      localStorage.setItem('idToken', refreshedToken);
-      setToken(refreshedToken);
-      headers.Authorization = `Bearer ${refreshedToken}`;
-
-      res = await fetch(`${API_BASE}${path}`, {
-        ...options,
-        headers,
-      });
-    } catch (refreshErr) {
-      console.error("Falló la renovación forzada de token expirado:", refreshErr);
-    }
-  }
-
-  const data = await res.json().catch(() => ({}));
-
-  if (!res.ok) {
-    if (res.status === 401) {
-      console.warn("⚠️ Sesión expirada o no autorizada (401). Cerrando sesión de forma limpia...");
-      localStorage.removeItem('idToken');
-      setToken(null);
-      setUser(null);
-    } else if (res.status >= 500) {
-      setServerError({
-        active: true,
-        retry: () => apiCall(path, options, customToken)
-      });
-    }
-
-    const err = new Error(data.error || res.statusText || "Error inesperado en la API");
-    err.status = res.status;
-    err.raw = data;
-
-    telemetry.track('error_aplicacion', {
-      codigo_error: res.status,
-      mensaje: err.message,
-      contexto: path
-    });
-
-    throw err;
-  }
-
-  // Limpiar el aviso de error de servidor si la llamada fue exitosa
-  setServerError(null);
-
-  // Guardar en cache de localStorage si fue una lectura GET exitosa de progreso
-  if (isProgressGet && data) {
-    try {
-      localStorage.setItem(PROGRESS_CACHE_KEY, JSON.stringify({
-        timestamp: Date.now(),
-        data: data
-      }));
-    } catch (e) {
-      console.warn("Error guardando progreso en localStorage:", e);
-    }
-  }
-
-  // Invalidar cache de progreso inmediatamente si el usuario realiza un cambio/avance en lecciones
-  if (isProgressMutation) {
-    console.log(`🔄 [Cache Invalidate] Invalidadas consultas de progreso en localStorage por actualización`);
-    localStorage.removeItem('mate_matico_cache_/progress');
-    localStorage.removeItem('mate_matico_cache_/progress/weekly');
-  }
-
-  return data;
-}, [token]);
-
-  /*
-    Obtener perfil del usuario autenticado.
-  */
-  const loadProfile = async (activeToken = null) => {
-    try {
-      const data = await apiCall(
-        '/auth/me',
-        {},
-        activeToken
-      );
-
-      handleSetUser(data.usuario);
-      telemetry.init(apiCall);
-    } catch (err) {
-      console.error('Error al cargar perfil:', err);
-      logout();
-    }
-  };
-
-  /*
-    Obtener progreso académico del alumno.
-  */
-  const loadUserProgress = async (
-    activeToken = null
-  ) => {
-    try {
-      const data = await apiCall(
-        '/progress',
-        {},
-        activeToken
-      );
-
-      setProgress(data.progreso || {});
-    } catch (err) {
-      console.error('Error al cargar progreso:', err);
-    }
-  };
-
   /*
     Guardar token JWT localmente.
   */
@@ -339,50 +344,13 @@ const apiCall = React.useCallback(async (path, options = {}, customToken = null)
     localStorage.setItem('idToken', idToken);
   };
 
-  /*
-    Cerrar sesión.
-  */
-  const logout = () => {
-    telemetry.endSession();
-    setToken('');
-    setUser(null);
-    setProgress(null);
 
-    localStorage.removeItem('idToken');
-
-    setStatus(
-      'Sesión cerrada correctamente',
-      true
-    );
-  };
 
   /*
     Carga del SDK Firebase.
   */
   const getFirebaseAuth = async () => {
-    if (!firebaseApp) {
-      if (
-        !firebaseClientConfig.apiKey ||
-        !firebaseClientConfig.projectId
-      ) {
-        throw new Error(
-          'Configurá REACT_APP_FIREBASE_API_KEY y REACT_APP_FIREBASE_PROJECT_ID en frontend/.env'
-        );
-      }
-      firebaseApp = initializeApp(firebaseClientConfig);
-      firebaseAuth = getAuth(firebaseApp);
-      firebaseAuth.languageCode = 'es';
-    }
-
-    const googleProvider = new GoogleAuthProvider();
-
-    return {
-      auth: firebaseAuth,
-      GoogleAuthProvider,
-      OAuthProvider,
-      signInWithPopup,
-      googleProvider,
-    };
+    return getFirebaseAuthDetails();
   };
 
   /*
@@ -903,63 +871,19 @@ const apiCall = React.useCallback(async (path, options = {}, customToken = null)
         </main>
 
         {/* Barra de navegación inferior fija estilo Figma */}
-        <nav className="figma-bottom-nav">
-          <button
-            type="button"
-            className={`figma-nav-item ${activeTab === 'lecciones' ? 'active' : ''}`}
-            onClick={() => setActiveTab('lecciones')}
-          >
-            <img src={navLeccionesSvg} alt="Lecciones" />
-            <span>Lecciones</span>
-          </button>
-
-          <button
-            type="button"
-            className={`figma-nav-item ${activeTab === 'practicar' ? 'active' : ''}`}
-            onClick={() => setActiveTab('practicar')}
-          >
-            <img src={navPracticarSvg} alt="Practicar" />
-            <span>Practicar</span>
-          </button>
-
-          <button
-            type="button"
-            className={`figma-nav-item ${activeTab === 'inicio' ? 'active' : ''}`}
-            onClick={() => setActiveTab('inicio')}
-          >
-            <img src={navInicioSvg} alt="Inicio" />
-            <span>Inicio</span>
-          </button>
-
-          <button
-            type="button"
-            className={`figma-nav-item ${activeTab === 'progreso' ? 'active' : ''}`}
-            onClick={() => setActiveTab('progreso')}
-          >
-            <img src={navProgresoSvg} alt="Progreso" />
-            <span>Progreso</span>
-          </button>
-
-          {(user?.rol === 'admin' || user?.rol === 'viewer' || user?.esAdmin === true) && (
-            <button
-              type="button"
-              className={`figma-nav-item ${activeTab === 'analitica' ? 'active' : ''}`}
-              onClick={() => setActiveTab('analitica')}
-            >
-              <img src={navAnaliticaImg} alt="Analítica" />
-              <span>Analítica</span>
-            </button>
-          )}
-
-          <button
-            type="button"
-            className={`figma-nav-item ${activeTab === 'perfil' ? 'active' : ''}`}
-            onClick={() => setActiveTab('perfil')}
-          >
-            <img src={navPerfilSvg} alt="Perfil" />
-            <span>Perfil</span>
-          </button>
-        </nav>
+        <FigmaBottomNav 
+          activeTab={activeTab} 
+          setActiveTab={setActiveTab} 
+          user={user} 
+          icons={{
+            lecciones: navLeccionesSvg,
+            practicar: navPracticarSvg,
+            inicio: navInicioSvg,
+            progreso: navProgresoSvg,
+            analitica: navAnaliticaImg,
+            perfil: navPerfilSvg
+          }}
+        />
       </div>
       {showRachaRota && (
         <RachaRotaModal
@@ -971,53 +895,10 @@ const apiCall = React.useCallback(async (path, options = {}, customToken = null)
         />
       )}
       {networkError && (
-        <div 
-          style={{
-            position: 'fixed',
-            top: 0, left: 0, right: 0, bottom: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.4)',
-            backdropFilter: 'blur(4px)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 9999,
-            padding: '20px'
-          }}
-        >
-          <div 
-            className="app-card"
-            style={{
-              maxWidth: '440px',
-              width: '100%',
-              backgroundColor: '#ffffff',
-              borderRadius: '24px',
-              padding: '30px',
-              boxShadow: '0 20px 40px rgba(0, 0, 0, 0.15)',
-              textAlign: 'center',
-              boxSizing: 'border-box'
-            }}
-          >
-            <img 
-              src={descansoMascota} 
-              alt="Mascota descansando" 
-              style={{ width: '120px', marginBottom: '20px' }}
-            />
-            <h2 style={{ fontFamily: 'Poppins, sans-serif', color: '#163b74', fontWeight: 800, fontSize: '1.4rem', margin: '0 0 10px 0' }}>
-              ¡Ups! No pudimos conectar con Mate Mático
-            </h2>
-            <p style={{ color: '#64748b', fontSize: '0.92rem', lineHeight: '1.5', margin: '0 0 24px 0' }}>
-              Parece que hay un problema temporal con tu conexión a internet o la pizarra de la aplicación está en mantenimiento.
-            </p>
-            <button
-              type="button"
-              className="btn-primary"
-              style={{ width: '100%', padding: '12px', fontSize: '0.95rem', fontWeight: 600, border: 'none', borderRadius: '12px', cursor: 'pointer' }}
-              onClick={handleRetryConnection}
-            >
-              Reintentar conexión ↻
-            </button>
-          </div>
-        </div>
+        <NetworkErrorModal 
+          onRetry={handleRetryConnection} 
+          logoMascota={descansoMascota} 
+        />
       )}
     </div>
   );
