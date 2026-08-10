@@ -8,6 +8,7 @@ import aliFoto from '../assets/Equipo/ali_tovar.png';
 import gissellaFoto from '../assets/Equipo/gi_saldana.png';
 import jesusFoto from '../assets/Equipo/jesus_capdevielle.jpg';
 import tamaraFoto from '../assets/Equipo/tamara_chaizas.jpeg';
+import elianaFoto from '../assets/Equipo/eliana_kaye.jpeg';
 
 import olaCard1 from '../assets/ola1.png';
 import olaCard2 from '../assets/ola2.png';
@@ -68,7 +69,14 @@ const INTEGRANTES = [
         fotoUrl: jonatanFoto
       },
       { nombre: "Gabriel Rzecznik", rol: "Backend Developer", avatarColor: "#3b82f6" },
-      { nombre: "Eliana Kaye", rol: "Frontend Developer", avatarColor: "#10b981" },
+      { 
+        nombre: "Eliana Kaye", 
+        rol: "Frontend Developer", 
+        avatarColor: "#10b981",
+        githubUrl: "https://github.com/elikaye",
+        linkedinUrl: "https://www.linkedin.com/in/eliana-kaye-70b5a524a/",
+        fotoUrl: elianaFoto
+      },
       { nombre: "Alessandra Sartori", rol: "Frontend Developer", avatarColor: "#f59e0b" }
     ]
   },
