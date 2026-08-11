@@ -124,8 +124,8 @@ const INTEGRANTES = [
         linkedinUrl: "https://www.linkedin.com/in/silvia-tamara-chaizaz-valenzuela-1a9ab1290/",
         fotoUrl: tamaraFoto,
         fotoStyle: {
-          objectPosition: 'center 12%',
-          transform: 'scale(0.92)'
+          objectPosition: 'center 18%',
+          transform: 'scale(1.04)'
         }
       },
       { 
@@ -201,7 +201,7 @@ export default function Equipo({ onClose, emailContacto = "talentotech17@gmail.c
                     <div 
                       className="equipo-avatar-oval"
                       style={{ 
-                        backgroundColor: miembro.avatarColor,
+                        backgroundColor: (miembro.fotoUrl && !invalidImages[miembro.nombre]) ? 'transparent' : miembro.avatarColor,
                         overflow: 'hidden'
                       }}
                     >
